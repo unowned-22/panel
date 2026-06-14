@@ -15,34 +15,26 @@ export const RequireAuth = () => {
     useEffect(() => {
         let mounted = true;
         const check = async () => {
-            // If no token, skip verify and mark as not checking
             if (!auth?.access_token) {
                 if (mounted) setChecking(false);
                 return;
             }
-
-            // Avoid duplicate concurrent verifications
             if (verificationStarted.current) return;
             verificationStarted.current = true;
-
             try {
                 await verify();
-            } catch (err) {
-                // Token invalid or verify failed — clear auth and redirect to login
-                try {
-                    logout();
-                } catch {}
+            } catch {
+                try { logout(); } catch {}
             } finally {
                 if (mounted) setChecking(false);
             }
         };
-
         check();
         return () => {
             mounted = false;
             verificationStarted.current = false;
         };
-    }, [auth, verify, logout]);
+    }, [auth]);
 
     if (checking || globalLoading) return <ScreenLoader />;
 

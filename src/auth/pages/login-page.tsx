@@ -19,7 +19,7 @@ export function LoginPage() {
         (async () => {
             try {
                 await login(email.trim(), password);
-                navigate('/feed');
+                navigate('/me/get-started');
             } catch (err) {
                 // error handled by AuthProvider toast
             }
