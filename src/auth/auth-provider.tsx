@@ -2,13 +2,13 @@ import { useEffect, useState, useRef, useCallback, type ReactNode } from 'react'
 import type { AuthModel, UserModel } from './auth-model';
 import { AuthContext } from './auth-context';
 import { toast } from '@/hooks/use-toast';
+import ApiClient from '@/lib/api-client';
 
 const STORAGE_KEY = 'unowned_auth_v1';
 const API_URL = import.meta.env.VITE_API_URL ?? '';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const verifyingRef = useRef(false);
-    const refreshingRef = useRef(false);
     const [loading, setLoading] = useState(false);
     const [auth, setAuth] = useState<AuthModel | undefined>(() => {
         try {
@@ -28,49 +28,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const saveAuth = (a: AuthModel | undefined) => setAuth(a);
 
-    async function requestJson(path: string, opts: RequestInit = {}, logoutOn401 = true) {
-        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-        if (auth?.access_token) headers['Authorization'] = `Bearer ${auth.access_token}`;
+    const clientRef = useRef<ApiClient | null>(null);
+    const authRef = useRef(auth);
+    useEffect(() => { authRef.current = auth; }, [auth]);
 
-        const res = await fetch(`${API_URL}${path}`, { ...opts, headers });
-
-        if (res.status === 401 && logoutOn401) {
-            const newToken = await refreshToken();
-            if (newToken) {
-                const retryRes = await fetch(`${API_URL}${path}`, {
-                    ...opts,
-                    headers: { ...headers, 'Authorization': `Bearer ${newToken}` },
-                });
-                if (retryRes.ok) return retryRes.json();
-            }
-
-            saveAuth(undefined);
-            setUser(undefined);
-            const text = await res.text();
-            throw new Error(text || res.statusText);
+    useEffect(() => {
+        if (!clientRef.current) {
+            clientRef.current = new ApiClient({
+                baseUrl: API_URL,
+                getToken: () => authRef.current?.access_token,
+                getRefreshToken: () => authRef.current?.refresh_token,
+                onTokenRefreshed: (newAuth) => saveAuth(newAuth as AuthModel),
+                onAuthFailure: () => { saveAuth(undefined); setUser(undefined); },
+            });
         }
-
-        if (!res.ok) {
-            const text = await res.text();
-            throw new Error(text || res.statusText);
-        }
-
-        return res.json();
-    }
+    }, []);
 
     async function login(email: string, password: string) {
         setLoading(true);
         try {
-            const body = await requestJson(`/auth/login`, {
-                method: 'POST',
-                body: JSON.stringify({ email, password }),
-            });
-            const newAuth = {
-                access_token: body.data.access_token,
-                refresh_token: body.data.refresh_token,
-            };
-            saveAuth(newAuth);
-            await getUserWithToken(newAuth.access_token);
+            const client = clientRef.current;
+            if (!client) throw new Error('Api client not initialized');
+            const body = await client.post<{ data: AuthModel }>('/auth/login', { email, password }, { logoutOn401: false });
+            saveAuth(body.data);
+            const me = await client.get<{ data: UserModel }>('/users/me');
+            setUser(me.data);
             toast({ title: 'Вход выполнен' });
         } catch (err: any) {
             toast({ title: 'Ошибка входа', description: err?.message ?? String(err), variant: 'destructive' });
@@ -89,10 +71,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     ) {
         setLoading(true);
         try {
-            await requestJson(`/auth/register`, {
-                method: 'POST',
-                body: JSON.stringify({ email, password, full_name, username, ...(phone ? { phone } : {}) }),
-            });
+            const client = clientRef.current;
+            if (!client) throw new Error('Api client not initialized');
+            await client.post('/auth/register', { email, password, full_name, username, ...(phone ? { phone } : {}) });
             toast({ title: 'Аккаунт создан', description: 'Проверьте почту для подтверждения' });
         } catch (err: any) {
             toast({ title: 'Ошибка регистрации', description: err?.message, variant: 'destructive' });
@@ -102,56 +83,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }
 
-    async function refreshToken(): Promise<string | null> {
-        if (refreshingRef.current) return null;
-        if (!auth?.refresh_token) return null;
-
-        refreshingRef.current = true;
-        try {
-            const res = await fetch(`${API_URL}/auth/refresh`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ refresh_token: auth.refresh_token }),
-            });
-            if (!res.ok) return null;
-
-            const body = await res.json();
-            const newAuth = {
-                access_token: body.data.access_token,
-                refresh_token: body.data.refresh_token,
-            };
-            saveAuth(newAuth);
-            return newAuth.access_token;
-        } catch {
-            return null;
-        } finally {
-            refreshingRef.current = false;
-        }
-    }
-
-    async function getUserWithToken(token: string): Promise<UserModel | null> {
-        try {
-            const res = await fetch(`${API_URL}/users/me`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-            if (!res.ok) throw new Error(res.statusText);
-            const data = await res.json();
-            setUser(data);
-            return data;
-        } catch {
-            setUser(undefined);
-            return null;
-        }
-    }
-
     async function getUser(): Promise<UserModel | null> {
         try {
-            const data = await requestJson("/users/me");
-            setUser(data as UserModel);
-            return data as UserModel;
+            const client = clientRef.current;
+            if (!client) throw new Error('Api client not initialized');
+            const data = await client.get<{ data: UserModel }>('/users/me');
+            setUser(data.data);
+            return data.data;
         } catch {
             setUser(undefined);
             return null;
@@ -169,24 +107,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setLoading(false);
             verifyingRef.current = false;
         }
-    }, [auth, getUser]);
+    }, [auth]);
 
     async function requestPasswordReset(email: string) {
-        await requestJson(`/auth/password/request`, { method: 'POST', body: JSON.stringify({ email }) });
+        const client = clientRef.current;
+        if (!client) throw new Error('Api client not initialized');
+        await client.post('/auth/password/request', { email });
     }
 
     async function resetPassword(password: string, password_confirmation: string) {
-        await requestJson(`/auth/password/reset`, { method: 'POST', body: JSON.stringify({ password, password_confirmation }) });
+        const client = clientRef.current;
+        if (!client) throw new Error('Api client not initialized');
+        await client.post('/auth/password/reset', { password, password_confirmation });
     }
 
     async function resendVerificationEmail(email: string) {
-        await requestJson(`/auth/resend-verification`, { method: 'POST', body: JSON.stringify({ email }) });
+        const client = clientRef.current;
+        if (!client) throw new Error('Api client not initialized');
+        await client.post('/auth/resend-verification', { email });
     }
 
     async function updateProfile(userData: Partial<UserModel>): Promise<UserModel> {
-        const updated = await requestJson(`/auth/me`, { method: 'PUT', body: JSON.stringify(userData) });
-        setUser(updated as UserModel);
-        return updated as UserModel;
+        const client = clientRef.current;
+        if (!client) throw new Error('Api client not initialized');
+        const updated = await client.put<{ data: UserModel }>('/auth/me', userData);
+        setUser(updated.data as UserModel);
+        return updated.data as UserModel;
     }
 
     function logout() {
