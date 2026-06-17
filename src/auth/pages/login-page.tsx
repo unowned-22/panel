@@ -4,7 +4,7 @@ import { QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAuth } from "@/auth/auth-context";
+import { useAuth } from "@/auth/use-auth";
 import { toAbsoluteUrl } from "@/lib/helpers";
 
 export function LoginPage() {
@@ -19,7 +19,7 @@ export function LoginPage() {
         (async () => {
             try {
                 await login(email.trim(), password);
-                navigate('/me/get-started');
+                navigate('/');
             } catch (err) {
                 // error handled by AuthProvider toast
             }

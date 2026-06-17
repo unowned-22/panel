@@ -1,0 +1,21 @@
+import type { TranslationDictionary } from './types';
+
+export const ru: TranslationDictionary = {
+    'sidebar.profile': 'Профиль',
+    'sidebar.feed': 'Лента',
+    'sidebar.messenger': 'Messenger',
+    'sidebar.calls': 'Звонки',
+    'sidebar.friends': 'Друзья',
+    'sidebar.groups': 'Сообщества',
+    'sidebar.photos': 'Фото',
+    'sidebar.clips': 'Клипы',
+    'sidebar.video': 'Видео',
+    'sidebar.music': 'Музыка',
+    'sidebar.games': 'Игры',
+    'sidebar.stickers': 'Стикеры',
+    'sidebar.market': 'Маркет',
+    'sidebar.services': 'Сервисы',
+    'sidebar.voices': 'Голоса',
+    'sidebar.bookmarks': 'Закладки',
+    'sidebar.help': 'Помощь',
+};

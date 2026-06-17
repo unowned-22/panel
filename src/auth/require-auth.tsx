@@ -1,44 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { ScreenLoader } from '@/components/common/screen-loader';
-import { useAuth } from './auth-context';
+import { useAuthStore } from './auth.store';
+import { authActions } from './auth-actions';
 
-/**
- * Component to protect routes that require authentication.
- * If user is not authenticated, redirects to the login page.
- */
 export const RequireAuth = () => {
-    const { auth, verify, loading: globalLoading, logout } = useAuth();
-    const [checking, setChecking] = useState(true);
-    const verificationStarted = useRef(false);
+    const token = useAuthStore((s) => s.auth?.access_token);
+    const [checking, setChecking] = useState(!!token);
+    const verifiedRef = useRef(false);
 
     useEffect(() => {
-        let mounted = true;
-        const check = async () => {
-            if (!auth?.access_token) {
-                if (mounted) setChecking(false);
-                return;
-            }
-            if (verificationStarted.current) return;
-            verificationStarted.current = true;
-            try {
-                await verify();
-            } catch {
-                try { logout(); } catch {}
-            } finally {
-                if (mounted) setChecking(false);
-            }
-        };
-        check();
-        return () => {
-            mounted = false;
-            verificationStarted.current = false;
-        };
-    }, [auth]);
+        if (!token || verifiedRef.current) return;
+        verifiedRef.current = true;
+        authActions.getUser().finally(() => setChecking(false));
+    }, [token]);
 
-    if (checking || globalLoading) return <ScreenLoader />;
-
-    if (!auth?.access_token) return <Navigate to="/auth/login" replace />;
+    if (checking) return <ScreenLoader />;
+    if (!token) return <Navigate to="/auth/login" replace />;
 
     return <Outlet />;
 };
