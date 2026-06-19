@@ -16,8 +16,8 @@ import {
     Trash2, WandSparkles
 } from "lucide-react";
 import { useState } from "react";
-import { AvatarUploader, type AvatarUploaderResult } from "@/components/AvatarUploader";
-import { CoverEditorModal, type CoverCropResult } from "@/components/cover-editor";
+import { AvatarUploader, type AvatarUploaderResult } from "@/me/components/avatar-editor";
+import { CoverEditorModal, type CoverCropResult } from "@/me/components/cover-editor";
 import { authActions } from "@/auth/auth-actions";
 import { getInitials, useAccount } from "@/hooks/use-account";
 import { useTranslation } from "@/hooks/use-translation";

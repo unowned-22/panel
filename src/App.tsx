@@ -6,11 +6,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { AppRouting } from '@/routing/app-routing';
 import { AccountProvider } from "./provider/account-provider";
 import { QueryClientProvider } from '@tanstack/react-query';
-import { StoriesProvider } from "./context/StoriesContext";
-import { RepostsProvider } from "./context/RepostsContext";
-import { PlayerProvider } from "@/context/PlayerContext";
-import { NotificationsProvider } from "@/context/NotificationsContext";
-import { MessengerProvider } from "@/context/MessengerContext";
 import { TranslationProvider } from '@/provider/translation-provider';
 import { queryClient } from '@/lib/query-client';
 
@@ -22,23 +17,13 @@ function App() {
           <TranslationProvider>
               <HelmetProvider>
                   <LoadingBarContainer>
-                      <StoriesProvider>
-                          <RepostsProvider>
-                              <NotificationsProvider>
-                                  <MessengerProvider>
-                                      <PlayerProvider>
-                                          <AccountProvider>
-                                              <Toaster />
-                                              <Sonner />
-                                              <BrowserRouter basename={BASE_URL}>
-                                                  <AppRouting />
-                                              </BrowserRouter>
-                                          </AccountProvider>
-                                      </PlayerProvider>
-                                  </MessengerProvider>
-                              </NotificationsProvider>
-                          </RepostsProvider>
-                      </StoriesProvider>
+                      <AccountProvider>
+                          <Toaster />
+                          <Sonner />
+                          <BrowserRouter basename={BASE_URL}>
+                              <AppRouting />
+                          </BrowserRouter>
+                      </AccountProvider>
                   </LoadingBarContainer>
               </HelmetProvider>
           </TranslationProvider>
