@@ -3,7 +3,7 @@ import type { TranslationDictionary } from './types';
 export const ru: TranslationDictionary = {
     'sidebar.profile': 'Профиль',
     'sidebar.feed': 'Лента',
-    'sidebar.messenger': 'Messenger',
+    'sidebar.messenger': 'Мессенджер',
     'sidebar.calls': 'Звонки',
     'sidebar.friends': 'Друзья',
     'sidebar.groups': 'Сообщества',
@@ -22,4 +22,10 @@ export const ru: TranslationDictionary = {
     'topbar.menu.mine.accounts': 'Мои аккаунты',
     'topbar.menu.settings': 'Настройки',
     'topbar.menu.logout': 'Выйти',
+    'page.home.new.story': 'Новая история',
+    'page.home.open.photo': 'Открыть изображение',
+    'page.home.change.cover': 'Изменить обложку',
+    'page.home.upload.image': 'Загрузить изображение',
+    'page.home.change.photo': 'Сменить изображение',
+    'page.home.delete.photo': 'Удалить изображение',
 };

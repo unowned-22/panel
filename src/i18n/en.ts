@@ -22,4 +22,10 @@ export const en: TranslationDictionary = {
     'topbar.menu.mine.accounts': 'My Accounts',
     'topbar.menu.settings': 'Settings',
     'topbar.menu.logout': 'Logout',
+    'page.home.new.story': 'New Story',
+    'page.home.open.photo': 'Open image',
+    'page.home.change.cover': 'Change cover',
+    'page.home.upload.image': 'Upload image',
+    'page.home.change.photo': 'Change image',
+    'page.home.delete.photo': 'Delete image',
 };

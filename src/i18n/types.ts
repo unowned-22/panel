@@ -22,4 +22,10 @@ export interface TranslationDictionary {
     'topbar.menu.mine.accounts': string;
     'topbar.menu.settings': string;
     'topbar.menu.logout': string;
+    'page.home.new.story': string;
+    'page.home.open.photo': string;
+    'page.home.change.cover': string;
+    'page.home.upload.image': string;
+    'page.home.change.photo': string;
+    'page.home.delete.photo': string;
 }
