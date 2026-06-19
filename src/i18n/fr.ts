@@ -29,7 +29,7 @@ export const fr: TranslationDictionary = {
     'page.home.new.story': 'Créer une story',
     'page.home.change.cover': 'Modifier la couverture',
     'page.home.upload.image': 'Télécharger une image',
-    'page.home.open.photo': 'Ouvrir l’image',
+    'page.home.open.photo': 'Ouvrir l\'image',
     'page.home.change.photo': 'Modifier la photo',
     'page.home.delete.photo': 'Supprimer la photo',
     'page.home.about.text': 'Parlez-nous de vous',
@@ -39,4 +39,70 @@ export const fr: TranslationDictionary = {
     'page.home.my.questions': 'Mes questions',
     'page.home.my.wishlist': 'Mes souhaits',
     'page.home.memories': 'Souvenirs',
+
+    // ── Shared auth ──────────────────────────────────────────────────────────
+    'page.auth.back-to-login': '← Retour à la connexion',
+
+    // ── Login page ───────────────────────────────────────────────────────────
+    'page.auth.login.subtitle': 'Heureux de vous revoir',
+    'page.auth.login.password': 'Mot de passe',
+    'page.auth.login.forgot-password': 'Mot de passe oublié ?',
+    'page.auth.login.submit': 'Se connecter',
+    'page.auth.login.no-account': 'Pas de compte ? {link}',
+
+    // ── Registration page ─────────────────────────────────────────────────────
+    'page.auth.registration.subtitle': 'Créez un compte pour vous connecter',
+    'page.auth.registration.full-name': 'Nom et prénom',
+    'page.auth.registration.username': 'Nom d\'utilisateur',
+    'page.auth.registration.phone': 'Numéro de téléphone',
+    'page.auth.registration.password': 'Mot de passe',
+    'page.auth.registration.confirm-password': 'Confirmer le mot de passe',
+    'page.auth.registration.fill-all-fields': 'Veuillez remplir tous les champs',
+    'page.auth.registration.passwords-mismatch': 'Les mots de passe ne correspondent pas',
+    'page.auth.registration.password-too-short': 'Le mot de passe doit comporter au moins 8 caractères',
+    'page.auth.registration.submit': 'Créer un compte',
+    'page.auth.registration.have-account': 'Vous avez déjà un compte ?',
+
+    // ── Forgot password page ──────────────────────────────────────────────────
+    'page.auth.forgot-password.title': 'Récupération du mot de passe',
+    'page.auth.forgot-password.subtitle': 'Entrez votre email — nous vous enverrons un lien de réinitialisation',
+    'page.auth.forgot-password.submitted-message':
+        'Si un compte avec {email} existe, un lien de réinitialisation du mot de passe lui sera envoyé.',
+    'page.auth.forgot-password.no-email': 'Vous n\'avez pas reçu d\'email ? Vérifiez vos spams ou',
+    'page.auth.forgot-password.try-again': 'réessayez',
+    'page.auth.forgot-password.sending': 'Envoi…',
+    'page.auth.forgot-password.send-link': 'Envoyer le lien',
+
+    // ── Reset password page ───────────────────────────────────────────────────
+    'page.auth.reset-password.title': 'Nouveau mot de passe',
+    'page.auth.reset-password.subtitle': 'Créez un mot de passe sécurisé pour votre compte',
+    'page.auth.reset-password.new-password': 'Nouveau mot de passe',
+    'page.auth.reset-password.confirm-password': 'Confirmer le mot de passe',
+    'page.auth.reset-password.error-min-length': 'Le mot de passe doit comporter au moins 8 caractères.',
+    'page.auth.reset-password.error-mismatch': 'Les mots de passe ne correspondent pas.',
+    'page.auth.reset-password.error-invalid-link': 'Le lien est invalide ou expiré. Veuillez en demander un nouveau.',
+    'page.auth.reset-password.saving': 'Enregistrement…',
+    'page.auth.reset-password.submit': 'Enregistrer le mot de passe',
+
+    // ── Verify email page ─────────────────────────────────────────────────────
+    'page.auth.verify-email.title': 'Vérification de l\'email',
+    'page.auth.verify-email.loading': 'Vérification du token…',
+    'page.auth.verify-email.pending-title': 'Confirmez votre email',
+    'page.auth.verify-email.sent-message':
+        'Nous avons envoyé un email à {email}. Vérifiez votre boîte de réception et suivez les instructions.',
+    'page.auth.verify-email.token-missing': 'Token introuvable dans le lien.',
+    'page.auth.verify-email.no-email-toast': 'Email non spécifié',
+    'page.auth.verify-email.sending': 'Envoi…',
+    'page.auth.verify-email.resend-cooldown': 'Renvoyer ({seconds}s)',
+    'page.auth.verify-email.resend': 'Renvoyer l\'email',
+    'page.auth.verify-email.go-to-login': 'Aller à la page de connexion',
+    'page.auth.verify-email.success-title': 'Email confirmé !',
+    'page.auth.verify-email.success-message': 'Vous pouvez maintenant vous connecter à votre compte.',
+    'page.auth.verify-email.login': 'Se connecter',
+    'page.auth.verify-email.error-title': 'Impossible de vérifier l\'email',
+    'page.auth.verify-email.error-default': 'Token invalide ou expiré.',
+    'page.auth.verify-email.sent-toast-title': 'Email envoyé',
+    'page.auth.verify-email.sent-toast-desc': 'Email envoyé à {email}',
+    'page.auth.verify-email.error-send-failed': 'Impossible d\'envoyer l\'email',
+    'page.auth.verify-email.to-login': 'Retour à la connexion',
 };

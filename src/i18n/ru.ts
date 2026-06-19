@@ -39,4 +39,70 @@ export const ru: TranslationDictionary = {
     'page.home.my.questions': 'Мои вопросы',
     'page.home.my.wishlist': 'Мои желания',
     'page.home.memories': 'Воспоминания',
+
+    // ── Shared auth ──────────────────────────────────────────────────────────
+    'page.auth.back-to-login': '← Вернуться ко входу',
+
+    // ── Login page ───────────────────────────────────────────────────────────
+    'page.auth.login.subtitle': 'Рады вас видеть',
+    'page.auth.login.password': 'Пароль',
+    'page.auth.login.forgot-password': 'Забыли пароль?',
+    'page.auth.login.submit': 'Войти',
+    'page.auth.login.no-account': 'Нет аккаунта? {link}',
+
+    // ── Registration page ─────────────────────────────────────────────────────
+    'page.auth.registration.subtitle': 'Создайте аккаунт, чтобы общаться',
+    'page.auth.registration.full-name': 'Имя и фамилия',
+    'page.auth.registration.username': 'Имя пользователя',
+    'page.auth.registration.phone': 'Номер телефона',
+    'page.auth.registration.password': 'Пароль',
+    'page.auth.registration.confirm-password': 'Повторите пароль',
+    'page.auth.registration.fill-all-fields': 'Заполните все поля',
+    'page.auth.registration.passwords-mismatch': 'Пароли не совпадают',
+    'page.auth.registration.password-too-short': 'Пароль должен быть не менее 8 символов',
+    'page.auth.registration.submit': 'Создать аккаунт',
+    'page.auth.registration.have-account': 'Уже есть аккаунт?',
+
+    // ── Forgot password page ──────────────────────────────────────────────────
+    'page.auth.forgot-password.title': 'Восстановление пароля',
+    'page.auth.forgot-password.subtitle': 'Введите email — мы отправим ссылку для сброса',
+    'page.auth.forgot-password.submitted-message':
+        'Если аккаунт с адресом {email} существует, на него придёт письмо со ссылкой для сброса пароля.',
+    'page.auth.forgot-password.no-email': 'Не получили письмо? Проверьте папку «Спам» или',
+    'page.auth.forgot-password.try-again': 'попробуйте снова',
+    'page.auth.forgot-password.sending': 'Отправка…',
+    'page.auth.forgot-password.send-link': 'Отправить ссылку',
+
+    // ── Reset password page ───────────────────────────────────────────────────
+    'page.auth.reset-password.title': 'Новый пароль',
+    'page.auth.reset-password.subtitle': 'Придумайте надёжный пароль для вашего аккаунта',
+    'page.auth.reset-password.new-password': 'Новый пароль',
+    'page.auth.reset-password.confirm-password': 'Подтвердите пароль',
+    'page.auth.reset-password.error-min-length': 'Пароль должен содержать не менее 8 символов.',
+    'page.auth.reset-password.error-mismatch': 'Пароли не совпадают.',
+    'page.auth.reset-password.error-invalid-link': 'Ссылка недействительна или истекла. Запросите новую.',
+    'page.auth.reset-password.saving': 'Сохранение…',
+    'page.auth.reset-password.submit': 'Сохранить пароль',
+
+    // ── Verify email page ─────────────────────────────────────────────────────
+    'page.auth.verify-email.title': 'Подтверждение email',
+    'page.auth.verify-email.loading': 'Проверяем токен…',
+    'page.auth.verify-email.pending-title': 'Подтвердите email',
+    'page.auth.verify-email.sent-message':
+        'Мы отправили письмо на {email}. Проверьте почту и следуйте инструкциям.',
+    'page.auth.verify-email.token-missing': 'Токен не найден в ссылке.',
+    'page.auth.verify-email.no-email-toast': 'Email не указан',
+    'page.auth.verify-email.sending': 'Отправляем…',
+    'page.auth.verify-email.resend-cooldown': 'Отправить повторно ({seconds}s)',
+    'page.auth.verify-email.resend': 'Отправить повторно',
+    'page.auth.verify-email.go-to-login': 'Перейти на страницу входа',
+    'page.auth.verify-email.success-title': 'Email подтверждён!',
+    'page.auth.verify-email.success-message': 'Теперь вы можете войти в аккаунт.',
+    'page.auth.verify-email.login': 'Войти',
+    'page.auth.verify-email.error-title': 'Не удалось подтвердить email',
+    'page.auth.verify-email.error-default': 'Неверный или истёкший токен.',
+    'page.auth.verify-email.sent-toast-title': 'Письмо отправлено',
+    'page.auth.verify-email.sent-toast-desc': 'Письмо отправлено на {email}',
+    'page.auth.verify-email.error-send-failed': 'Не удалось отправить письмо',
+    'page.auth.verify-email.to-login': 'На страницу входа',
 };

@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authActions } from "@/auth/auth-actions";
+import { useTranslation } from "@/hooks/use-translation";
 import { toAbsoluteUrl } from "@/lib/helpers";
 
 export function ResetPasswordPage() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const token = searchParams.get("token") ?? "";
@@ -16,7 +18,6 @@ export function ResetPasswordPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Redirect immediately if there's no token in the URL
     useEffect(() => {
         if (!token) {
             navigate("/auth/login", { replace: true });
@@ -28,12 +29,12 @@ export function ResetPasswordPage() {
         setError(null);
 
         if (newPassword.length < 8) {
-            setError("Пароль должен содержать не менее 8 символов.");
+            setError(t('page.auth.reset-password.error-min-length'));
             return;
         }
 
         if (newPassword !== confirmPassword) {
-            setError("Пароли не совпадают.");
+            setError(t('page.auth.reset-password.error-mismatch'));
             return;
         }
 
@@ -46,7 +47,7 @@ export function ResetPasswordPage() {
                     state: { passwordReset: true },
                 });
             } catch {
-                setError("Ссылка недействительна или истекла. Запросите новую.");
+                setError(t('page.auth.reset-password.error-invalid-link'));
             } finally {
                 setLoading(false);
             }
@@ -60,18 +61,18 @@ export function ResetPasswordPage() {
                     <img
                         className="h-12 max-w-none"
                         src={toAbsoluteUrl('/u.png')}
-                        alt="logo"
+                        alt={t('name')}
                     />
                 </span>
-                <h1 className="mt-4 text-2xl font-semibold">Новый пароль</h1>
+                <h1 className="mt-4 text-2xl font-semibold">{t('page.auth.reset-password.title')}</h1>
                 <p className="mt-1 text-sm text-muted-foreground">
-                    Придумайте надёжный пароль для вашего аккаунта
+                    {t('page.auth.reset-password.subtitle')}
                 </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-1.5">
-                    <Label htmlFor="new-password">Новый пароль</Label>
+                    <Label htmlFor="new-password">{t('page.auth.reset-password.new-password')}</Label>
                     <Input
                         id="new-password"
                         type="password"
@@ -85,7 +86,7 @@ export function ResetPasswordPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                    <Label htmlFor="confirm-password">Подтвердите пароль</Label>
+                    <Label htmlFor="confirm-password">{t('page.auth.reset-password.confirm-password')}</Label>
                     <Input
                         id="confirm-password"
                         type="password"
@@ -102,13 +103,16 @@ export function ResetPasswordPage() {
                 )}
 
                 <Button type="submit" className="w-full h-11 rounded-lg" disabled={loading}>
-                    {loading ? "Сохранение…" : "Сохранить пароль"}
+                    {loading
+                        ? t('page.auth.reset-password.saving')
+                        : t('page.auth.reset-password.submit')
+                    }
                 </Button>
             </form>
 
             <p className="mt-6 text-center text-xs text-muted-foreground">
                 <Link to="/auth/login" className="text-primary hover:underline">
-                    ← Вернуться ко входу
+                    {t('page.auth.back-to-login')}
                 </Link>
             </p>
         </div>

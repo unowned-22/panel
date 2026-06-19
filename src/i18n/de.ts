@@ -39,4 +39,70 @@ export const de: TranslationDictionary = {
     'page.home.my.questions': 'Meine Fragen',
     'page.home.my.wishlist': 'Meine Wünsche',
     'page.home.memories': 'Erinnerungen',
+
+    // ── Shared auth ──────────────────────────────────────────────────────────
+    'page.auth.back-to-login': '← Zurück zum Login',
+
+    // ── Login page ───────────────────────────────────────────────────────────
+    'page.auth.login.subtitle': 'Schön, dich zu sehen',
+    'page.auth.login.password': 'Passwort',
+    'page.auth.login.forgot-password': 'Passwort vergessen?',
+    'page.auth.login.submit': 'Anmelden',
+    'page.auth.login.no-account': 'Kein Konto? {link}',
+
+    // ── Registration page ─────────────────────────────────────────────────────
+    'page.auth.registration.subtitle': 'Erstelle ein Konto, um zu chatten',
+    'page.auth.registration.full-name': 'Vor- und Nachname',
+    'page.auth.registration.username': 'Benutzername',
+    'page.auth.registration.phone': 'Telefonnummer',
+    'page.auth.registration.password': 'Passwort',
+    'page.auth.registration.confirm-password': 'Passwort bestätigen',
+    'page.auth.registration.fill-all-fields': 'Bitte alle Felder ausfüllen',
+    'page.auth.registration.passwords-mismatch': 'Passwörter stimmen nicht überein',
+    'page.auth.registration.password-too-short': 'Das Passwort muss mindestens 8 Zeichen lang sein',
+    'page.auth.registration.submit': 'Konto erstellen',
+    'page.auth.registration.have-account': 'Bereits ein Konto?',
+
+    // ── Forgot password page ──────────────────────────────────────────────────
+    'page.auth.forgot-password.title': 'Passwort zurücksetzen',
+    'page.auth.forgot-password.subtitle': 'E-Mail eingeben — wir senden dir einen Reset-Link',
+    'page.auth.forgot-password.submitted-message':
+        'Falls ein Konto mit {email} existiert, wird ein Link zum Zurücksetzen des Passworts gesendet.',
+    'page.auth.forgot-password.no-email': 'Keine E-Mail erhalten? Überprüfe den Spam-Ordner oder',
+    'page.auth.forgot-password.try-again': 'erneut versuchen',
+    'page.auth.forgot-password.sending': 'Senden…',
+    'page.auth.forgot-password.send-link': 'Link senden',
+
+    // ── Reset password page ───────────────────────────────────────────────────
+    'page.auth.reset-password.title': 'Neues Passwort',
+    'page.auth.reset-password.subtitle': 'Erstelle ein sicheres Passwort für dein Konto',
+    'page.auth.reset-password.new-password': 'Neues Passwort',
+    'page.auth.reset-password.confirm-password': 'Passwort bestätigen',
+    'page.auth.reset-password.error-min-length': 'Das Passwort muss mindestens 8 Zeichen lang sein.',
+    'page.auth.reset-password.error-mismatch': 'Passwörter stimmen nicht überein.',
+    'page.auth.reset-password.error-invalid-link': 'Der Link ist ungültig oder abgelaufen. Bitte einen neuen anfordern.',
+    'page.auth.reset-password.saving': 'Speichern…',
+    'page.auth.reset-password.submit': 'Passwort speichern',
+
+    // ── Verify email page ─────────────────────────────────────────────────────
+    'page.auth.verify-email.title': 'E-Mail bestätigen',
+    'page.auth.verify-email.loading': 'Token wird überprüft…',
+    'page.auth.verify-email.pending-title': 'E-Mail bestätigen',
+    'page.auth.verify-email.sent-message':
+        'Wir haben eine E-Mail an {email} gesendet. Überprüfe dein Postfach und folge den Anweisungen.',
+    'page.auth.verify-email.token-missing': 'Token nicht im Link gefunden.',
+    'page.auth.verify-email.no-email-toast': 'E-Mail nicht angegeben',
+    'page.auth.verify-email.sending': 'Senden…',
+    'page.auth.verify-email.resend-cooldown': 'Erneut senden ({seconds}s)',
+    'page.auth.verify-email.resend': 'E-Mail erneut senden',
+    'page.auth.verify-email.go-to-login': 'Zur Anmeldeseite',
+    'page.auth.verify-email.success-title': 'E-Mail bestätigt!',
+    'page.auth.verify-email.success-message': 'Du kannst dich jetzt anmelden.',
+    'page.auth.verify-email.login': 'Anmelden',
+    'page.auth.verify-email.error-title': 'E-Mail konnte nicht bestätigt werden',
+    'page.auth.verify-email.error-default': 'Ungültiger oder abgelaufener Token.',
+    'page.auth.verify-email.sent-toast-title': 'E-Mail gesendet',
+    'page.auth.verify-email.sent-toast-desc': 'E-Mail gesendet an {email}',
+    'page.auth.verify-email.error-send-failed': 'E-Mail konnte nicht gesendet werden',
+    'page.auth.verify-email.to-login': 'Zur Anmeldeseite',
 };

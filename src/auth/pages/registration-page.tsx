@@ -9,7 +9,7 @@ import { useTranslation } from "@/hooks/use-translation";
 import { toAbsoluteUrl } from "@/lib/helpers";
 
 export function RegistrationPage() {
-    const { t } = useTranslation()
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const { register } = useAuth();
 
@@ -20,28 +20,28 @@ export function RegistrationPage() {
     const [password, setPassword] = useState("");
     const [confirm, setConfirm] = useState("");
 
-    const handleSubmit = (e: FormEvent)=> {
+    const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         const trimmedUser = username.trim();
         const trimmedName = name.trim();
 
         if (!trimmedName || !trimmedUser || !phone || !password || !confirm) {
-            toast({ title: "Заполните все поля", variant: "destructive" });
+            toast({ title: t('page.auth.registration.fill-all-fields'), variant: "destructive" });
             return;
         }
         if (password !== confirm) {
-            toast({ title: "Пароли не совпадают", variant: "destructive" });
+            toast({ title: t('page.auth.registration.passwords-mismatch'), variant: "destructive" });
             return;
         }
         if (password.length < 8) {
-            toast({ title: "Пароль должен быть не менее 8 символов", variant: "destructive" });
+            toast({ title: t('page.auth.registration.password-too-short'), variant: "destructive" });
             return;
         }
         (async () => {
             try {
                 await register(email.trim(), password, name.trim(), username.trim(), phone || undefined);
                 navigate(`/auth/verify-email?mode=pending&email=${encodeURIComponent(email.trim())}`);
-            } catch  {
+            } catch {
                 // error shown by AuthProvider
             }
         })();
@@ -59,29 +59,33 @@ export function RegistrationPage() {
                 </span>
                 <h1 className="mt-4 text-2xl font-semibold">{t('page.auth.registration')}</h1>
                 <p className="mt-1 text-sm text-muted-foreground">
-                    Create an account Unowned, to connect
+                    {t('page.auth.registration.subtitle')}
                 </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-1.5">
-                    <Label htmlFor="name">Имя и фамилия</Label>
+                    <Label htmlFor="name">{t('page.auth.registration.full-name')}</Label>
                     <Input
                         id="name"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        placeholder="Иван Иванов"
+                        placeholder="John Doe"
                         autoComplete="name"
                     />
                 </div>
                 <div className="space-y-1.5">
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" value={email}
-                           onChange={(e) => setEmail(e.target.value)}
-                           placeholder="user@example.com" />
+                    <Input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="user@example.com"
+                    />
                 </div>
                 <div className="space-y-1.5">
-                    <Label htmlFor="username">Имя пользователя</Label>
+                    <Label htmlFor="username">{t('page.auth.registration.username')}</Label>
                     <Input
                         id="username"
                         value={username}
@@ -91,29 +95,29 @@ export function RegistrationPage() {
                     />
                 </div>
                 <div className="space-y-1.5">
-                    <Label htmlFor="phone">Номер телефона</Label>
+                    <Label htmlFor="phone">{t('page.auth.registration.phone')}</Label>
                     <Input
                         id="phone"
                         type="tel"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        placeholder="+7 (999) 000-00-00"
+                        placeholder="+1 (999) 000-0000"
                         autoComplete="tel"
                     />
                 </div>
                 <div className="space-y-1.5">
-                    <Label htmlFor="password">Пароль</Label>
+                    <Label htmlFor="password">{t('page.auth.registration.password')}</Label>
                     <Input
                         id="password"
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Минимум 6 символов"
+                        placeholder="••••••••"
                         autoComplete="new-password"
                     />
                 </div>
                 <div className="space-y-1.5">
-                    <Label htmlFor="confirm">Повторите пароль</Label>
+                    <Label htmlFor="confirm">{t('page.auth.registration.confirm-password')}</Label>
                     <Input
                         id="confirm"
                         type="password"
@@ -125,14 +129,14 @@ export function RegistrationPage() {
                 </div>
 
                 <Button type="submit" className="w-full h-11 rounded-lg">
-                    Создать аккаунт
+                    {t('page.auth.registration.submit')}
                 </Button>
             </form>
 
             <p className="mt-6 text-center text-xs text-muted-foreground">
-                Already have an account?{" "}
+                {t('page.auth.registration.have-account')}{" "}
                 <Link to="/auth/login" className="text-primary">
-                    Login
+                    {t('page.auth.login')}
                 </Link>
             </p>
         </div>

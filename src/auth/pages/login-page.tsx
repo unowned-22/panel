@@ -8,7 +8,7 @@ import { useTranslation } from "@/hooks/use-translation";
 import { toAbsoluteUrl } from "@/lib/helpers";
 
 export function LoginPage() {
-    const { t } = useTranslation()
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const { login } = useAuth();
     const [email, setEmail] = useState("");
@@ -39,7 +39,7 @@ export function LoginPage() {
                 </span>
                 <h1 className="mt-4 text-2xl font-semibold">{t('page.auth.login')}</h1>
                 <p className="mt-1 text-sm text-muted-foreground">
-                    let's chat
+                    {t('page.auth.login.subtitle')}
                 </p>
             </div>
 
@@ -58,12 +58,12 @@ export function LoginPage() {
                 </div>
                 <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                        <Label htmlFor="password">Пароль</Label>
+                        <Label htmlFor="password">{t('page.auth.login.password')}</Label>
                         <Link
                             to="/auth/forgot-password"
                             className="text-xs text-muted-foreground hover:text-primary transition-colors"
                         >
-                            Забыли пароль?
+                            {t('page.auth.login.forgot-password')}
                         </Link>
                     </div>
                     <Input
@@ -78,7 +78,7 @@ export function LoginPage() {
                 </div>
 
                 <Button type="submit" className="w-full h-11 rounded-lg">
-                    Войти
+                    {t('page.auth.login.submit')}
                 </Button>
             </form>
 
@@ -89,9 +89,10 @@ export function LoginPage() {
             </div>
 
             <p className="mt-6 text-center text-xs text-muted-foreground">
-                Нет аккаунта? <span className="text-primary cursor-pointer">
-                    <Link to="/auth/registration">Registration</Link>
-                </span>
+                {t('page.auth.login.no-account').replace('{link}', '')}{" "}
+                <Link to="/auth/registration" className="text-primary">
+                    {t('page.auth.registration')}
+                </Link>
             </p>
         </div>
     );

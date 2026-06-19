@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authActions } from "@/auth/auth-actions";
+import { useTranslation } from "@/hooks/use-translation";
 import { toAbsoluteUrl } from "@/lib/helpers";
 
 export function ForgotPasswordPage() {
+    const { t } = useTranslation();
     const [email, setEmail] = useState("");
     const [submitted, setSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -34,29 +36,30 @@ export function ForgotPasswordPage() {
                     <img
                         className="h-12 max-w-none"
                         src={toAbsoluteUrl('/u.png')}
-                        alt="logo"
+                        alt={t('name')}
                     />
                 </span>
-                <h1 className="mt-4 text-2xl font-semibold">Восстановление пароля</h1>
+                <h1 className="mt-4 text-2xl font-semibold">{t('page.auth.forgot-password.title')}</h1>
                 <p className="mt-1 text-sm text-muted-foreground">
-                    Введите email — мы отправим ссылку для сброса
+                    {t('page.auth.forgot-password.subtitle')}
                 </p>
             </div>
 
             {submitted ? (
                 <div className="space-y-4">
                     <div className="rounded-lg bg-muted p-4 text-center text-sm text-muted-foreground">
-                        Если аккаунт с адресом <span className="font-medium text-foreground">{email}</span> существует,
-                        на него придёт письмо со ссылкой для сброса пароля.
+                        {t('page.auth.forgot-password.submitted-message').split('{email}')[0]}
+                        <span className="font-medium text-foreground">{email}</span>
+                        {t('page.auth.forgot-password.submitted-message').split('{email}')[1]}
                     </div>
                     <p className="text-center text-xs text-muted-foreground">
-                        Не получили письмо? Проверьте папку «Спам» или{" "}
+                        {t('page.auth.forgot-password.no-email')}{" "}
                         <button
                             type="button"
                             onClick={() => setSubmitted(false)}
                             className="text-primary hover:underline"
                         >
-                            попробуйте снова
+                            {t('page.auth.forgot-password.try-again')}
                         </button>
                         .
                     </p>
@@ -77,14 +80,17 @@ export function ForgotPasswordPage() {
                     </div>
 
                     <Button type="submit" className="w-full h-11 rounded-lg" disabled={loading}>
-                        {loading ? "Отправка…" : "Отправить ссылку"}
+                        {loading
+                            ? t('page.auth.forgot-password.sending')
+                            : t('page.auth.forgot-password.send-link')
+                        }
                     </Button>
                 </form>
             )}
 
             <p className="mt-6 text-center text-xs text-muted-foreground">
                 <Link to="/auth/login" className="text-primary hover:underline">
-                    ← Вернуться ко входу
+                    {t('page.auth.back-to-login')}
                 </Link>
             </p>
         </div>
