@@ -1,5 +1,5 @@
 import type { JSX } from 'react';
-import { useTranslation } from '@/i18n/useTranslation';
+import { useTranslation } from '@/hooks/use-translation';
 import { NavLink } from "react-router-dom";
 import type { NavItem } from './types';
 

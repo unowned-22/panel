@@ -18,4 +18,8 @@ export interface TranslationDictionary {
     'sidebar.voices': string;
     'sidebar.bookmarks': string;
     'sidebar.help': string;
+    'topbar.menu.your.accounts': string;
+    'topbar.menu.mine.accounts': string;
+    'topbar.menu.settings': string;
+    'topbar.menu.logout': string;
 }

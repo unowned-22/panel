@@ -18,4 +18,8 @@ export const ua: TranslationDictionary = {
     'sidebar.voices': 'Voices',
     'sidebar.bookmarks': 'Bookmarks',
     'sidebar.help': 'Help',
+    'topbar.menu.your.accounts': 'Ваші акаунти',
+    'topbar.menu.mine.accounts': 'Мої акаунти',
+    'topbar.menu.settings': 'Налаштування',
+    'topbar.menu.logout': 'Вийти',
 };

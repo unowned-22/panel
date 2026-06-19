@@ -2,10 +2,9 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { RefreshCw, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAccounts } from "@/context/AccountsContext";
+import { useAccount } from "@/hooks/use-account";
 import { toast } from "@/hooks/use-toast";
 
-/** Generates a simple SVG QR-code placeholder with random modules. */
 const QRPlaceholder = ({ value }: { value: string }) => {
     const size = 200;
     const cells = 21;
@@ -65,7 +64,7 @@ import { toAbsoluteUrl } from "@/lib/helpers";
 
 export function QRLoginPage() {
     const navigate = useNavigate();
-    const { addAccount } = useAccounts();
+    const { addAccount } = useAccount();
 
     const [qrKey, setQrKey] = useState(() => Math.random().toString(36).slice(2));
     const [status, setStatus] = useState<QRStatus>("waiting");

@@ -18,4 +18,8 @@ export const de: TranslationDictionary = {
     'sidebar.voices': 'Voices',
     'sidebar.bookmarks': 'Bookmarks',
     'sidebar.help': 'Help',
+    'topbar.menu.your.accounts': 'Deine Konten',
+    'topbar.menu.mine.accounts': 'Meine Konten',
+    'topbar.menu.settings': 'Einstellungen',
+    'topbar.menu.logout': 'Abmelden',
 };

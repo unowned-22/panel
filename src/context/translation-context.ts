@@ -1,12 +1,12 @@
 import { createContext } from 'react';
-import type { Language, TranslationDictionary } from './types';
-import { en } from './en';
-import { ru } from './ru';
-import { ua } from './ua';
-import { it } from './it';
-import { es } from './es';
-import { fr } from './fr';
-import { de } from './de';
+import type { Language, TranslationDictionary } from '@/i18n/types';
+import { en } from '@/i18n/en';
+import { ru } from '@/i18n/ru';
+import { ua } from '@/i18n/ua';
+import { it } from '@/i18n/it';
+import { es } from '@/i18n/es';
+import { fr } from '@/i18n/fr';
+import { de } from '@/i18n/de';
 
 export const SUPPORTED_LANGUAGES: Language[] = ['en', 'ua', 'it', 'es', 'fr', 'ru', 'de'];
 

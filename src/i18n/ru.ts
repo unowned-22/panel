@@ -18,4 +18,8 @@ export const ru: TranslationDictionary = {
     'sidebar.voices': 'Голоса',
     'sidebar.bookmarks': 'Закладки',
     'sidebar.help': 'Помощь',
+    'topbar.menu.your.accounts': 'Ваши аккаунты',
+    'topbar.menu.mine.accounts': 'Мои аккаунты',
+    'topbar.menu.settings': 'Настройки',
+    'topbar.menu.logout': 'Выйти',
 };

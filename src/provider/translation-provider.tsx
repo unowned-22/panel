@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
-import type { Language, TranslationDictionary } from './types';
-import { TranslationContext, dictionaries, SUPPORTED_LANGUAGES } from './translation-context';
-import { en } from './en';
+import type { Language, TranslationDictionary } from '@/i18n/types';
+import { TranslationContext, dictionaries, SUPPORTED_LANGUAGES } from '@/context/translation-context';
+import { en } from '@/i18n/en';
 
 function getInitialLanguage(): Language {
     if (typeof navigator !== 'undefined') {
