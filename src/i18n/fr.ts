@@ -20,6 +20,7 @@ export const fr: TranslationDictionary = {
     'sidebar.help': 'Aide',
     'topbar.menu.your.accounts': 'Vos comptes',
     'topbar.menu.mine.accounts': 'Mes comptes',
+    'topbar.menu.account.delete': 'Supprimer le compte',
     'topbar.menu.settings': 'Paramètres',
     'topbar.menu.logout': 'Se déconnecter',
     'page.home.new.story': 'Créer une story',

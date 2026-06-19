@@ -22,6 +22,7 @@ export const ua: TranslationDictionary = {
     'topbar.menu.mine.accounts': 'Мої акаунти',
     'topbar.menu.settings': 'Налаштування',
     'topbar.menu.logout': 'Вийти',
+    'topbar.menu.account.delete': 'Видалити акаунт',
     'page.home.new.story': 'Створити історію',
     'page.home.open.photo': 'Відкрити зображення',
     'page.home.change.cover': 'Змінити обкладинку',

@@ -21,6 +21,7 @@ export const en: TranslationDictionary = {
     'topbar.menu.your.accounts': 'Your Accounts',
     'topbar.menu.mine.accounts': 'My Accounts',
     'topbar.menu.settings': 'Settings',
+    'topbar.menu.account.delete': 'Delete Account',
     'topbar.menu.logout': 'Logout',
     'page.home.new.story': 'New Story',
     'page.home.open.photo': 'Open image',

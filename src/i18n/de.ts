@@ -22,6 +22,7 @@ export const de: TranslationDictionary = {
     'topbar.menu.mine.accounts': 'Meine Konten',
     'topbar.menu.settings': 'Einstellungen',
     'topbar.menu.logout': 'Abmelden',
+    'topbar.menu.account.delete': 'Konto löschen',
     'page.home.new.story': 'Story erstellen',
     'page.home.change.cover': 'Titelbild ändern',
     'page.home.open.photo': 'Bild öffnen',

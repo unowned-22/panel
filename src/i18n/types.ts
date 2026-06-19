@@ -22,6 +22,7 @@ export interface TranslationDictionary {
     'topbar.menu.mine.accounts': string;
     'topbar.menu.settings': string;
     'topbar.menu.logout': string;
+    'topbar.menu.account.delete': string;
     'page.home.new.story': string;
     'page.home.open.photo': string;
     'page.home.change.cover': string;
