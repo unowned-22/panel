@@ -45,7 +45,7 @@ export function LoginPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-1.5">
-                    <Label htmlFor="username">Email</Label>
+                    <Label htmlFor="email">Email</Label>
                     <Input
                         id="email"
                         type="email"
@@ -57,7 +57,15 @@ export function LoginPage() {
                     />
                 </div>
                 <div className="space-y-1.5">
-                    <Label htmlFor="password">Пароль</Label>
+                    <div className="flex items-center justify-between">
+                        <Label htmlFor="password">Пароль</Label>
+                        <Link
+                            to="/auth/forgot-password"
+                            className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                        >
+                            Забыли пароль?
+                        </Link>
+                    </div>
                     <Input
                         id="password"
                         type="password"

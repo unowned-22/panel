@@ -72,14 +72,13 @@ export function RegistrationPage() {
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Иван Иванов"
                         autoComplete="name"
-                        required
                     />
                 </div>
                 <div className="space-y-1.5">
                     <Label htmlFor="email">Email</Label>
                     <Input id="email" type="email" value={email}
                            onChange={(e) => setEmail(e.target.value)}
-                           placeholder="user@example.com" required />
+                           placeholder="user@example.com" />
                 </div>
                 <div className="space-y-1.5">
                     <Label htmlFor="username">Имя пользователя</Label>
@@ -89,7 +88,6 @@ export function RegistrationPage() {
                         onChange={(e) => setUsername(e.target.value)}
                         placeholder="@username"
                         autoComplete="username"
-                        required
                     />
                 </div>
                 <div className="space-y-1.5">
@@ -101,7 +99,6 @@ export function RegistrationPage() {
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="+7 (999) 000-00-00"
                         autoComplete="tel"
-                        required
                     />
                 </div>
                 <div className="space-y-1.5">
@@ -113,7 +110,6 @@ export function RegistrationPage() {
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Минимум 6 символов"
                         autoComplete="new-password"
-                        required
                     />
                 </div>
                 <div className="space-y-1.5">
@@ -125,7 +121,6 @@ export function RegistrationPage() {
                         onChange={(e) => setConfirm(e.target.value)}
                         placeholder="••••••••"
                         autoComplete="new-password"
-                        required
                     />
                 </div>
 
