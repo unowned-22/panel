@@ -28,4 +28,11 @@ export const ua: TranslationDictionary = {
     'page.home.upload.image': 'Завантажити зображення',
     'page.home.change.photo': 'Змінити зображення',
     'page.home.delete.photo': 'Видалити зображення',
+    'page.home.about.text': 'Вкажіть інформацію про себе',
+    'page.home.edit.profile': 'Редагувати профіль',
+    'page.home.analytics': 'Аналітика',
+    'page.home.more': 'Ще',
+    'page.home.my.questions': 'Мої запитання',
+    'page.home.my.wishlist': 'Мої бажання',
+    'page.home.memories': 'Спогади',
 };

@@ -28,4 +28,11 @@ export interface TranslationDictionary {
     'page.home.upload.image': string;
     'page.home.change.photo': string;
     'page.home.delete.photo': string;
+    'page.home.about.text': string;
+    'page.home.edit.profile': string;
+    'page.home.analytics': string;
+    'page.home.more': string;
+    'page.home.my.questions': string;
+    'page.home.my.wishlist': string;
+    'page.home.memories': string;
 }

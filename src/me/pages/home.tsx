@@ -4,13 +4,24 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { Camera, Image as ImageIcon, PenLine, Plus, Trash2 } from "lucide-react";
+import {
+    BarChart3,
+    Camera,
+    ChevronDown,
+    ChevronRight,
+    FileQuestion,
+    Image as ImageIcon,
+    PenLine,
+    Plus, RotateCcw,
+    Trash2, WandSparkles
+} from "lucide-react";
 import { useState } from "react";
 import { AvatarUploader, type AvatarUploaderResult } from "@/components/AvatarUploader";
 import { CoverEditorModal, type CoverCropResult } from "@/components/cover-editor";
 import { authActions } from "@/auth/auth-actions";
 import { getInitials, useAccount } from "@/hooks/use-account";
 import { useTranslation } from "@/hooks/use-translation";
+import {Link} from "react-router-dom";
 
 const Home = () => {
     const { t } = useTranslation();
@@ -67,7 +78,7 @@ const Home = () => {
                     </DropdownMenu>
                 </div>
                 <div className="relative flex min-h-22 items-center gap-4 bg-card px-5 py-4">
-                    <div className="absolute -top-16 left-5">
+                    <div className="absolute -top-14 left-5">
                         <DropdownMenu open={avatarMenuOpen} onOpenChange={setAvatarMenuOpen}>
                             <DropdownMenuTrigger asChild>
                                 <button className="relative block rounded-full outline-none">
@@ -102,6 +113,36 @@ const Home = () => {
                                         </DropdownMenuItem>
                                     </>
                                 )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                    <div className="ml-37 min-w-0 flex-1">
+                        <h1 className="text-xl font-bold">{activeAccount.name}</h1>
+                        <button className="mt-0.5 flex items-center gap-1 text-sm text-primary hover:underline">
+                            {t('page.home.about.text')} <ChevronRight className="h-4 w-4" />
+                        </button>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <button className="button-pill rounded-lg px-5">{t('page.home.edit.profile')}</button>
+                        <Link to="/me/analytics" className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary hover:bg-accent" aria-label={t('page.home.analytics')}>
+                            <BarChart3 className="h-5 w-5" />
+                        </Link>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <button className="button-pill gap-2 rounded-lg px-4">
+                                    {t('page.home.more')} <ChevronDown className="h-4 w-4" />
+                                </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-64 rounded-xl border-border bg-popover p-2 shadow-elevated">
+                                <DropdownMenuItem className="gap-3 py-3">
+                                    <FileQuestion className="h-4 w-4 text-primary" /> {t('page.home.my.questions')}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="gap-3 py-3">
+                                    <RotateCcw className="h-4 w-4 text-primary" /> {t('page.home.memories')}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="gap-3 py-3">
+                                    <WandSparkles className="h-4 w-4 text-primary" /> {t('page.home.my.wishlist')}
+                                </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>

@@ -28,4 +28,11 @@ export const ru: TranslationDictionary = {
     'page.home.upload.image': 'Загрузить изображение',
     'page.home.change.photo': 'Сменить изображение',
     'page.home.delete.photo': 'Удалить изображение',
+    'page.home.about.text': 'Укажите информацию о себе',
+    'page.home.edit.profile': 'Редактировать профиль',
+    'page.home.analytics': 'Аналитика',
+    'page.home.more': 'Еще',
+    'page.home.my.questions': 'Мои вопросы',
+    'page.home.my.wishlist': 'Мои желания',
+    'page.home.memories': 'Воспоминания',
 };

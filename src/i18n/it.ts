@@ -28,4 +28,11 @@ export const it: TranslationDictionary = {
     'page.home.open.photo': 'Apri immagine',
     'page.home.change.photo': 'Modifica foto',
     'page.home.delete.photo': 'Elimina foto',
+    'page.home.about.text': 'Parlaci di te',
+    'page.home.edit.profile': 'Modifica profilo',
+    'page.home.analytics': 'Analisi',
+    'page.home.more': 'Altro',
+    'page.home.my.questions': 'Le mie domande',
+    'page.home.my.wishlist': 'I miei desideri',
+    'page.home.memories': 'Ricordi',
 };
