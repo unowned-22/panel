@@ -90,7 +90,6 @@
 
         --radius: 0.875rem;
 
-        /* VK gradients */
         --gradient-story: linear-gradient(135deg, hsl(211 100% 56%), hsl(280 80% 60%));
         --gradient-ig-ring: linear-gradient(45deg, hsl(45 100% 60%) 0%, hsl(25 100% 55%) 25%, hsl(340 90% 55%) 50%, hsl(290 80% 55%) 75%, hsl(220 90% 55%) 100%);
         --gradient-music-1: linear-gradient(180deg, hsl(210 80% 55%), hsl(220 70% 40%));
@@ -128,20 +127,20 @@
 }
 
 @layer components {
-    .vk-card {
+    .panel-card {
         @apply bg-card rounded-2xl;
         box-shadow: var(--shadow-card);
     }
 
-    .vk-nav-item {
+    .sidebar-nav-item {
         @apply flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-foreground/85 hover:bg-sidebar-accent transition-colors;
     }
 
-    .vk-nav-item.active {
+    .sidebar-nav-item.active {
         @apply bg-sidebar-accent text-foreground;
     }
 
-    .vk-pill {
+    .button-pill {
         @apply inline-flex items-center justify-center px-4 py-2 rounded-full text-sm font-medium bg-secondary text-secondary-foreground hover:bg-accent transition-colors;
     }
 }

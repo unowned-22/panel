@@ -1,0 +1,47 @@
+.workspace {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #4a4a4a;
+  overflow: hidden;
+  user-select: none;
+  border-radius: 4px;
+}
+
+.imageLayer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.imageLayer img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform 0.15s ease;
+}
+
+.rnd {
+  border: 1px dashed rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35);
+  box-sizing: border-box;
+}
+
+.handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #ddd;
+  border: 1px solid #555;
+}
+.handleTL { top: -5px; left: -5px; cursor: nwse-resize; }
+.handleTR { top: -5px; right: -5px; cursor: nesw-resize; }
+.handleBL { bottom: -5px; left: -5px; cursor: nesw-resize; }
+.handleBR { bottom: -5px; right: -5px; cursor: nwse-resize; }
+.handleT  { top: -5px; left: calc(50% - 5px); cursor: ns-resize; }
+.handleB  { bottom: -5px; left: calc(50% - 5px); cursor: ns-resize; }
+.handleL  { left: -5px; top: calc(50% - 5px); cursor: ew-resize; }
+.handleR  { right: -5px; top: calc(50% - 5px); cursor: ew-resize; }

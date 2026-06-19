@@ -1,25 +1,33 @@
 import { HelmetProvider } from 'react-helmet-async';
 import { BrowserRouter } from 'react-router-dom';
 import { LoadingBarContainer } from 'react-top-loading-bar';
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toaster";
 import { AppRouting } from '@/routing/app-routing';
-import { AccountsProvider } from "./context/AccountsContext";
-import { AuthProvider } from '@/auth/auth-provider';
+import { AccountProvider } from "./provider/account-provider";
+import { QueryClientProvider } from '@tanstack/react-query';
+import { TranslationProvider } from '@/provider/translation-provider';
+import { queryClient } from '@/lib/query-client';
 
 const { BASE_URL } = import.meta.env;
 
 function App() {
   return (
-      <HelmetProvider>
-          <LoadingBarContainer>
-              <AuthProvider>
-                  <AccountsProvider>
-                      <BrowserRouter basename={BASE_URL}>
-                          <AppRouting />
-                      </BrowserRouter>
-                  </AccountsProvider>
-              </AuthProvider>
-          </LoadingBarContainer>
-      </HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+          <TranslationProvider>
+              <HelmetProvider>
+                  <LoadingBarContainer>
+                      <AccountProvider>
+                          <Toaster />
+                          <Sonner />
+                          <BrowserRouter basename={BASE_URL}>
+                              <AppRouting />
+                          </BrowserRouter>
+                      </AccountProvider>
+                  </LoadingBarContainer>
+              </HelmetProvider>
+          </TranslationProvider>
+      </QueryClientProvider>
   )
 }
 

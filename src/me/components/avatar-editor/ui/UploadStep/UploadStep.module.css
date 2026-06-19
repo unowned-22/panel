@@ -1,0 +1,48 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  padding: 28px 32px 36px;
+  text-align: center;
+}
+.help {
+  color: #c9c9cc;
+  font-size: 14px;
+  line-height: 1.55;
+  max-width: 520px;
+}
+.dropzone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+.dropzone[data-active="true"] {
+  background: rgba(255,255,255,0.05);
+}
+.select {
+  background: #e7e7ea;
+  color: #1a1a1c;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 9px 22px;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.select:hover { background: #fff; }
+.footer {
+  color: #9a9aa0;
+  font-size: 13px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  width: 100%;
+  text-align: center;
+}
+.error {
+  color: #ff6b6b;
+  font-size: 13px;
+}

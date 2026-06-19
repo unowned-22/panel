@@ -1,0 +1,22 @@
+.previews {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+.large, .medium, .small {
+  border-radius: 50%;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.1);
+}
+.large { width: 96px; height: 96px; }
+.medium { width: 56px; height: 56px; }
+.small { width: 32px; height: 32px; }
+
+.preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}

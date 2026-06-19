@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
-import { useAuth } from "@/auth/auth-context";
+import { useAuth } from "@/auth/use-auth";
 import { toAbsoluteUrl } from "@/lib/helpers";
 
 export function RegistrationPage() {
@@ -38,7 +38,7 @@ export function RegistrationPage() {
         (async () => {
             try {
                 await register(email.trim(), password, name.trim(), username.trim(), phone || undefined);
-                navigate('/auth/login');
+                navigate(`/auth/verify-email?mode=pending&email=${encodeURIComponent(email.trim())}`);
             } catch (err) {
                 // error shown by AuthProvider
             }

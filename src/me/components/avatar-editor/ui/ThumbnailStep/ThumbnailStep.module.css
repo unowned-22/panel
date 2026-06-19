@@ -1,0 +1,33 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 28px 24px;
+}
+.desc {
+  color: #c9c9cc;
+  text-align: center;
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.55;
+}
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 22px;
+  align-items: center;
+}
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+.primary, .secondary {
+  font-size: 14px;
+  padding: 9px 22px;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.primary { background: #e7e7ea; color: #1a1a1c; }
+.secondary { background: #3a3a3f; color: #e7e7ea; }

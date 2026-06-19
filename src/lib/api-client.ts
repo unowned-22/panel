@@ -52,6 +52,10 @@ export default class ApiClient {
         return this.request<T>('DELETE', path, undefined, opts);
     }
 
+    async upload<T>(path: string, file: File, opts?: { logoutOn401?: boolean }): Promise<T> {
+        return this.requestFormData<T>('POST', path, file, opts);
+    }
+
     private async request<T>(method: string, path: string, body?: unknown, opts?: { logoutOn401?: boolean }): Promise<T> {
         const url = `${this.baseUrl}${path}`;
         const headers: Record<string,string> = { 'Content-Type': 'application/json' };
@@ -95,6 +99,56 @@ export default class ApiClient {
                 throw new ApiError(retryRes.status, text || retryRes.statusText);
             }
 
+            return retryRes.json();
+        }
+
+        if (!res.ok) {
+            const text = await safeText(res);
+            throw new ApiError(res.status, text || res.statusText);
+        }
+
+        if (res.status === 204) return undefined as T;
+
+        return res.json();
+    }
+
+    private async requestFormData<T>(method: string, path: string, file: File, opts?: { logoutOn401?: boolean }): Promise<T> {
+        const url = `${this.baseUrl}${path}`;
+        const headers: Record<string, string> = {};
+        const token = this.getToken();
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const res = await fetch(url, { method, headers, body: formData });
+
+        if (res.status === 401) {
+            const logoutOn401 = opts?.logoutOn401 ?? true;
+            if (path === '/auth/refresh' || !logoutOn401) {
+                const text = await safeText(res);
+                throw new ApiError(res.status, text || res.statusText);
+            }
+
+            const refreshed = await this.getOrCreateRefresh();
+            if (!refreshed) {
+                this.onAuthFailure();
+                const text = await safeText(res);
+                throw new ApiError(res.status, text || res.statusText);
+            }
+
+            const newToken = this.getToken();
+            const retryHeaders = { ...headers };
+            if (newToken) retryHeaders['Authorization'] = `Bearer ${newToken}`;
+
+            const retryFormData = new FormData();
+            retryFormData.append('file', file);
+
+            const retryRes = await fetch(url, { method, headers: retryHeaders, body: retryFormData });
+            if (!retryRes.ok) {
+                const text = await safeText(retryRes);
+                throw new ApiError(retryRes.status, text || retryRes.statusText);
+            }
             return retryRes.json();
         }
 
@@ -154,3 +208,24 @@ async function safeText(res: Response): Promise<string> {
         return '';
     }
 }
+
+import type { AuthModel } from '@/auth/auth-model';
+import { useAuthStore } from '@/auth/auth.store';
+
+export const apiClient = new ApiClient({
+    baseUrl: import.meta.env.VITE_API_URL ?? '',
+
+    getToken: () =>
+        useAuthStore.getState().auth?.access_token,
+
+    getRefreshToken: () =>
+        useAuthStore.getState().auth?.refresh_token,
+
+    onTokenRefreshed: (newAuth) =>
+        useAuthStore.getState().setAuth(newAuth as AuthModel),
+
+    onAuthFailure: () => {
+        useAuthStore.getState().logout();
+        window.location.href = '/auth/login';
+    },
+});
