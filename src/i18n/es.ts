@@ -1,6 +1,7 @@
 import type { TranslationDictionary } from './types';
 
 export const es: TranslationDictionary = {
+    'name': 'Unowned',
     'sidebar.profile': 'Perfil',
     'sidebar.feed': 'Noticias',
     'sidebar.messenger': 'Messenger',
@@ -23,6 +24,8 @@ export const es: TranslationDictionary = {
     'topbar.menu.settings': 'Configuración',
     'topbar.menu.logout': 'Cerrar sesión',
     'topbar.menu.account.delete': 'Eliminar cuenta',
+    'page.auth.login': 'Login',
+    'page.auth.registration': 'Registrarse',
     'page.home.new.story': 'Crear historia',
     'page.home.change.cover': 'Cambiar portada',
     'page.home.open.photo': 'Abrir imagen',
@@ -36,4 +39,70 @@ export const es: TranslationDictionary = {
     'page.home.my.questions': 'Mis preguntas',
     'page.home.my.wishlist': 'Mis deseos',
     'page.home.memories': 'Recuerdos',
+
+    // ── Shared auth ──────────────────────────────────────────────────────────
+    'page.auth.back-to-login': '← Volver al inicio de sesión',
+
+    // ── Login page ───────────────────────────────────────────────────────────
+    'page.auth.login.subtitle': 'Nos alegra verte',
+    'page.auth.login.password': 'Contraseña',
+    'page.auth.login.forgot-password': '¿Olvidaste tu contraseña?',
+    'page.auth.login.submit': 'Iniciar sesión',
+    'page.auth.login.no-account': '¿No tienes cuenta? {link}',
+
+    // ── Registration page ─────────────────────────────────────────────────────
+    'page.auth.registration.subtitle': 'Crea una cuenta para conectarte',
+    'page.auth.registration.full-name': 'Nombre y apellido',
+    'page.auth.registration.username': 'Nombre de usuario',
+    'page.auth.registration.phone': 'Número de teléfono',
+    'page.auth.registration.password': 'Contraseña',
+    'page.auth.registration.confirm-password': 'Confirmar contraseña',
+    'page.auth.registration.fill-all-fields': 'Por favor completa todos los campos',
+    'page.auth.registration.passwords-mismatch': 'Las contraseñas no coinciden',
+    'page.auth.registration.password-too-short': 'La contraseña debe tener al menos 8 caracteres',
+    'page.auth.registration.submit': 'Crear cuenta',
+    'page.auth.registration.have-account': '¿Ya tienes una cuenta?',
+
+    // ── Forgot password page ──────────────────────────────────────────────────
+    'page.auth.forgot-password.title': 'Recuperar contraseña',
+    'page.auth.forgot-password.subtitle': 'Ingresa tu email — te enviaremos un enlace para restablecer',
+    'page.auth.forgot-password.submitted-message':
+        'Si existe una cuenta con {email}, recibirás un enlace para restablecer tu contraseña.',
+    'page.auth.forgot-password.no-email': '¿No recibiste el correo? Revisa tu carpeta de spam o',
+    'page.auth.forgot-password.try-again': 'inténtalo de nuevo',
+    'page.auth.forgot-password.sending': 'Enviando…',
+    'page.auth.forgot-password.send-link': 'Enviar enlace',
+
+    // ── Reset password page ───────────────────────────────────────────────────
+    'page.auth.reset-password.title': 'Nueva contraseña',
+    'page.auth.reset-password.subtitle': 'Crea una contraseña segura para tu cuenta',
+    'page.auth.reset-password.new-password': 'Nueva contraseña',
+    'page.auth.reset-password.confirm-password': 'Confirmar contraseña',
+    'page.auth.reset-password.error-min-length': 'La contraseña debe tener al menos 8 caracteres.',
+    'page.auth.reset-password.error-mismatch': 'Las contraseñas no coinciden.',
+    'page.auth.reset-password.error-invalid-link': 'El enlace no es válido o ha expirado. Solicita uno nuevo.',
+    'page.auth.reset-password.saving': 'Guardando…',
+    'page.auth.reset-password.submit': 'Guardar contraseña',
+
+    // ── Verify email page ─────────────────────────────────────────────────────
+    'page.auth.verify-email.title': 'Verificación de email',
+    'page.auth.verify-email.loading': 'Verificando token…',
+    'page.auth.verify-email.pending-title': 'Confirma tu email',
+    'page.auth.verify-email.sent-message':
+        'Enviamos un correo a {email}. Revisa tu bandeja de entrada y sigue las instrucciones.',
+    'page.auth.verify-email.token-missing': 'Token no encontrado en el enlace.',
+    'page.auth.verify-email.no-email-toast': 'Email no especificado',
+    'page.auth.verify-email.sending': 'Enviando…',
+    'page.auth.verify-email.resend-cooldown': 'Reenviar ({seconds}s)',
+    'page.auth.verify-email.resend': 'Reenviar correo',
+    'page.auth.verify-email.go-to-login': 'Ir a la página de inicio de sesión',
+    'page.auth.verify-email.success-title': '¡Email confirmado!',
+    'page.auth.verify-email.success-message': 'Ahora puedes iniciar sesión en tu cuenta.',
+    'page.auth.verify-email.login': 'Iniciar sesión',
+    'page.auth.verify-email.error-title': 'No se pudo verificar el email',
+    'page.auth.verify-email.error-default': 'Token inválido o expirado.',
+    'page.auth.verify-email.sent-toast-title': 'Correo enviado',
+    'page.auth.verify-email.sent-toast-desc': 'Correo enviado a {email}',
+    'page.auth.verify-email.error-send-failed': 'No se pudo enviar el correo',
+    'page.auth.verify-email.to-login': 'Ir al inicio de sesión',
 };

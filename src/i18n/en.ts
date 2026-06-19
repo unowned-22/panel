@@ -1,6 +1,7 @@
 import type { TranslationDictionary } from './types';
 
 export const en: TranslationDictionary = {
+    'name': 'Unowned',
     'sidebar.profile': 'Profile',
     'sidebar.feed': 'Feed',
     'sidebar.messenger': 'Messenger',
@@ -23,6 +24,8 @@ export const en: TranslationDictionary = {
     'topbar.menu.settings': 'Settings',
     'topbar.menu.account.delete': 'Delete Account',
     'topbar.menu.logout': 'Logout',
+    'page.auth.login': 'Login',
+    'page.auth.registration': 'Registration',
     'page.home.new.story': 'New Story',
     'page.home.open.photo': 'Open image',
     'page.home.change.cover': 'Change cover',
@@ -31,9 +34,75 @@ export const en: TranslationDictionary = {
     'page.home.delete.photo': 'Delete image',
     'page.home.about.text': 'Add information about yourself',
     'page.home.edit.profile': 'Edit profile',
-    'page.home.more': 'More',
     'page.home.analytics': 'Analytics',
+    'page.home.more': 'More',
     'page.home.my.questions': 'My questions',
     'page.home.my.wishlist': 'My wishlist',
     'page.home.memories': 'Memories',
+
+    // ── Shared auth ──────────────────────────────────────────────────────────
+    'page.auth.back-to-login': '← Back to login',
+
+    // ── Login page ───────────────────────────────────────────────────────────
+    'page.auth.login.subtitle': "Let's chat",
+    'page.auth.login.password': 'Password',
+    'page.auth.login.forgot-password': 'Forgot password?',
+    'page.auth.login.submit': 'Sign in',
+    'page.auth.login.no-account': 'No account? {link}',
+
+    // ── Registration page ─────────────────────────────────────────────────────
+    'page.auth.registration.subtitle': 'Create an account to connect',
+    'page.auth.registration.full-name': 'Full name',
+    'page.auth.registration.username': 'Username',
+    'page.auth.registration.phone': 'Phone number',
+    'page.auth.registration.password': 'Password',
+    'page.auth.registration.confirm-password': 'Confirm password',
+    'page.auth.registration.fill-all-fields': 'Please fill in all fields',
+    'page.auth.registration.passwords-mismatch': 'Passwords do not match',
+    'page.auth.registration.password-too-short': 'Password must be at least 8 characters',
+    'page.auth.registration.submit': 'Create account',
+    'page.auth.registration.have-account': 'Already have an account?',
+
+    // ── Forgot password page ──────────────────────────────────────────────────
+    'page.auth.forgot-password.title': 'Password recovery',
+    'page.auth.forgot-password.subtitle': 'Enter your email — we will send you a reset link',
+    'page.auth.forgot-password.submitted-message':
+        'If an account with {email} exists, a password reset link will be sent to it.',
+    'page.auth.forgot-password.no-email': "Didn't receive an email? Check your Spam folder or",
+    'page.auth.forgot-password.try-again': 'try again',
+    'page.auth.forgot-password.sending': 'Sending…',
+    'page.auth.forgot-password.send-link': 'Send link',
+
+    // ── Reset password page ───────────────────────────────────────────────────
+    'page.auth.reset-password.title': 'New password',
+    'page.auth.reset-password.subtitle': 'Create a strong password for your account',
+    'page.auth.reset-password.new-password': 'New password',
+    'page.auth.reset-password.confirm-password': 'Confirm password',
+    'page.auth.reset-password.error-min-length': 'Password must be at least 8 characters.',
+    'page.auth.reset-password.error-mismatch': 'Passwords do not match.',
+    'page.auth.reset-password.error-invalid-link': 'The link is invalid or has expired. Please request a new one.',
+    'page.auth.reset-password.saving': 'Saving…',
+    'page.auth.reset-password.submit': 'Save password',
+
+    // ── Verify email page ─────────────────────────────────────────────────────
+    'page.auth.verify-email.title': 'Email verification',
+    'page.auth.verify-email.loading': 'Verifying token…',
+    'page.auth.verify-email.pending-title': 'Confirm your email',
+    'page.auth.verify-email.sent-message':
+        'We sent an email to {email}. Check your inbox and follow the instructions.',
+    'page.auth.verify-email.token-missing': 'Token not found in the link.',
+    'page.auth.verify-email.no-email-toast': 'Email not specified',
+    'page.auth.verify-email.sending': 'Sending…',
+    'page.auth.verify-email.resend-cooldown': 'Resend ({seconds}s)',
+    'page.auth.verify-email.resend': 'Resend email',
+    'page.auth.verify-email.go-to-login': 'Go to login page',
+    'page.auth.verify-email.success-title': 'Email confirmed!',
+    'page.auth.verify-email.success-message': 'You can now sign in to your account.',
+    'page.auth.verify-email.login': 'Sign in',
+    'page.auth.verify-email.error-title': 'Could not verify email',
+    'page.auth.verify-email.error-default': 'Invalid or expired token.',
+    'page.auth.verify-email.sent-toast-title': 'Email sent',
+    'page.auth.verify-email.sent-toast-desc': 'Email sent to {email}',
+    'page.auth.verify-email.error-send-failed': 'Failed to send email',
+    'page.auth.verify-email.to-login': 'Back to login',
 };

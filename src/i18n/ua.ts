@@ -1,6 +1,7 @@
 import type { TranslationDictionary } from './types';
 
 export const ua: TranslationDictionary = {
+    'name': 'Unowned',
     'sidebar.profile': 'Профіль',
     'sidebar.feed': 'Стрічка',
     'sidebar.messenger': 'Месенджер',
@@ -23,6 +24,8 @@ export const ua: TranslationDictionary = {
     'topbar.menu.settings': 'Налаштування',
     'topbar.menu.logout': 'Вийти',
     'topbar.menu.account.delete': 'Видалити акаунт',
+    'page.auth.login': 'Логін',
+    'page.auth.registration': 'Зареєструватися',
     'page.home.new.story': 'Створити історію',
     'page.home.open.photo': 'Відкрити зображення',
     'page.home.change.cover': 'Змінити обкладинку',
@@ -36,4 +39,70 @@ export const ua: TranslationDictionary = {
     'page.home.my.questions': 'Мої запитання',
     'page.home.my.wishlist': 'Мої бажання',
     'page.home.memories': 'Спогади',
+
+    // ── Shared auth ──────────────────────────────────────────────────────────
+    'page.auth.back-to-login': '← Повернутися до входу',
+
+    // ── Login page ───────────────────────────────────────────────────────────
+    'page.auth.login.subtitle': 'Раді вас бачити',
+    'page.auth.login.password': 'Пароль',
+    'page.auth.login.forgot-password': 'Забули пароль?',
+    'page.auth.login.submit': 'Увійти',
+    'page.auth.login.no-account': 'Немає акаунту? {link}',
+
+    // ── Registration page ─────────────────────────────────────────────────────
+    'page.auth.registration.subtitle': 'Створіть акаунт, щоб спілкуватися',
+    'page.auth.registration.full-name': "Ім'я та прізвище",
+    'page.auth.registration.username': "Ім'я користувача",
+    'page.auth.registration.phone': 'Номер телефону',
+    'page.auth.registration.password': 'Пароль',
+    'page.auth.registration.confirm-password': 'Повторіть пароль',
+    'page.auth.registration.fill-all-fields': 'Заповніть усі поля',
+    'page.auth.registration.passwords-mismatch': 'Паролі не збігаються',
+    'page.auth.registration.password-too-short': 'Пароль має бути не менше 8 символів',
+    'page.auth.registration.submit': 'Створити акаунт',
+    'page.auth.registration.have-account': 'Вже є акаунт?',
+
+    // ── Forgot password page ──────────────────────────────────────────────────
+    'page.auth.forgot-password.title': 'Відновлення пароля',
+    'page.auth.forgot-password.subtitle': 'Введіть email — ми надішлемо посилання для скидання',
+    'page.auth.forgot-password.submitted-message':
+        'Якщо акаунт з адресою {email} існує, на нього надійде лист із посиланням для скидання пароля.',
+    'page.auth.forgot-password.no-email': 'Не отримали лист? Перевірте папку «Спам» або',
+    'page.auth.forgot-password.try-again': 'спробуйте ще раз',
+    'page.auth.forgot-password.sending': 'Надсилання…',
+    'page.auth.forgot-password.send-link': 'Надіслати посилання',
+
+    // ── Reset password page ───────────────────────────────────────────────────
+    'page.auth.reset-password.title': 'Новий пароль',
+    'page.auth.reset-password.subtitle': 'Придумайте надійний пароль для вашого акаунту',
+    'page.auth.reset-password.new-password': 'Новий пароль',
+    'page.auth.reset-password.confirm-password': 'Підтвердіть пароль',
+    'page.auth.reset-password.error-min-length': 'Пароль має містити не менше 8 символів.',
+    'page.auth.reset-password.error-mismatch': 'Паролі не збігаються.',
+    'page.auth.reset-password.error-invalid-link': 'Посилання недійсне або застаріло. Запросіть нове.',
+    'page.auth.reset-password.saving': 'Збереження…',
+    'page.auth.reset-password.submit': 'Зберегти пароль',
+
+    // ── Verify email page ─────────────────────────────────────────────────────
+    'page.auth.verify-email.title': 'Підтвердження email',
+    'page.auth.verify-email.loading': 'Перевіряємо токен…',
+    'page.auth.verify-email.pending-title': 'Підтвердіть email',
+    'page.auth.verify-email.sent-message':
+        'Ми надіслали лист на {email}. Перевірте пошту та дотримуйтесь інструкцій.',
+    'page.auth.verify-email.token-missing': 'Токен не знайдено в посиланні.',
+    'page.auth.verify-email.no-email-toast': 'Email не вказано',
+    'page.auth.verify-email.sending': 'Надсилаємо…',
+    'page.auth.verify-email.resend-cooldown': 'Надіслати повторно ({seconds}s)',
+    'page.auth.verify-email.resend': 'Надіслати повторно',
+    'page.auth.verify-email.go-to-login': 'Перейти на сторінку входу',
+    'page.auth.verify-email.success-title': 'Email підтверджено!',
+    'page.auth.verify-email.success-message': 'Тепер ви можете увійти до акаунту.',
+    'page.auth.verify-email.login': 'Увійти',
+    'page.auth.verify-email.error-title': 'Не вдалося підтвердити email',
+    'page.auth.verify-email.error-default': 'Невірний або застарілий токен.',
+    'page.auth.verify-email.sent-toast-title': 'Лист надіслано',
+    'page.auth.verify-email.sent-toast-desc': 'Лист надіслано на {email}',
+    'page.auth.verify-email.error-send-failed': 'Не вдалося надіслати лист',
+    'page.auth.verify-email.to-login': 'На сторінку входу',
 };

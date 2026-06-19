@@ -1,13 +1,14 @@
 import { type FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/auth/use-auth";
+import { useTranslation } from "@/hooks/use-translation";
 import { toAbsoluteUrl } from "@/lib/helpers";
 
 export function LoginPage() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const { login } = useAuth();
     const [email, setEmail] = useState("");
@@ -20,7 +21,7 @@ export function LoginPage() {
             try {
                 await login(email.trim(), password);
                 navigate('/');
-            } catch (err) {
+            } catch {
                 // error handled by AuthProvider toast
             }
         })();
@@ -33,18 +34,18 @@ export function LoginPage() {
                     <img
                         className="h-12 max-w-none"
                         src={toAbsoluteUrl('/u.png')}
-                        alt="Unowned"
+                        alt={t('name')}
                     />
                 </span>
-                <h1 className="mt-4 text-2xl font-semibold">Login</h1>
+                <h1 className="mt-4 text-2xl font-semibold">{t('page.auth.login')}</h1>
                 <p className="mt-1 text-sm text-muted-foreground">
-                    let's chat
+                    {t('page.auth.login.subtitle')}
                 </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-1.5">
-                    <Label htmlFor="username">Email</Label>
+                    <Label htmlFor="email">Email</Label>
                     <Input
                         id="email"
                         type="email"
@@ -56,7 +57,15 @@ export function LoginPage() {
                     />
                 </div>
                 <div className="space-y-1.5">
-                    <Label htmlFor="password">Пароль</Label>
+                    <div className="flex items-center justify-between">
+                        <Label htmlFor="password">{t('page.auth.login.password')}</Label>
+                        <Link
+                            to="/auth/forgot-password"
+                            className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                        >
+                            {t('page.auth.login.forgot-password')}
+                        </Link>
+                    </div>
                     <Input
                         id="password"
                         type="password"
@@ -69,7 +78,7 @@ export function LoginPage() {
                 </div>
 
                 <Button type="submit" className="w-full h-11 rounded-lg">
-                    Войти
+                    {t('page.auth.login.submit')}
                 </Button>
             </form>
 
@@ -79,17 +88,11 @@ export function LoginPage() {
                 <span className="h-px flex-1 bg-border" />
             </div>
 
-            <Link
-                to="/auth/qr-login"
-                className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-lg bg-secondary text-sm font-medium hover:bg-accent"
-            >
-                <QrCode className="w-4 h-4" /> Enter by QR
-            </Link>
-
             <p className="mt-6 text-center text-xs text-muted-foreground">
-                Нет аккаунта? <span className="text-primary cursor-pointer">
-                    <Link to="/auth/registration">Registration</Link>
-                </span>
+                {t('page.auth.login.no-account').replace('{link}', '')}{" "}
+                <Link to="/auth/registration" className="text-primary">
+                    {t('page.auth.registration')}
+                </Link>
             </p>
         </div>
     );

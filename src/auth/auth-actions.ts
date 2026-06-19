@@ -52,11 +52,11 @@ export const authActions = {
     },
 
     async requestPasswordReset(email: string): Promise<void> {
-        await apiClient.post('/auth/password/request', { email });
+        await apiClient.post('/auth/forgot-password', { email });
     },
 
     async resetPassword(token: string, new_password: string): Promise<void> {
-        await apiClient.post('/auth/password/reset', { token, new_password });
+        await apiClient.post('/auth/reset-password', { token, new_password });
     },
 
     async resendVerificationEmail(email: string): Promise<void> {
