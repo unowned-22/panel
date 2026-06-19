@@ -21,7 +21,7 @@ import { CoverEditorModal, type CoverCropResult } from "@/components/cover-edito
 import { authActions } from "@/auth/auth-actions";
 import { getInitials, useAccount } from "@/hooks/use-account";
 import { useTranslation } from "@/hooks/use-translation";
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const Home = () => {
     const { t } = useTranslation();
@@ -34,7 +34,9 @@ const Home = () => {
     const [cover, setCover] = useState<string|null>(() => {
         return activeAccount.user?.cover_url ?? null;
     });
+
     const [coverEditorOpen, setCoverEditorOpen] = useState(false);
+    const [coverEditorFresh, setCoverEditorFresh] = useState(false);
     const [coverMenuOpen, setCoverMenuOpen] = useState(false);
     const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
     const [avatarUploaderOpen, setAvatarUploaderOpen] = useState(false);
@@ -43,6 +45,22 @@ const Home = () => {
         setAvatarMenuOpen(false);
         setAvatarUploaderOpen(true);
     };
+
+    const openCoverEditor = (fresh = false) => {
+        setCoverEditorFresh(fresh);
+        setCoverMenuOpen(false);
+        setCoverEditorOpen(true);
+    };
+
+    const removeCover = (): void => {
+        setCoverMenuOpen(false);
+        setCover(null);
+        authActions.deleteCover()
+    }
+    const removeAvatar = (): void => {
+        setAvatar(null)
+        authActions.deleteAvatar()
+    }
 
     return (
         <>
@@ -67,13 +85,27 @@ const Home = () => {
                         <DropdownMenuContent align="end" className="w-56 rounded-xl border-border bg-popover p-2 shadow-elevated">
                             <DropdownMenuItem
                                 className="gap-3 py-3"
-                                onClick={() => {
-                                    setCoverMenuOpen(false);
-                                    setCoverEditorOpen(true);
-                                }}
+                                onClick={() => openCoverEditor(false)}
                             >
-                                <ImageIcon className="h-4 w-4 text-primary" />{t('page.home.upload.image')}
+                                <ImageIcon className="h-4 w-4 text-primary" />
+                                {t(cover ? 'page.home.change.cover' : 'page.home.upload.image')}
                             </DropdownMenuItem>
+
+                            {cover && (
+                                <>
+                                    <DropdownMenuItem
+                                        className="gap-3 py-3"
+                                        onClick={() => openCoverEditor(true)}
+                                    >
+                                        <Plus className="h-4 w-4 text-primary" />
+                                        {t('page.home.upload.image')}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className="gap-3 py-3 text-destructive" onClick={removeCover}>
+                                        <Trash2 className="h-4 w-4" />
+                                        {t('page.home.delete.photo')}
+                                    </DropdownMenuItem>
+                                </>
+                            )}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
@@ -84,7 +116,7 @@ const Home = () => {
                                 <button className="relative block rounded-full outline-none">
                                     <div
                                         className="h-32 w-32 overflow-hidden rounded-full border-4 border-background ring-4 ring-background"
-                                        style={{ background: avatar ? undefined : activeAccount.avatarColor }}
+                                        style={{ background: avatar ? "hsl(var(--background))" : activeAccount.avatarColor }}
                                     >
                                         {avatar
                                             ? <img src={avatar} alt={activeAccount.name} className="h-full w-full object-cover" />
@@ -108,7 +140,7 @@ const Home = () => {
                                         <DropdownMenuItem onClick={openAvatarUpload} className="gap-3 py-3">
                                             <PenLine className="h-4 w-4 text-primary" />{t('page.home.change.photo')}
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => setAvatar(null)} className="gap-3 py-3 text-destructive">
+                                        <DropdownMenuItem onClick={removeAvatar} className="gap-3 py-3 text-destructive">
                                             <Trash2 className="h-4 w-4" />{t('page.home.delete.photo')}
                                         </DropdownMenuItem>
                                     </>
@@ -151,7 +183,7 @@ const Home = () => {
 
             <CoverEditorModal
                 open={coverEditorOpen}
-                image={activeAccount.user?.cover_url ?? cover ?? undefined}
+                image={coverEditorFresh ? undefined : (activeAccount.user?.cover_url ?? cover ?? undefined)}
                 avatar={avatar ?? undefined}
                 userName={activeAccount.name}
                 onClose={() => setCoverEditorOpen(false)}

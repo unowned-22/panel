@@ -87,4 +87,20 @@ export const authActions = {
         });
         return coverUrl;
     },
+
+    deleteAvatar(): void {
+        apiClient.delete('/users/me/avatar');
+        useAuthStore.getState().setUser({
+            ...useAuthStore.getState().user!,
+            avatar_url: '',
+        });
+    },
+
+    deleteCover(): void {
+        apiClient.delete('/users/me/cover');
+        useAuthStore.getState().setUser({
+            ...useAuthStore.getState().user!,
+            cover_url: '',
+        });
+    },
 };

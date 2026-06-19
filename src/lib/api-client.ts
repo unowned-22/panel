@@ -107,6 +107,8 @@ export default class ApiClient {
             throw new ApiError(res.status, text || res.statusText);
         }
 
+        if (res.status === 204) return undefined as T;
+
         return res.json();
     }
 
