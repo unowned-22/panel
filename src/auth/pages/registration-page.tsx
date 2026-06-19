@@ -5,14 +5,16 @@ import { Label } from "@/components/ui/label";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/auth/use-auth";
+import { useTranslation } from "@/hooks/use-translation";
 import { toAbsoluteUrl } from "@/lib/helpers";
 
 export function RegistrationPage() {
+    const { t } = useTranslation()
     const navigate = useNavigate();
     const { register } = useAuth();
 
     const [email, setEmail] = useState("");
-    const [name, setName] = useState("");       // full_name
+    const [name, setName] = useState("");
     const [username, setUsername] = useState("");
     const [phone, setPhone] = useState("");
     const [password, setPassword] = useState("");
@@ -39,7 +41,7 @@ export function RegistrationPage() {
             try {
                 await register(email.trim(), password, name.trim(), username.trim(), phone || undefined);
                 navigate(`/auth/verify-email?mode=pending&email=${encodeURIComponent(email.trim())}`);
-            } catch (err) {
+            } catch  {
                 // error shown by AuthProvider
             }
         })();
@@ -52,10 +54,10 @@ export function RegistrationPage() {
                     <img
                         className="h-12 max-w-none"
                         src={toAbsoluteUrl('/u.png')}
-                        alt="Unowned"
+                        alt={t('name')}
                     />
                 </span>
-                <h1 className="mt-4 text-2xl font-semibold">Registration</h1>
+                <h1 className="mt-4 text-2xl font-semibold">{t('page.auth.registration')}</h1>
                 <p className="mt-1 text-sm text-muted-foreground">
                     Create an account Unowned, to connect
                 </p>
@@ -126,12 +128,6 @@ export function RegistrationPage() {
                         required
                     />
                 </div>
-
-                <p className="text-xs text-muted-foreground">
-                    Регистрируясь, вы принимаете{" "}
-                    <span className="text-primary cursor-pointer">Пользовательское соглашение</span> и{" "}
-                    <span className="text-primary cursor-pointer">Политику конфиденциальности</span>.
-                </p>
 
                 <Button type="submit" className="w-full h-11 rounded-lg">
                     Создать аккаунт

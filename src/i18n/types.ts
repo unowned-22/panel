@@ -1,6 +1,7 @@
 export type Language = 'en' | 'ua' | 'it' | 'es' | 'fr' | 'de' | 'ru';
 
 export interface TranslationDictionary {
+    'name': string;
     'sidebar.profile': string;
     'sidebar.feed': string;
     'sidebar.messenger': string;
@@ -23,6 +24,8 @@ export interface TranslationDictionary {
     'topbar.menu.settings': string;
     'topbar.menu.logout': string;
     'topbar.menu.account.delete': string;
+    'page.auth.login': string;
+    'page.auth.registration': string;
     'page.home.new.story': string;
     'page.home.open.photo': string;
     'page.home.change.cover': string;

@@ -1,6 +1,7 @@
 import type { TranslationDictionary } from './types';
 
 export const en: TranslationDictionary = {
+    'name': 'Unowned',
     'sidebar.profile': 'Profile',
     'sidebar.feed': 'Feed',
     'sidebar.messenger': 'Messenger',
@@ -23,6 +24,8 @@ export const en: TranslationDictionary = {
     'topbar.menu.settings': 'Settings',
     'topbar.menu.account.delete': 'Delete Account',
     'topbar.menu.logout': 'Logout',
+    'page.auth.login': 'Login',
+    'page.auth.registration': 'Registration',
     'page.home.new.story': 'New Story',
     'page.home.open.photo': 'Open image',
     'page.home.change.cover': 'Change cover',

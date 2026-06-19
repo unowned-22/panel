@@ -5,10 +5,12 @@ import { Button } from '@/components/ui/button';
 import { toAbsoluteUrl } from '@/lib/helpers';
 import { apiClient } from '@/lib/api-client';
 import { toast } from '@/hooks/use-toast';
+import { useTranslation } from "@/hooks/use-translation";
 
 type Status = 'loading' | 'success' | 'error' | 'pending';
 
 export function VerifyEmailPage() {
+    const { t } = useTranslation()
     const [searchParams] = useSearchParams();
     const token = searchParams.get('token');
     const mode = searchParams.get('mode');
@@ -100,7 +102,7 @@ export function VerifyEmailPage() {
     return (
         <div className="rounded-2xl border border-border bg-card p-8 shadow-elevated">
             <div className="flex flex-col items-center text-center mb-6">
-                <img className="h-12" src={toAbsoluteUrl('/u.png')} alt="Unowned" />
+                <img className="h-12" src={toAbsoluteUrl('/u.png')} alt={t('name')} />
                 <h1 className="mt-4 text-2xl font-semibold">Подтверждение email</h1>
             </div>
 
