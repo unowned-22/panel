@@ -7,8 +7,16 @@ import { useState } from "react";
 
 const Account = () => {
     const { t } = useTranslation()
-    const { accounts, activeId, activeAccount, switchAccount, removeAccount } = useAccount();
+    const { accounts, activeId, switchAccount, removeAccount } = useAccount();
     const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+
+    console.table(
+        accounts.map(acc => ({
+            id: acc.id,
+            username: acc.username,
+            name: acc.name
+        }))
+    );
 
     const handleSwitch = (id: string) => {
         if (id !== activeId) {
@@ -63,10 +71,10 @@ const Account = () => {
                                                 "flex items-center overflow-hidden justify-center rounded-full text-white font-semibold",
                                                 isActive ? "w-14 h-14 text-lg ring-2 ring-primary" : "w-12 h-12 text-sm"
                                             )}
-                                            style={{ background: activeAccount.user?.avatar_url ? "hsl(var(--background))" : activeAccount.avatarColor }}
+                                            style={{ background: acc.user?.avatar_url ? "hsl(var(--background))" : acc.avatarColor }}
                                         >
-                                            {activeAccount.user?.avatar_url
-                                                ? <img src={activeAccount.user?.avatar_url} alt={activeAccount.name} className="h-full w-full object-cover" />
+                                            {acc.user?.avatar_url
+                                                ? <img src={acc.user.avatar_url} alt={acc.name} className="h-full w-full object-cover" />
                                                 : getInitials(acc.name)
                                             }
                                         </div>

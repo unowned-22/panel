@@ -65,6 +65,13 @@ export interface TranslationDictionary {
     'page.account.manage.accounts.notifications': string;
     'page.account.manage.accounts.notifications.desc': string;
 
+    // ── Add account page ──────────────────────────────────────────────────────
+    'page.account.add.title': string;
+    'page.account.add.subtitle': string;
+    'page.account.add.back': string;
+    'page.account.add.submit': string;
+    'page.account.add.error': string;
+
     // ── Shared auth ──────────────────────────────────────────────────────────
     'page.auth.back-to-login': string;
 

@@ -14,8 +14,9 @@ export type AccountContextValue = {
     accounts: Account[];
     activeId: string;
     activeAccount: Account;
-    switchAccount: (id: string) => void;
-    addAccount: (acc: Omit<Account, "id" | "avatarColor"> & { avatarColor?: string }) => Account;
+    switchAccount: (id: string) => void | Promise<void>;
+    // id is optional: pass it when tokens are already stored under a specific key
+    addAccount: (acc: Omit<Account, "avatarColor"> & { avatarColor?: string }) => Account;
     removeAccount: (id: string) => void;
 };
 
@@ -28,17 +29,7 @@ export const COLORS = [
     "hsl(190 75% 45%)",
 ];
 
-export const DEFAULT_ACCOUNTS: Account[] = [
-    {
-        id: "acc_mark",
-        name: "Mark Roberts",
-        username: "@id648226314",
-        avatarColor: COLORS[0],
-        hasNotifications: true,
-    },
-];
-
-export const STORAGE_KEY = "vk_accounts_v1";
-export const ACTIVE_KEY = "vk_active_account_v1";
+export const STORAGE_KEY = "un_accounts_v1";
+export const ACTIVE_KEY = "un_active_account_v1";
 
 export const AccountContext = createContext<AccountContextValue | null>(null);

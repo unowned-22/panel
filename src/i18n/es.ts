@@ -53,6 +53,13 @@ export const es: TranslationDictionary = {
     'page.account.manage.accounts.notifications': 'Notificaciones',
     'page.account.manage.accounts.notifications.desc': 'Las notificaciones y la configuración se guardan por separado para cada cuenta.',
 
+    // ── Add account page ──────────────────────────────────────────────────────
+    'page.account.add.title': 'Añadir cuenta',
+    'page.account.add.subtitle': 'Inicia sesión con otra cuenta para alternar entre ellas',
+    'page.account.add.back': 'Volver a las cuentas',
+    'page.account.add.submit': 'Añadir cuenta',
+    'page.account.add.error': 'No se pudo añadir la cuenta. Verifica tus credenciales.',
+
     // ── Settings page ──────────────────────────────────────────────────────────
     'page.settings.general': 'General',
     'page.settings.cancel': 'Cancelar',

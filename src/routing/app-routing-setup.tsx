@@ -6,6 +6,7 @@ import { MainLayout } from '@/layouts/main/layout';
 import Home from "@/me/pages/home";
 import Settings from "@/me/pages/settings";
 import Account from "@/me/pages/account";
+import AddAccountPage from "@/me/pages/add-account";
 
 export function AppRoutingSetup() {
     return (
@@ -15,6 +16,7 @@ export function AppRoutingSetup() {
                     <Route path="/" element={<Home />} />
                     <Route path="/me/settings" element={<Settings />} />
                     <Route path="/me/account" element={<Account />} />
+                    <Route path="/me/login" element={<AddAccountPage />} />
                 </Route>
             </Route>
             <Route path="error/*" element={<ErrorRouting />} />

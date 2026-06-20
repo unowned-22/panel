@@ -63,6 +63,13 @@ export const en: TranslationDictionary = {
     'page.account.manage.accounts.notifications': 'Notifications',
     'page.account.manage.accounts.notifications.desc': 'Notifications and settings are stored separately for each account.',
 
+    // ── Add account page ──────────────────────────────────────────────────────
+    'page.account.add.title': 'Add account',
+    'page.account.add.subtitle': 'Sign in with another account to switch between them',
+    'page.account.add.back': 'Back to accounts',
+    'page.account.add.submit': 'Add account',
+    'page.account.add.error': 'Failed to add account. Check your credentials.',
+
     // ── Shared auth ──────────────────────────────────────────────────────────
     'page.auth.back-to-login': '← Back to login',
 
