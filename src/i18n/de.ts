@@ -26,7 +26,9 @@ export const de: TranslationDictionary = {
     'topbar.menu.account.delete': 'Konto löschen',
     'page.auth.login': 'Login',
     'page.auth.registration': 'Registrieren',
+
     'page.home.new.story': 'Story erstellen',
+    'page.home.story.published': 'Veröffentlicht',
     'page.home.change.cover': 'Titelbild ändern',
     'page.home.open.photo': 'Bild öffnen',
     'page.home.upload.image': 'Bild hochladen',

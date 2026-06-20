@@ -26,7 +26,9 @@ export const fr: TranslationDictionary = {
     'topbar.menu.logout': 'Se déconnecter',
     'page.auth.login': 'Login',
     'page.auth.registration': 'S\'inscrire',
+
     'page.home.new.story': 'Créer une story',
+    'page.home.story.published': 'Publié',
     'page.home.change.cover': 'Modifier la couverture',
     'page.home.upload.image': 'Télécharger une image',
     'page.home.open.photo': 'Ouvrir l\'image',

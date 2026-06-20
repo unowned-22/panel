@@ -29,6 +29,7 @@ export interface TranslationDictionary {
 
     // ── Home page ───────────────────────────────────────────────────────────
     'page.home.new.story': string;
+    'page.home.story.published': string;
     'page.home.open.photo': string;
     'page.home.change.cover': string;
     'page.home.upload.image': string;
