@@ -26,7 +26,9 @@ export const ua: TranslationDictionary = {
     'topbar.menu.account.delete': 'Видалити акаунт',
     'page.auth.login': 'Логін',
     'page.auth.registration': 'Зареєструватися',
+
     'page.home.new.story': 'Створити історію',
+    'page.home.story.published': 'Опубліковано',
     'page.home.open.photo': 'Відкрити зображення',
     'page.home.change.cover': 'Змінити обкладинку',
     'page.home.upload.image': 'Завантажити зображення',

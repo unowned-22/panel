@@ -26,7 +26,9 @@ export const ru: TranslationDictionary = {
     'topbar.menu.account.delete': 'Удалить аккаунт',
     'page.auth.login': 'Логин',
     'page.auth.registration': 'Регистрация',
+
     'page.home.new.story': 'Новая история',
+    'page.home.story.published': 'Опубликовано',
     'page.home.open.photo': 'Открыть изображение',
     'page.home.change.cover': 'Изменить обложку',
     'page.home.upload.image': 'Загрузить изображение',
