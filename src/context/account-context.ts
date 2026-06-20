@@ -15,7 +15,8 @@ export type AccountContextValue = {
     activeId: string;
     activeAccount: Account;
     switchAccount: (id: string) => void | Promise<void>;
-    addAccount: (acc: Omit<Account, "id" | "avatarColor"> & { avatarColor?: string }) => Account;
+    // id is optional: pass it when tokens are already stored under a specific key
+    addAccount: (acc: Omit<Account, "avatarColor"> & { avatarColor?: string }) => Account;
     removeAccount: (id: string) => void;
 };
 
@@ -26,16 +27,6 @@ export const COLORS = [
     "hsl(28 95% 55%)",
     "hsl(340 80% 55%)",
     "hsl(190 75% 45%)",
-];
-
-export const DEFAULT_ACCOUNTS: Account[] = [
-    {
-        id: "acc_mark",
-        name: "Mark Roberts",
-        username: "@id648226314",
-        avatarColor: COLORS[0],
-        hasNotifications: true,
-    },
 ];
 
 export const STORAGE_KEY = "vk_accounts_v1";

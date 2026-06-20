@@ -24,12 +24,16 @@ const AddAccountPage = () => {
             try {
                 const newId = `acc_${Date.now().toString(36)}`;
                 const user = await authActions.addAccount(email.trim(), password, newId);
-                const newAcc = addAccount({
+
+                addAccount({
+                    id: newId,
                     name: user.full_name,
                     username: user.username,
                     user,
                 });
-                await switchAccount(newAcc.id);
+
+                await switchAccount(newId);
+
                 navigate('/me/account');
             } catch {
                 toast({ title: t('page.account.add.error'), variant: "destructive" });
