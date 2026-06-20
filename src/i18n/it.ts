@@ -40,6 +40,19 @@ export const it: TranslationDictionary = {
     'page.home.my.wishlist': 'I miei desideri',
     'page.home.memories': 'Ricordi',
 
+    // ── Account page ──────────────────────────────────────────────────────────
+    'page.account.back': 'Indietro',
+    'page.account.manage.account.add': 'Aggiungi account',
+    'page.account.manage.account.confirm': 'Conferma',
+    'page.account.manage.account.switch': 'Passa',
+    'page.account.manage.account.active': 'Attivo',
+    'page.account.manage.accounts': 'Gestione degli account',
+    'page.account.manage.accounts.desc': 'Aggiungi, passa da un account all\'altro ed elimina account',
+    'page.account.manage.accounts.security': 'Sicurezza',
+    'page.account.manage.accounts.security.desc': 'Tutti gli account sono archiviati localmente nel tuo browser. Nessun dato viene inviato al server.',
+    'page.account.manage.accounts.notifications': 'Notifiche',
+    'page.account.manage.accounts.notifications.desc': 'Le notifiche e le impostazioni vengono salvate separatamente per ogni account.',
+
     // ── Settings page ──────────────────────────────────────────────────────────
     'page.settings.general': 'Generale',
     'page.settings.cancel': 'Annulla',

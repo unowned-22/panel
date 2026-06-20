@@ -132,7 +132,7 @@ export const TopBar = () => {
 
                         <div className="px-2 pb-2">
                             <DropdownMenuItem asChild className="gap-3 py-2.5">
-                                <Link to="/me/accounts">
+                                <Link to="/me/account">
                                     <Users className="w-4 h-4 text-primary" />{t('topbar.menu.mine.accounts')}
                                 </Link>
                             </DropdownMenuItem>

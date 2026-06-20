@@ -52,6 +52,19 @@ export interface TranslationDictionary {
     'page.settings.section.account': string;
     'page.settings.modal.setup.items': string;
 
+    // ── Account page ──────────────────────────────────────────────────────────
+    'page.account.back': string;
+    'page.account.manage.accounts': string;
+    'page.account.manage.account.add': string;
+    'page.account.manage.account.confirm': string;
+    'page.account.manage.account.switch': string;
+    'page.account.manage.account.active': string;
+    'page.account.manage.accounts.desc': string;
+    'page.account.manage.accounts.security': string;
+    'page.account.manage.accounts.security.desc': string;
+    'page.account.manage.accounts.notifications': string;
+    'page.account.manage.accounts.notifications.desc': string;
+
     // ── Shared auth ──────────────────────────────────────────────────────────
     'page.auth.back-to-login': string;
 

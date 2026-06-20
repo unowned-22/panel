@@ -40,6 +40,19 @@ export const ua: TranslationDictionary = {
     'page.home.my.wishlist': 'Мої бажання',
     'page.home.memories': 'Спогади',
 
+    // ── Account page ──────────────────────────────────────────────────────────
+    'page.account.back': 'Назад',
+    'page.account.manage.account.add': 'Додати акаунт',
+    'page.account.manage.account.confirm': 'Підтвердити',
+    'page.account.manage.account.switch': 'Перемкнутися',
+    'page.account.manage.account.active': 'Активний',
+    'page.account.manage.accounts': 'Керування акаунтами',
+    'page.account.manage.accounts.desc': 'Додавайте, перемикайтеся та видаляйте облікові записи',
+    'page.account.manage.accounts.security': 'Безпека',
+    'page.account.manage.accounts.security.desc': 'Усі акаунти зберігаються локально у вашому браузері. Дані не надсилаються на сервер.',
+    'page.account.manage.accounts.notifications': 'Сповіщення',
+    'page.account.manage.accounts.notifications.desc': 'Сповіщення та налаштування зберігаються окремо для кожного акаунта.',
+
     // ── Settings page ──────────────────────────────────────────────────────────
     'page.settings.general': 'Загальне',
     'page.settings.cancel': 'Скасувати',
