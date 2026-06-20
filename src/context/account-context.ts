@@ -29,7 +29,7 @@ export const COLORS = [
     "hsl(190 75% 45%)",
 ];
 
-export const STORAGE_KEY = "vk_accounts_v1";
-export const ACTIVE_KEY = "vk_active_account_v1";
+export const STORAGE_KEY = "un_accounts_v1";
+export const ACTIVE_KEY = "un_active_account_v1";
 
 export const AccountContext = createContext<AccountContextValue | null>(null);

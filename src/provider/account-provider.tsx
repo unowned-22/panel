@@ -11,7 +11,6 @@ import {
     type AccountContextValue
 } from '@/context/account-context';
 
-
 export const AccountProvider = ({ children }: { children: ReactNode }) => {
     const storeUser = useAuthStore((s) => s.user);
     const storeActiveId = useAuthStore((s) => s.activeAccountId);
@@ -92,7 +91,7 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
         if (!accounts.some((a) => a.id === id)) return;
         setActiveId(id);
         useAuthStore.getState().setActiveAccountId(id);
-        // Reload user for this account
+
         try {
             const user = await authActions.getUser();
             if (user) {
@@ -112,7 +111,7 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
     // addAccount accepts id from the caller so the same id used to store tokens
     // in auth.store is reused here — preventing the id mismatch bug.
     const addAccount: AccountContextValue["addAccount"] = (acc) => {
-        const resolvedId = acc.id ?? `acc_${Date.now().toString(36)}`;
+        const resolvedId = acc.id ?? `acc_${Date.now().toString(36)}`
         const newAcc: Account = {
             id: resolvedId,
             avatarColor: acc.avatarColor ?? COLORS[Math.floor(Math.random() * COLORS.length)],
@@ -121,8 +120,13 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
             hasNotifications: acc.hasNotifications,
             user: acc.user,
         };
+
+        console.log("ADD ACCOUNT", newAcc);
         setAccounts((prev) => {
-            const existing = prev.find((a) => a.username === newAcc.username);
+            const existing = prev.find(
+                (a) => a.id === newAcc.id || a.username === newAcc.username
+            );
+
             if (existing) {
                 // Duplicate username — switch to the existing account
                 setActiveId(existing.id);
@@ -167,6 +171,22 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
             user: storeUser,
         }
         : baseAccount ?? { id: '', name: '', username: '', avatarColor: COLORS[0] };
+
+    useEffect(() => {
+        console.table(
+            accounts.map(a => ({
+                id: a.id,
+                username: a.username
+            }))
+        );
+    }, [accounts]);
+
+    useEffect(() => {
+        console.log("AUTO ADD", {
+            storeActiveId,
+            storeUser
+        });
+    }, [storeActiveId, storeUser]);
 
     return (
         <AccountContext.Provider

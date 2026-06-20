@@ -22,17 +22,17 @@ const AddAccountPage = () => {
 
         (async () => {
             try {
-                const newId = `acc_${Date.now().toString(36)}`;
-                const user = await authActions.addAccount(email.trim(), password, newId);
+                const id = `acc_${Date.now().toString(36)}`
+                const user = await authActions.addAccount(email.trim(), password, id);
 
                 addAccount({
-                    id: newId,
+                    id: id,
                     name: user.full_name,
                     username: user.username,
                     user,
                 });
 
-                await switchAccount(newId);
+                await switchAccount(id);
 
                 navigate('/me/account');
             } catch {
