@@ -5,7 +5,10 @@ import { useAuthStore } from './auth.store';
 import { authActions } from './auth-actions';
 
 export const RequireAuth = () => {
-    const token = useAuthStore((s) => s.auth?.access_token);
+    const token = useAuthStore((s) => {
+        if (!s.activeAccountId) return undefined;
+        return s.tokens[s.activeAccountId]?.access_token;
+    });
     const [checking, setChecking] = useState(!!token);
     const verifiedRef = useRef(false);
 

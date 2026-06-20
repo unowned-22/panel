@@ -14,7 +14,7 @@ export type AccountContextValue = {
     accounts: Account[];
     activeId: string;
     activeAccount: Account;
-    switchAccount: (id: string) => void;
+    switchAccount: (id: string) => void | Promise<void>;
     addAccount: (acc: Omit<Account, "id" | "avatarColor"> & { avatarColor?: string }) => Account;
     removeAccount: (id: string) => void;
 };

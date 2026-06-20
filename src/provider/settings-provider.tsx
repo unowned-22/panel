@@ -7,12 +7,16 @@ import {
     type NavItemKey,
 } from "@/context/settings-context";
 import { fetchUserPreferences, saveUserPreferences } from "@/lib/user-preferences";
+import { useAuthStore } from "@/auth/auth.store";
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
-    const [isLoading, setIsLoading] = useState(true);
+    // Settings are user-scoped; there's nothing to load (and no point hitting
+    // the API) until someone is actually authenticated — e.g. on the login page.
+    const isAuthenticated = useAuthStore((s) => !!s.activeAccountId && !!s.tokens[s.activeAccountId]);
+
+    const [isLoading, setIsLoading] = useState(isAuthenticated);
 
     const [visible, setVisible] = useState<Set<NavItemKey>>(() => {
-        // localStorage используется как мгновенный fallback пока грузится API
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) {
             try { return new Set(JSON.parse(raw) as NavItemKey[]); } catch { /* ignore */ }
@@ -22,8 +26,13 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
 
     const [modalOpen, setModalOpen] = useState(false);
 
-    // Загружаем nav_config из API при маунте
     useEffect(() => {
+        if (!isAuthenticated) {
+            setIsLoading(false);
+            return;
+        }
+
+        setIsLoading(true);
         fetchUserPreferences()
             .then((prefs) => {
                 if (prefs && prefs.nav_config.length > 0) {
@@ -33,7 +42,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
                 }
             })
             .finally(() => setIsLoading(false));
-    }, []);
+    }, [isAuthenticated]);
 
     const save = useCallback(async (draft: Set<NavItemKey>) => {
         ALL_NAV_ITEMS.forEach((item) => {
@@ -41,9 +50,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
         });
         const next = new Set(draft);
         setVisible(next);
-        // Оптимистично обновляем localStorage как кэш
         localStorage.setItem(STORAGE_KEY, JSON.stringify([...next]));
-        // Сохраняем в API
         await saveUserPreferences({ nav_config: [...next] });
     }, []);
 

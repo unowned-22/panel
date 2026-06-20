@@ -53,6 +53,13 @@ export const ru: TranslationDictionary = {
     'page.account.manage.accounts.notifications': 'Уведомления',
     'page.account.manage.accounts.notifications.desc': 'Уведомления и настройки привязаны к каждому аккаунту отдельно.',
 
+    // ── Add account page ──────────────────────────────────────────────────────
+    'page.account.add.title': 'Добавить аккаунт',
+    'page.account.add.subtitle': 'Войдите в другой аккаунт, чтобы переключаться между ними',
+    'page.account.add.back': 'Назад к аккаунтам',
+    'page.account.add.submit': 'Добавить аккаунт',
+    'page.account.add.error': 'Не удалось добавить аккаунт. Проверьте данные для входа.',
+
     // ── Settings page ──────────────────────────────────────────────────────────
     'page.settings.general': 'Общее',
     'page.settings.cancel': 'Отменить',

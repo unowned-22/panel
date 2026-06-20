@@ -70,8 +70,12 @@ export default class ApiClient {
 
         if (res.status === 401) {
             const logoutOn401 = opts?.logoutOn401 ?? true;
-            // Never attempt refresh for the refresh endpoint itself
-            if (path === '/auth/refresh' || !logoutOn401) {
+            // Never attempt refresh for the refresh endpoint itself, or for
+            // requests that were already anonymous (no token to begin with) —
+            // those aren't a "session expired" event and must not trigger a
+            // redirect to /auth/login (which would just loop forever on
+            // public/unauthenticated pages like the login page itself).
+            if (path === '/auth/refresh' || !logoutOn401 || !token) {
                 const text = await safeText(res);
                 throw new ApiError(res.status, text || res.statusText);
             }
@@ -125,7 +129,7 @@ export default class ApiClient {
 
         if (res.status === 401) {
             const logoutOn401 = opts?.logoutOn401 ?? true;
-            if (path === '/auth/refresh' || !logoutOn401) {
+            if (path === '/auth/refresh' || !logoutOn401 || !token) {
                 const text = await safeText(res);
                 throw new ApiError(res.status, text || res.statusText);
             }
@@ -215,16 +219,30 @@ import { useAuthStore } from '@/auth/auth.store';
 export const apiClient = new ApiClient({
     baseUrl: import.meta.env.VITE_API_URL ?? '',
 
-    getToken: () =>
-        useAuthStore.getState().auth?.access_token,
+    getToken: () => {
+        const { tokens, activeAccountId } = useAuthStore.getState();
+        if (!activeAccountId) return undefined;
+        return tokens[activeAccountId]?.access_token;
+    },
 
-    getRefreshToken: () =>
-        useAuthStore.getState().auth?.refresh_token,
+    getRefreshToken: () => {
+        const { tokens, activeAccountId } = useAuthStore.getState();
+        if (!activeAccountId) return undefined;
+        return tokens[activeAccountId]?.refresh_token;
+    },
 
-    onTokenRefreshed: (newAuth) =>
-        useAuthStore.getState().setAuth(newAuth as AuthModel),
+    onTokenRefreshed: (newAuth) => {
+        const { activeAccountId } = useAuthStore.getState();
+        if (activeAccountId) {
+            useAuthStore.getState().setTokens(activeAccountId, newAuth as AuthModel);
+        }
+    },
 
     onAuthFailure: () => {
+        const { activeAccountId } = useAuthStore.getState();
+        if (activeAccountId) {
+            useAuthStore.getState().removeTokens(activeAccountId);
+        }
         useAuthStore.getState().logout();
         window.location.href = '/auth/login';
     },

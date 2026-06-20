@@ -11,12 +11,46 @@ export const authActions = {
             { logoutOn401: false }
         );
 
-        useAuthStore.getState().setAuth(body.data);
+        const accountId = useAuthStore.getState().activeAccountId ?? `acc_${Date.now().toString(36)}`;
+        useAuthStore.getState().setTokens(accountId, body.data);
+        useAuthStore.getState().setActiveAccountId(accountId);
 
         const me = await apiClient.get<{ data: UserModel }>('/users/me');
         useAuthStore.getState().setUser(me.data);
 
         return me.data;
+    },
+
+    async addAccount(
+        email: string,
+        password: string,
+        accountId: string // pre-generated ID from AccountProvider
+    ): Promise<UserModel> {
+        // 1. Login without touching the current active account
+        const body = await apiClient.post<{ data: AuthModel }>(
+            '/auth/login',
+            { email, password },
+            { logoutOn401: false }
+        );
+
+        // 2. Store tokens under the new account ID
+        useAuthStore.getState().setTokens(accountId, body.data);
+
+        // 3. Temporarily switch active to fetch the new account's user
+        const previousActiveId = useAuthStore.getState().activeAccountId;
+        useAuthStore.getState().setActiveAccountId(accountId);
+
+        try {
+            const me = await apiClient.get<{ data: UserModel }>('/users/me');
+            // 4. Switch back to previous account
+            useAuthStore.getState().setActiveAccountId(previousActiveId);
+            return me.data;
+        } catch (err) {
+            // On failure: clean up the new tokens and restore previous
+            useAuthStore.getState().removeTokens(accountId);
+            useAuthStore.getState().setActiveAccountId(previousActiveId);
+            throw err;
+        }
     },
 
     async register(
@@ -65,7 +99,8 @@ export const authActions = {
     },
 
     async logout(): Promise<void> {
-        const refreshToken = useAuthStore.getState().auth?.refresh_token;
+        const { tokens, activeAccountId } = useAuthStore.getState();
+        const refreshToken = activeAccountId ? tokens[activeAccountId]?.refresh_token : undefined;
 
         try {
             if (refreshToken) {

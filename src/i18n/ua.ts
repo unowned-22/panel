@@ -53,6 +53,13 @@ export const ua: TranslationDictionary = {
     'page.account.manage.accounts.notifications': 'Сповіщення',
     'page.account.manage.accounts.notifications.desc': 'Сповіщення та налаштування зберігаються окремо для кожного акаунта.',
 
+    // ── Add account page ──────────────────────────────────────────────────────
+    'page.account.add.title': 'Додати акаунт',
+    'page.account.add.subtitle': 'Увійдіть в інший акаунт, щоб перемикатися між ними',
+    'page.account.add.back': 'Назад до акаунтів',
+    'page.account.add.submit': 'Додати акаунт',
+    'page.account.add.error': 'Не вдалося додати акаунт. Перевірте дані для входу.',
+
     // ── Settings page ──────────────────────────────────────────────────────────
     'page.settings.general': 'Загальне',
     'page.settings.cancel': 'Скасувати',
