@@ -1,28 +1,50 @@
-import { type ReactNode, useCallback, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useState } from "react";
 import {
     SettingsContext,
     ALL_NAV_ITEMS,
     STORAGE_KEY,
     DEFAULT_VISIBLE,
-    type NavItemKey
+    type NavItemKey,
 } from "@/context/settings-context";
+import { fetchUserPreferences, saveUserPreferences } from "@/lib/user-preferences";
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
-    const [visible, setVisible] = useState<Set<NavItemKey>>(() => {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) return new Set(JSON.parse(raw) as NavItemKey[]);
+    const [isLoading, setIsLoading] = useState(true);
 
+    const [visible, setVisible] = useState<Set<NavItemKey>>(() => {
+        // localStorage используется как мгновенный fallback пока грузится API
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+            try { return new Set(JSON.parse(raw) as NavItemKey[]); } catch { /* ignore */ }
+        }
         return new Set(DEFAULT_VISIBLE);
     });
 
     const [modalOpen, setModalOpen] = useState(false);
-    const save = useCallback((draft: Set<NavItemKey>) => {
+
+    // Загружаем nav_config из API при маунте
+    useEffect(() => {
+        fetchUserPreferences()
+            .then((prefs) => {
+                if (prefs && prefs.nav_config.length > 0) {
+                    const next = new Set(prefs.nav_config);
+                    setVisible(next);
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify([...next]));
+                }
+            })
+            .finally(() => setIsLoading(false));
+    }, []);
+
+    const save = useCallback(async (draft: Set<NavItemKey>) => {
         ALL_NAV_ITEMS.forEach((item) => {
             if (item.alwaysVisible) draft.add(item.key);
         });
         const next = new Set(draft);
         setVisible(next);
+        // Оптимистично обновляем localStorage как кэш
         localStorage.setItem(STORAGE_KEY, JSON.stringify([...next]));
+        // Сохраняем в API
+        await saveUserPreferences({ nav_config: [...next] });
     }, []);
 
     const isVisible = useCallback(
@@ -38,6 +60,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
             modalOpen,
             openModal: () => setModalOpen(true),
             closeModal: () => setModalOpen(false),
+            isLoading,
         }}>
             {children}
         </SettingsContext.Provider>

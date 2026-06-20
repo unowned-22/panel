@@ -1,6 +1,6 @@
 import { ChevronDown, LogOut, Settings, Trash2, CheckCircle2, Users } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -17,26 +17,35 @@ import { cn } from "@/lib/utils";
 import { toAbsoluteUrl } from '@/lib/helpers';
 import type { Language } from "@/i18n/types.ts";
 import { useTranslation } from '@/hooks/use-translation';
+import { authActions } from '@/auth/auth-actions';
 
-const LANGUAGE_OPTIONS: { code: Language; flag: string; label: string } [] = [
+const LANGUAGE_OPTIONS: { code: Language; flag: string; label: string }[] = [
     { code: 'en', flag: toAbsoluteUrl('/flags/united-states.svg'), label: 'English' },
-    { code: 'ua', flag: toAbsoluteUrl('/flags/ukraine.svg'), label: 'Українська' },
-    { code: 'ru', flag: toAbsoluteUrl('/flags/russia.svg'), label: 'Русский' },
-    { code: 'it', flag: toAbsoluteUrl('/flags/italy.svg'), label: 'Italiano' },
-    { code: 'es', flag: toAbsoluteUrl('/flags/spain.svg'), label: 'Español' },
-    { code: 'fr', flag: toAbsoluteUrl('/flags/france.svg'), label: 'Français' },
-    { code: 'de', flag: toAbsoluteUrl('/flags/germany.svg'), label: 'Deutsch' },
+    { code: 'ua', flag: toAbsoluteUrl('/flags/ukraine.svg'),       label: 'Українська' },
+    { code: 'ru', flag: toAbsoluteUrl('/flags/russia.svg'),        label: 'Русский' },
+    { code: 'it', flag: toAbsoluteUrl('/flags/italy.svg'),         label: 'Italiano' },
+    { code: 'es', flag: toAbsoluteUrl('/flags/spain.svg'),         label: 'Español' },
+    { code: 'fr', flag: toAbsoluteUrl('/flags/france.svg'),        label: 'Français' },
+    { code: 'de', flag: toAbsoluteUrl('/flags/germany.svg'),       label: 'Deutsch' },
 ];
 
 export const TopBar = () => {
     const { accounts, activeId, activeAccount, switchAccount, removeAccount } = useAccount();
     const { t, language, setLanguage } = useTranslation();
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
     const currentLang = LANGUAGE_OPTIONS.find(l => l.code === language);
     const avatar = activeAccount.user?.avatar_url ?? null;
 
     const handleLanguageChange = useCallback((langCode: string) => {
         setLanguage(langCode as Language);
     }, [setLanguage]);
+
+    const handleLogout = useCallback(async () => {
+        if (isLoggingOut) return;
+        setIsLoggingOut(true);
+        await authActions.logout();
+        // authActions.logout() редиректит, поэтому состояние дальше не используется
+    }, [isLoggingOut]);
 
     return (
         <header className="sticky top-0 z-40 h-15 bg-background/85 backdrop-blur-xl border-b border-border">
@@ -132,7 +141,7 @@ export const TopBar = () => {
 
                         <div className="px-2 pb-2">
                             <DropdownMenuItem asChild className="gap-3 py-2.5">
-                                <Link to="/me/account">
+                                <Link to="/me/accounts">
                                     <Users className="w-4 h-4 text-primary" />{t('topbar.menu.mine.accounts')}
                                 </Link>
                             </DropdownMenuItem>
@@ -150,14 +159,11 @@ export const TopBar = () => {
                                     />
                                     <span className="text-sm font-medium">{currentLang?.label}</span>
                                 </DropdownMenuSubTrigger>
-
                                 <DropdownMenuSubContent className="w-48">
                                     <DropdownMenuRadioGroup
                                         value={currentLang?.code}
                                         onValueChange={(value) => {
-                                            const selectedLang = LANGUAGE_OPTIONS.find(
-                                                (lang) => lang.code === value,
-                                            );
+                                            const selectedLang = LANGUAGE_OPTIONS.find(l => l.code === value);
                                             if (selectedLang) handleLanguageChange(selectedLang.code);
                                         }}
                                     >
@@ -178,13 +184,18 @@ export const TopBar = () => {
                                     </DropdownMenuRadioGroup>
                                 </DropdownMenuSubContent>
                             </DropdownMenuSub>
-                            <DropdownMenuItem className="gap-3 py-2.5">
-                                <LogOut className="w-4 h-4 text-primary" />{t('topbar.menu.logout')}
+                            <DropdownMenuItem
+                                className="gap-3 py-2.5"
+                                disabled={isLoggingOut}
+                                onClick={handleLogout}
+                            >
+                                <LogOut className="w-4 h-4 text-primary" />
+                                {isLoggingOut ? '...' : t('topbar.menu.logout')}
                             </DropdownMenuItem>
                         </div>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
         </header>
-    )
+    );
 };

@@ -128,4 +128,10 @@ export const ru: TranslationDictionary = {
     'page.auth.verify-email.sent-toast-desc': 'Письмо отправлено на {email}',
     'page.auth.verify-email.error-send-failed': 'Не удалось отправить письмо',
     'page.auth.verify-email.to-login': 'На страницу входа',
+
+    // ── 404 ─────────────────────────────────────────────────────
+    'page.error.404': 'Ошибка 404',
+    'page.error.lost.page': 'Мы потеряли эту страницу',
+    'page.error.return': 'Домой',
+    'page.error.page.missing': 'Запрашиваемая страница не найдена&nbsp;',
 };

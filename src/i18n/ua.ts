@@ -128,4 +128,10 @@ export const ua: TranslationDictionary = {
     'page.auth.verify-email.sent-toast-desc': 'Лист надіслано на {email}',
     'page.auth.verify-email.error-send-failed': 'Не вдалося надіслати лист',
     'page.auth.verify-email.to-login': 'На сторінку входу',
+
+    // ── 404 ─────────────────────────────────────────────────────
+    'page.error.404': 'Помилка 404',
+    'page.error.lost.page': 'Ми не можемо знайти цю сторінку',
+    'page.error.return': 'На головну',
+    'page.error.page.missing': 'Запитувану сторінку не знайдено&nbsp;',
 };

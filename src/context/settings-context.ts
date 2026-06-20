@@ -40,15 +40,17 @@ export const DEFAULT_VISIBLE = new Set<NavItemKey>([
     "services", "voices", "bookmarks", "help",
 ]);
 
+// Keep for backward compat with any import that still references STORAGE_KEY
 export const STORAGE_KEY = "nav_config_v1";
 
 export interface SettingsContextValue {
     visible: Set<NavItemKey>;
     isVisible: (key: NavItemKey) => boolean;
-    save: (draft: Set<NavItemKey>) => void;
+    save: (draft: Set<NavItemKey>) => Promise<void>;
     modalOpen: boolean;
     openModal: () => void;
     closeModal: () => void;
+    isLoading: boolean;
 }
 
 export const SettingsContext = createContext<SettingsContextValue | null>(null);
