@@ -4,6 +4,8 @@ import { RequireAuth } from '@/auth/require-auth';
 import { ErrorRouting } from '@/errors/error-routing';
 import { MainLayout } from '@/layouts/main/layout';
 import Home from "@/me/pages/home";
+import Settings from "@/me/pages/settings";
+import Account from "@/me/pages/account";
 
 export function AppRoutingSetup() {
     return (
@@ -11,6 +13,8 @@ export function AppRoutingSetup() {
             <Route element={<RequireAuth />}>
                 <Route element={<MainLayout />}>
                     <Route path="/" element={<Home />} />
+                    <Route path="/me/settings" element={<Settings />} />
+                    <Route path="/me/account" element={<Account />} />
                 </Route>
             </Route>
             <Route path="error/*" element={<ErrorRouting />} />

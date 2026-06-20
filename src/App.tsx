@@ -7,6 +7,7 @@ import { AppRouting } from '@/routing/app-routing';
 import { AccountProvider } from "./provider/account-provider";
 import { QueryClientProvider } from '@tanstack/react-query';
 import { TranslationProvider } from '@/provider/translation-provider';
+import { SettingsProvider } from '@/provider/settings-provider';
 import { queryClient } from '@/lib/query-client';
 
 const { BASE_URL } = import.meta.env;
@@ -17,13 +18,15 @@ function App() {
           <TranslationProvider>
               <HelmetProvider>
                   <LoadingBarContainer>
-                      <AccountProvider>
-                          <Toaster />
-                          <Sonner />
-                          <BrowserRouter basename={BASE_URL}>
-                              <AppRouting />
-                          </BrowserRouter>
-                      </AccountProvider>
+                      <SettingsProvider>
+                          <AccountProvider>
+                              <Toaster />
+                              <Sonner />
+                              <BrowserRouter basename={BASE_URL}>
+                                  <AppRouting />
+                              </BrowserRouter>
+                          </AccountProvider>
+                      </SettingsProvider>
                   </LoadingBarContainer>
               </HelmetProvider>
           </TranslationProvider>

@@ -40,6 +40,29 @@ export const fr: TranslationDictionary = {
     'page.home.my.wishlist': 'Mes souhaits',
     'page.home.memories': 'Souvenirs',
 
+    // ── Account page ──────────────────────────────────────────────────────────
+    'page.account.back': 'Retour',
+    'page.account.manage.account.add': 'Ajouter un compte',
+    'page.account.manage.account.confirm': 'Confirmer',
+    'page.account.manage.account.switch': 'Basculer',
+    'page.account.manage.account.active': 'Actif',
+    'page.account.manage.accounts': 'Gestion des comptes',
+    'page.account.manage.accounts.desc': 'Ajoutez, changez et supprimez des comptes',
+    'page.account.manage.accounts.security': 'Sécurité',
+    'page.account.manage.accounts.security.desc': 'Tous les comptes sont stockés localement dans votre navigateur. Aucune donnée n\'est envoyée au serveur.',
+    'page.account.manage.accounts.notifications': 'Notifications',
+    'page.account.manage.accounts.notifications.desc': 'Les notifications et les paramètres sont enregistrés séparément pour chaque compte.',
+
+    // ── Settings page ──────────────────────────────────────────────────────────
+    'page.settings.general': 'Général',
+    'page.settings.cancel': 'Annuler',
+    'page.settings.save': 'Enregistrer',
+    'page.settings.games.apps': 'Jeux et applications',
+    'page.settings.menu.settings': 'Menu du site',
+    'page.settings.setup.menu.items': 'Configurer les éléments du menu',
+    'page.settings.section.account': 'Compte et apparence',
+    'page.settings.modal.setup.items': 'Configuration des éléments du menu',
+
     // ── Shared auth ──────────────────────────────────────────────────────────
     'page.auth.back-to-login': '← Retour à la connexion',
 

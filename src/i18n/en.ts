@@ -40,6 +40,29 @@ export const en: TranslationDictionary = {
     'page.home.my.wishlist': 'My wishlist',
     'page.home.memories': 'Memories',
 
+    // ── Settings page ──────────────────────────────────────────────────────────
+    'page.settings.general': 'General',
+    'page.settings.cancel': 'Cancel',
+    'page.settings.save': 'Save',
+    'page.settings.games.apps': 'Favorite games and apps',
+    'page.settings.menu.settings': 'Menu settings',
+    'page.settings.setup.menu.items': 'Set up menu items',
+    'page.settings.section.account': 'Account and appearance',
+    'page.settings.modal.setup.items': 'Menu item settings',
+
+    // ── Account page ──────────────────────────────────────────────────────────
+    'page.account.back': 'Back',
+    'page.account.manage.account.add': 'Add account',
+    'page.account.manage.account.confirm': 'Confirm',
+    'page.account.manage.account.switch': 'Switch',
+    'page.account.manage.account.active': 'Active',
+    'page.account.manage.accounts': 'Manage accounts',
+    'page.account.manage.accounts.desc': 'Add, switch, and remove accounts',
+    'page.account.manage.accounts.security': 'Security',
+    'page.account.manage.accounts.security.desc': 'All accounts are stored locally in your browser. No data is sent to the server.',
+    'page.account.manage.accounts.notifications': 'Notifications',
+    'page.account.manage.accounts.notifications.desc': 'Notifications and settings are stored separately for each account.',
+
     // ── Shared auth ──────────────────────────────────────────────────────────
     'page.auth.back-to-login': '← Back to login',
 

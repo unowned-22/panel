@@ -26,6 +26,8 @@ export interface TranslationDictionary {
     'topbar.menu.account.delete': string;
     'page.auth.login': string;
     'page.auth.registration': string;
+
+    // ── Home page ───────────────────────────────────────────────────────────
     'page.home.new.story': string;
     'page.home.open.photo': string;
     'page.home.change.cover': string;
@@ -39,6 +41,29 @@ export interface TranslationDictionary {
     'page.home.my.questions': string;
     'page.home.my.wishlist': string;
     'page.home.memories': string;
+
+    // ── Home page ───────────────────────────────────────────────────────────
+    'page.settings.general': string;
+    'page.settings.cancel': string;
+    'page.settings.save': string;
+    'page.settings.games.apps': string;
+    'page.settings.menu.settings': string;
+    'page.settings.setup.menu.items': string;
+    'page.settings.section.account': string;
+    'page.settings.modal.setup.items': string;
+
+    // ── Account page ──────────────────────────────────────────────────────────
+    'page.account.back': string;
+    'page.account.manage.accounts': string;
+    'page.account.manage.account.add': string;
+    'page.account.manage.account.confirm': string;
+    'page.account.manage.account.switch': string;
+    'page.account.manage.account.active': string;
+    'page.account.manage.accounts.desc': string;
+    'page.account.manage.accounts.security': string;
+    'page.account.manage.accounts.security.desc': string;
+    'page.account.manage.accounts.notifications': string;
+    'page.account.manage.accounts.notifications.desc': string;
 
     // ── Shared auth ──────────────────────────────────────────────────────────
     'page.auth.back-to-login': string;

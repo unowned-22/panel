@@ -40,6 +40,29 @@ export const de: TranslationDictionary = {
     'page.home.my.wishlist': 'Meine Wünsche',
     'page.home.memories': 'Erinnerungen',
 
+    // ── Account page ──────────────────────────────────────────────────────────
+    'page.account.back': 'Zurück',
+    'page.account.manage.account.add': 'Konto hinzufügen',
+    'page.account.manage.account.confirm': 'Bestätigen',
+    'page.account.manage.account.switch': 'Wechseln',
+    'page.account.manage.account.active': 'Aktiv',
+    'page.account.manage.accounts': 'Kontoverwaltung',
+    'page.account.manage.accounts.desc': 'Konten hinzufügen, wechseln und löschen',
+    'page.account.manage.accounts.security': 'Sicherheit',
+    'page.account.manage.accounts.security.desc': 'Alle Konten werden lokal in Ihrem Browser gespeichert. Es werden keine Daten an den Server gesendet.',
+    'page.account.manage.accounts.notifications': 'Benachrichtigungen',
+    'page.account.manage.accounts.notifications.desc': 'Benachrichtigungen und Einstellungen werden für jedes Konto separat gespeichert.',
+
+    // ── Settings page ──────────────────────────────────────────────────────────
+    'page.settings.general': 'Allgemein',
+    'page.settings.cancel': 'Abbrechen',
+    'page.settings.save': 'Speichern',
+    'page.settings.games.apps': 'Spiele und Apps',
+    'page.settings.menu.settings': 'Website-Menü',
+    'page.settings.setup.menu.items': 'Menüpunkte konfigurieren',
+    'page.settings.section.account': 'Konto und Erscheinungsbild',
+    'page.settings.modal.setup.items': 'Konfiguration der Menüpunkte',
+
     // ── Shared auth ──────────────────────────────────────────────────────────
     'page.auth.back-to-login': '← Zurück zum Login',
 

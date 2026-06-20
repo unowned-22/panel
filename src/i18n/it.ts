@@ -40,6 +40,29 @@ export const it: TranslationDictionary = {
     'page.home.my.wishlist': 'I miei desideri',
     'page.home.memories': 'Ricordi',
 
+    // ── Account page ──────────────────────────────────────────────────────────
+    'page.account.back': 'Indietro',
+    'page.account.manage.account.add': 'Aggiungi account',
+    'page.account.manage.account.confirm': 'Conferma',
+    'page.account.manage.account.switch': 'Passa',
+    'page.account.manage.account.active': 'Attivo',
+    'page.account.manage.accounts': 'Gestione degli account',
+    'page.account.manage.accounts.desc': 'Aggiungi, passa da un account all\'altro ed elimina account',
+    'page.account.manage.accounts.security': 'Sicurezza',
+    'page.account.manage.accounts.security.desc': 'Tutti gli account sono archiviati localmente nel tuo browser. Nessun dato viene inviato al server.',
+    'page.account.manage.accounts.notifications': 'Notifiche',
+    'page.account.manage.accounts.notifications.desc': 'Le notifiche e le impostazioni vengono salvate separatamente per ogni account.',
+
+    // ── Settings page ──────────────────────────────────────────────────────────
+    'page.settings.general': 'Generale',
+    'page.settings.cancel': 'Annulla',
+    'page.settings.save': 'Salva',
+    'page.settings.games.apps': 'Giochi e applicazioni',
+    'page.settings.menu.settings': 'Menu del sito',
+    'page.settings.setup.menu.items': 'Configura le voci del menu',
+    'page.settings.section.account': 'Account e aspetto',
+    'page.settings.modal.setup.items': 'Configurazione delle voci del menu',
+
     // ── Shared auth ──────────────────────────────────────────────────────────
     'page.auth.back-to-login': '← Torna al login',
 

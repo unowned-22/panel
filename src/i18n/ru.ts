@@ -40,6 +40,29 @@ export const ru: TranslationDictionary = {
     'page.home.my.wishlist': 'Мои желания',
     'page.home.memories': 'Воспоминания',
 
+    // ── Account page ──────────────────────────────────────────────────────────
+    'page.account.back': 'Назад',
+    'page.account.manage.account.add': 'Добавить аккаунт',
+    'page.account.manage.account.confirm': 'Подтвердить',
+    'page.account.manage.account.switch': 'Переключиться',
+    'page.account.manage.account.active': 'Активный',
+    'page.account.manage.accounts': 'Управление аккаунтами',
+    'page.account.manage.accounts.desc': 'Добавляйте, переключайтесь и удаляйте учётные записи',
+    'page.account.manage.accounts.security': 'Безопасность',
+    'page.account.manage.accounts.security.desc': 'Все аккаунты хранятся локально в вашем браузере. Данные не отправляются на сервер.',
+    'page.account.manage.accounts.notifications': 'Уведомления',
+    'page.account.manage.accounts.notifications.desc': 'Уведомления и настройки привязаны к каждому аккаунту отдельно.',
+
+    // ── Settings page ──────────────────────────────────────────────────────────
+    'page.settings.general': 'Общее',
+    'page.settings.cancel': 'Отменить',
+    'page.settings.save': 'Сохранить',
+    'page.settings.games.apps': 'Игры и приложения',
+    'page.settings.menu.settings': 'Меню сайта',
+    'page.settings.setup.menu.items': 'Настроить отображение пунктов меню',
+    'page.settings.section.account': 'Аккаунт и внешний вид',
+    'page.settings.modal.setup.items': 'Настройка пунктов меню',
+
     // ── Shared auth ──────────────────────────────────────────────────────────
     'page.auth.back-to-login': '← Вернуться ко входу',
 
