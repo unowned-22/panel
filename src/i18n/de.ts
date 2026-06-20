@@ -40,6 +40,16 @@ export const de: TranslationDictionary = {
     'page.home.my.wishlist': 'Meine Wünsche',
     'page.home.memories': 'Erinnerungen',
 
+    // ── Settings page ──────────────────────────────────────────────────────────
+    'page.settings.general': 'Allgemein',
+    'page.settings.cancel': 'Abbrechen',
+    'page.settings.save': 'Speichern',
+    'page.settings.games.apps': 'Spiele und Apps',
+    'page.settings.menu.settings': 'Website-Menü',
+    'page.settings.setup.menu.items': 'Menüpunkte konfigurieren',
+    'page.settings.section.account': 'Konto und Erscheinungsbild',
+    'page.settings.modal.setup.items': 'Konfiguration der Menüpunkte',
+
     // ── Shared auth ──────────────────────────────────────────────────────────
     'page.auth.back-to-login': '← Zurück zum Login',
 

@@ -40,6 +40,16 @@ export const ru: TranslationDictionary = {
     'page.home.my.wishlist': 'Мои желания',
     'page.home.memories': 'Воспоминания',
 
+    // ── Settings page ──────────────────────────────────────────────────────────
+    'page.settings.general': 'Общее',
+    'page.settings.cancel': 'Отменить',
+    'page.settings.save': 'Сохранить',
+    'page.settings.games.apps': 'Игры и приложения',
+    'page.settings.menu.settings': 'Меню сайта',
+    'page.settings.setup.menu.items': 'Настроить отображение пунктов меню',
+    'page.settings.section.account': 'Аккаунт и внешний вид',
+    'page.settings.modal.setup.items': 'Настройка пунктов меню',
+
     // ── Shared auth ──────────────────────────────────────────────────────────
     'page.auth.back-to-login': '← Вернуться ко входу',
 

@@ -40,6 +40,16 @@ export const ua: TranslationDictionary = {
     'page.home.my.wishlist': 'Мої бажання',
     'page.home.memories': 'Спогади',
 
+    // ── Settings page ──────────────────────────────────────────────────────────
+    'page.settings.general': 'Загальне',
+    'page.settings.cancel': 'Скасувати',
+    'page.settings.save': 'Зберегти',
+    'page.settings.games.apps': 'Ігри та застосунки',
+    'page.settings.menu.settings': 'Меню сайту',
+    'page.settings.setup.menu.items': 'Налаштувати пункти меню',
+    'page.settings.section.account': 'Акаунт і зовнішній вигляд',
+    'page.settings.modal.setup.items': 'Налаштування пунктів меню',
+
     // ── Shared auth ──────────────────────────────────────────────────────────
     'page.auth.back-to-login': '← Повернутися до входу',
 
