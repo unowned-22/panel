@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useAuthStore } from '@/auth/auth.store';
-import { authActions } from '@/auth/auth-actions';
 import { apiClient } from '@/lib/api-client';
 import {
     STORAGE_KEY,
@@ -11,11 +10,15 @@ import {
     type AccountContextValue
 } from '@/context/account-context';
 
+const colorFromId = (id: string) =>
+    COLORS[id.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % COLORS.length];
+
 export const AccountProvider = ({ children }: { children: ReactNode }) => {
     const storeUser = useAuthStore((s) => s.user);
     const storeActiveId = useAuthStore((s) => s.activeAccountId);
+    const activeId = storeActiveId ?? '';
 
-    const [accounts, setAccounts] = useState<Account[]>(() => {
+    const [savedAccounts, setSavedAccounts] = useState<Account[]>(() => {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) {
             try {
@@ -25,139 +28,91 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
         }
         return [];
     });
-    const [activeId, setActiveId] = useState<string>(() => {
-        return localStorage.getItem(ACTIVE_KEY) ?? '';
-    });
+
+    const accounts = useMemo(() => {
+        if (!storeActiveId || !storeUser) return savedAccounts;
+        if (savedAccounts.some((a) => a.id === storeActiveId)) return savedAccounts;
+        const alreadyTracked = savedAccounts.some(
+            (a) => a.user?.id === storeUser.id || a.username === `@${storeUser.username}`
+        );
+        if (alreadyTracked) return savedAccounts;
+
+        return [
+            ...savedAccounts,
+            {
+                id: storeActiveId,
+                name: storeUser.full_name,
+                username: `@${storeUser.username}`,
+                avatarColor: colorFromId(storeActiveId),
+                user: storeUser,
+            } satisfies Account,
+        ];
+    }, [savedAccounts, storeActiveId, storeUser]);
 
     useEffect(() => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
     }, [accounts]);
+
     useEffect(() => {
-        if (activeId) localStorage.setItem(ACTIVE_KEY, activeId);
-    }, [activeId]);
+        if (storeActiveId) localStorage.setItem(ACTIVE_KEY, storeActiveId);
+    }, [storeActiveId]);
 
-    // One-time migration link: if auth.store has a migrated legacy token under
-    // 'acc_migrated' but the account list has a different (existing) account id,
-    // rename the token key to match so they stay linked.
-    const migrationDone = useRef(false);
-    useEffect(() => {
-        if (migrationDone.current) return;
-        migrationDone.current = true;
-
-        const { tokens, activeAccountId } = useAuthStore.getState();
-        if (
-            activeAccountId === 'acc_migrated' &&
-            accounts.length === 1 &&
-            accounts[0].id !== 'acc_migrated'
-        ) {
-            const migratedAuth = tokens['acc_migrated'];
-            if (migratedAuth) {
-                useAuthStore.getState().setTokens(accounts[0].id, migratedAuth);
-            }
-            useAuthStore.getState().removeTokens('acc_migrated');
-            useAuthStore.getState().setActiveAccountId(accounts[0].id);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    // Auto-sync: when auth.store gets a new activeAccountId (e.g. after normal
-    // login via /auth/login), make sure the account list reflects it.
-    // If the account doesn't exist in the list yet, add it once the user is loaded.
-    useEffect(() => {
-        if (!storeActiveId) return;
-        // Already in the list — just keep activeId in sync
-        if (accounts.some((a) => a.id === storeActiveId)) {
-            if (activeId !== storeActiveId) setActiveId(storeActiveId);
-            return;
-        }
-        // Not in the list yet — wait for storeUser to be populated then add
-        if (!storeUser) return;
-        const newAcc: Account = {
-            id: storeActiveId,
-            name: storeUser.full_name,
-            username: `@${storeUser.username}`,
-            avatarColor: COLORS[Math.floor(Math.random() * COLORS.length)],
-            user: storeUser,
-        };
-        setAccounts((prev) => {
-            if (prev.some((a) => a.id === storeActiveId)) return prev;
-            return [...prev, newAcc];
-        });
-        setActiveId(storeActiveId);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [storeActiveId, storeUser]);
-
-    const switchAccount = async (id: string) => {
+    const switchAccount = (id: string) => {
         if (!accounts.some((a) => a.id === id)) return;
-        setActiveId(id);
         useAuthStore.getState().setActiveAccountId(id);
-
-        try {
-            const user = await authActions.getUser();
-            if (user) {
-                setAccounts((prev) =>
-                    prev.map((a) =>
-                        a.id === id
-                            ? { ...a, name: user.full_name, username: `@${user.username}`, user }
-                            : a
-                    )
-                );
-            }
-        } catch {
-            // Token may be expired — apiClient will refresh automatically
-        }
+        window.location.href = '/me/account';
     };
 
-    // addAccount accepts id from the caller so the same id used to store tokens
-    // in auth.store is reused here — preventing the id mismatch bug.
     const addAccount: AccountContextValue["addAccount"] = (acc) => {
-        const resolvedId = acc.id ?? `acc_${Date.now().toString(36)}`
+        const resolvedId = acc.id ?? `acc_${Date.now().toString(36)}`;
         const newAcc: Account = {
             id: resolvedId,
-            avatarColor: acc.avatarColor ?? COLORS[Math.floor(Math.random() * COLORS.length)],
+            avatarColor: acc.avatarColor ?? colorFromId(resolvedId),
             name: acc.name,
             username: acc.username.startsWith("@") ? acc.username : `@${acc.username}`,
             hasNotifications: acc.hasNotifications,
             user: acc.user,
         };
 
-        console.log("ADD ACCOUNT", newAcc);
-        setAccounts((prev) => {
+        let existingAccount: Account | undefined;
+
+        setSavedAccounts((prev) => {
             const existing = prev.find(
                 (a) => a.id === newAcc.id || a.username === newAcc.username
             );
-
             if (existing) {
-                // Duplicate username — switch to the existing account
-                setActiveId(existing.id);
-                useAuthStore.getState().setActiveAccountId(existing.id);
+                existingAccount = existing;
                 return prev;
             }
             return [...prev, newAcc];
         });
-        // Do NOT call setActiveId / setActiveAccountId here —
-        // the caller drives the switch via switchAccount() after addAccount() returns.
+
+        if (existingAccount) {
+            useAuthStore.getState().setActiveAccountId(existingAccount.id);
+            return existingAccount;
+        }
+
         return newAcc;
     };
 
     const removeAccount = (id: string) => {
-        // Fire-and-forget: revoke the refresh token for this account
         const tokenForAccount = useAuthStore.getState().tokens[id];
         if (tokenForAccount?.refresh_token) {
-            apiClient.post('/auth/logout', { refresh_token: tokenForAccount.refresh_token })
+            apiClient
+                .post('/auth/logout', { refresh_token: tokenForAccount.refresh_token })
                 .catch(() => { /* ignore — local cleanup proceeds regardless */ });
         }
 
         useAuthStore.getState().removeTokens(id);
 
-        setAccounts((prev) => {
+        setSavedAccounts((prev) => {
             const next = prev.filter((a) => a.id !== id);
             if (next.length === 0) return prev; // never remove last account
+
             if (id === activeId) {
-                const fallback = next[0].id;
-                setActiveId(fallback);
-                useAuthStore.getState().setActiveAccountId(fallback);
+                useAuthStore.getState().setActiveAccountId(next[0].id);
             }
+
             return next;
         });
     };
@@ -171,22 +126,6 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
             user: storeUser,
         }
         : baseAccount ?? { id: '', name: '', username: '', avatarColor: COLORS[0] };
-
-    useEffect(() => {
-        console.table(
-            accounts.map(a => ({
-                id: a.id,
-                username: a.username
-            }))
-        );
-    }, [accounts]);
-
-    useEffect(() => {
-        console.log("AUTO ADD", {
-            storeActiveId,
-            storeUser
-        });
-    }, [storeActiveId, storeUser]);
 
     return (
         <AccountContext.Provider
