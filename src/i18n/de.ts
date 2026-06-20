@@ -128,4 +128,10 @@ export const de: TranslationDictionary = {
     'page.auth.verify-email.sent-toast-desc': 'E-Mail gesendet an {email}',
     'page.auth.verify-email.error-send-failed': 'E-Mail konnte nicht gesendet werden',
     'page.auth.verify-email.to-login': 'Zur Anmeldeseite',
+
+    // ── 404 ─────────────────────────────────────────────────────
+    'page.error.404': 'Fehler 404',
+    'page.error.lost.page': 'Wir konnten diese Seite nicht finden',
+    'page.error.return': 'Startseite',
+    'page.error.page.missing': 'Die angeforderte Seite wurde nicht gefunden&nbsp;',
 };

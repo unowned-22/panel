@@ -1,5 +1,6 @@
 import { apiClient } from '@/lib/api-client';
 import { useAuthStore } from '@/auth/auth.store';
+import { clearPreferencesCache } from '@/lib/user-preferences';
 import type { AuthModel, UserModel } from './auth-model';
 
 export const authActions = {
@@ -63,9 +64,20 @@ export const authActions = {
         await apiClient.post('/auth/resend-verification', { email });
     },
 
-    logout(): void {
-        useAuthStore.getState().logout();
-        window.location.href = '/auth/login';
+    async logout(): Promise<void> {
+        const refreshToken = useAuthStore.getState().auth?.refresh_token;
+
+        try {
+            if (refreshToken) {
+                await apiClient.post('/auth/logout', { refresh_token: refreshToken });
+            }
+        } catch {
+            // Если запрос не прошёл — всё равно разлогиниваем локально
+        } finally {
+            clearPreferencesCache();
+            useAuthStore.getState().logout();
+            window.location.href = '/auth/login';
+        }
     },
 
     async uploadAvatar(file: File): Promise<string> {

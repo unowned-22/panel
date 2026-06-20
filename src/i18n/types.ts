@@ -132,4 +132,10 @@ export interface TranslationDictionary {
     'page.auth.verify-email.sent-toast-desc': string;
     'page.auth.verify-email.error-send-failed': string;
     'page.auth.verify-email.to-login': string;
+
+    // ── 404 page ──────────────────────────────────────────────────
+    'page.error.404': string;
+    'page.error.return': string;
+    'page.error.lost.page': string;
+    'page.error.page.missing': string;
 }
