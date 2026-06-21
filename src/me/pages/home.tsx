@@ -7,7 +7,6 @@ import {
 import {
     BarChart3,
     Camera,
-    Check,
     ChevronDown,
     ChevronRight,
     FileQuestion,
@@ -25,6 +24,10 @@ import { useTranslation } from "@/hooks/use-translation";
 import { Link } from "react-router-dom";
 import StoryEditor from "@/me/components/stories/StoryEditor";
 import type { StoryState } from "@/me/components/stories/storyTypes";
+import { ApiError } from '@/lib/api-client';
+import { storiesActions } from '@/me/components/stories/stories-actions';
+import { toast } from "@/hooks/use-toast";
+import { StoryViewer } from "@/me/components/stories/StoryViewer.tsx";
 
 const Home = () => {
     const { t } = useTranslation();
@@ -44,7 +47,7 @@ const Home = () => {
     const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
     const [avatarUploaderOpen, setAvatarUploaderOpen] = useState(false);
     const [storyEditorOpen, setStoryEditorOpen] = useState(false);
-    const [storyToast, setStoryToast] = useState(false);
+    const [storyOpen, setStoryOpen] = useState(false);
 
     const openAvatarUpload = () => {
         setAvatarMenuOpen(false);
@@ -143,6 +146,9 @@ const Home = () => {
                                 >
                                     <Camera className="h-4 w-4 text-primary" />{t('page.home.new.story')}
                                 </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setStoryOpen(true)} className="gap-3 py-3">
+                                    <ImageIcon className="h-4 w-4 text-primary" />{t('page.home.view.story')}
+                                </DropdownMenuItem>
                                 <DropdownMenuItem onClick={openAvatarUpload} className="gap-3 py-3">
                                     <ImageIcon className="h-4 w-4 text-primary" />{t(avatar ? 'page.home.open.photo' : 'page.home.upload.image')}
                                 </DropdownMenuItem>
@@ -216,23 +222,23 @@ const Home = () => {
                 allowedTypes={["image/jpeg", "image/png", "image/webp", "image/gif", "image/heic", "image/heif"]}
             />
 
+            <StoryViewer open={storyOpen} onOpenChange={setStoryOpen} startUserId="1" />
             {storyEditorOpen && (
                 <StoryEditor
                     onClose={() => setStoryEditorOpen(false)}
-                    onPublish={(_state: StoryState) => {
-                        console.log('state', _state)
-                        setStoryEditorOpen(false);
-                        setStoryToast(true);
-                        setTimeout(() => setStoryToast(false), 2500);
+                    onPublish={async (state: StoryState) => {
+                        try {
+                            await storiesActions.publish(state);
+                            setStoryEditorOpen(false);
+                            toast({ title: t('page.home.story.published') });
+                        } catch (err) {
+                            toast({
+                                title: err instanceof ApiError ? err.message : t('page.home.story.publish.error'),
+                                variant: "destructive"
+                            });
+                        }
                     }}
                 />
-            )}
-
-            {storyToast && (
-                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-60 flex items-center gap-2 rounded-full bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 shadow-lg">
-                    <Check className="h-4 w-4 text-emerald-600" />
-                    {t('page.home.story.published')}
-                </div>
             )}
         </>
     );

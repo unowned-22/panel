@@ -29,6 +29,9 @@ export const ua: TranslationDictionary = {
 
     'page.home.new.story': 'Створити історію',
     'page.home.story.published': 'Опубліковано',
+    'page.home.view.story': 'Переглянути історію',
+    'page.home.my.stories': 'Мої історії',
+    'page.home.story.publish.error': 'Не вдалося опублікувати історію. Спробуйте ще раз.',
     'page.home.open.photo': 'Відкрити зображення',
     'page.home.change.cover': 'Змінити обкладинку',
     'page.home.upload.image': 'Завантажити зображення',

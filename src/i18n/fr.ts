@@ -29,6 +29,9 @@ export const fr: TranslationDictionary = {
 
     'page.home.new.story': 'Créer une story',
     'page.home.story.published': 'Publié',
+    'page.home.view.story': 'Voir la story',
+    'page.home.my.stories': 'Mes stories',
+    'page.home.story.publish.error': 'Impossible de publier la story. Veuillez réessayer.',
     'page.home.change.cover': 'Modifier la couverture',
     'page.home.upload.image': 'Télécharger une image',
     'page.home.open.photo': 'Ouvrir l\'image',

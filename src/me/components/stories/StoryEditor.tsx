@@ -121,7 +121,7 @@ function backgroundPreviewStyle(bg: Background): CSSProperties {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-export default function StoryEditor({ onClose, onPublish }: { onClose: () => void; onPublish: (s: StoryState) => void }) {
+export default function StoryEditor({ onClose, onPublish }: { onClose: () => void; onPublish: (s: StoryState) => void | Promise<void> }) {
   const { state, set, undo, redo, canUndo, canRedo } = useHistory(initialState());
   const [tool, setTool] = useState<Tool>(null);
   const [audienceOpen, setAudienceOpen] = useState(false);
