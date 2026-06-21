@@ -22,12 +22,9 @@ import { authActions } from "@/auth/auth-actions";
 import { getInitials, useAccount } from "@/hooks/use-account";
 import { useTranslation } from "@/hooks/use-translation";
 import { Link } from "react-router-dom";
-import StoryEditor from "@/me/components/stories/StoryEditor";
-import type { StoryState } from "@/me/components/stories/storyTypes";
+import { StoriesViewer, StoriesEditor, type StoryState, storiesActions  } from "@/components/stories";
 import { ApiError } from '@/lib/api-client';
-import { storiesActions } from '@/me/components/stories/stories-actions';
 import { toast } from "@/hooks/use-toast";
-import { StoryViewer } from "@/me/components/stories/StoryViewer.tsx";
 
 const Home = () => {
     const { t } = useTranslation();
@@ -222,9 +219,9 @@ const Home = () => {
                 allowedTypes={["image/jpeg", "image/png", "image/webp", "image/gif", "image/heic", "image/heif"]}
             />
 
-            <StoryViewer open={storyOpen} onOpenChange={setStoryOpen} startUserId="1" />
+            <StoriesViewer open={storyOpen} onOpenChange={setStoryOpen} startUserId="1" />
             {storyEditorOpen && (
-                <StoryEditor
+                <StoriesEditor
                     onClose={() => setStoryEditorOpen(false)}
                     onPublish={async (state: StoryState) => {
                         try {

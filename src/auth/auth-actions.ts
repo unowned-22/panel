@@ -21,32 +21,22 @@ export const authActions = {
         return me.data;
     },
 
-    async addAccount(
-        email: string,
-        password: string,
-        accountId: string // pre-generated ID from AccountProvider
-    ): Promise<UserModel> {
-        // 1. Login without touching the current active account
+    async addAccount(email: string, password: string, accountId: string): Promise<UserModel> {
         const body = await apiClient.post<{ data: AuthModel }>(
             '/auth/login',
             { email, password },
             { logoutOn401: false }
         );
 
-        // 2. Store tokens under the new account ID
         useAuthStore.getState().setTokens(accountId, body.data);
-
-        // 3. Temporarily switch active to fetch the new account's user
         const previousActiveId = useAuthStore.getState().activeAccountId;
         useAuthStore.getState().setActiveAccountId(accountId);
 
         try {
             const me = await apiClient.get<{ data: UserModel }>('/users/me');
-            // 4. Switch back to previous account
             useAuthStore.getState().setActiveAccountId(previousActiveId);
             return me.data;
         } catch (err) {
-            // On failure: clean up the new tokens and restore previous
             useAuthStore.getState().removeTokens(accountId);
             useAuthStore.getState().setActiveAccountId(previousActiveId);
             throw err;
@@ -106,8 +96,6 @@ export const authActions = {
             if (refreshToken) {
                 await apiClient.post('/auth/logout', { refresh_token: refreshToken });
             }
-        } catch {
-            // Если запрос не прошёл — всё равно разлогиниваем локально
         } finally {
             clearPreferencesCache();
             useAuthStore.getState().logout();

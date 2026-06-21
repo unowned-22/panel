@@ -1,7 +1,7 @@
-// Define UUID type for consistent usage
+// Define UUID types for consistent usage
 export type UUID = string;
 
-// Language code type for user preferences
+// Language code types for user preferences
 export type LanguageCode = 'en' | 'de' | 'es' | 'fr' | 'ja' | 'zh';
 
 // Auth model representing the authentication session

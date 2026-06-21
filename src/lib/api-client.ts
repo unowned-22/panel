@@ -70,11 +70,6 @@ export default class ApiClient {
 
         if (res.status === 401) {
             const logoutOn401 = opts?.logoutOn401 ?? true;
-            // Never attempt refresh for the refresh endpoint itself, or for
-            // requests that were already anonymous (no token to begin with) —
-            // those aren't a "session expired" event and must not trigger a
-            // redirect to /auth/login (which would just loop forever on
-            // public/unauthenticated pages like the login page itself).
             if (path === '/auth/refresh' || !logoutOn401 || !token) {
                 const text = await safeText(res);
                 throw new ApiError(res.status, text || res.statusText);

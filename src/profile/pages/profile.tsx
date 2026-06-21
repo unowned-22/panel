@@ -26,7 +26,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { StoryViewer } from "@/me/components/stories/StoryViewer.tsx";
+import { StoriesViewer } from "@/components/stories";
 
 const ProfilePage = () => {
     const { t } = useTranslation();
@@ -131,7 +131,7 @@ const ProfilePage = () => {
                     </div>
                 </div>
             </div>
-            <StoryViewer open={storyOpen} onOpenChange={setStoryOpen} startUserId="1" />
+            <StoriesViewer open={storyOpen} onOpenChange={setStoryOpen} startUserId="1" />
         </>
     );
 }

@@ -13,7 +13,7 @@ type Props = {
 
 const DURATION = 5000;
 
-export const StoryViewer = ({ open, onOpenChange, startUserId }: Props) => {
+export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
     const { users, markSeen } = useStories();
     const visibleUsers = users.filter((u) => u.items.length > 0);
 
@@ -23,7 +23,7 @@ export const StoryViewer = ({ open, onOpenChange, startUserId }: Props) => {
     const [reply, setReply] = useState("");
     const [inputFocused, setInputFocused] = useState(false);
     const [holdPause, setHoldPause] = useState(false);
-    const rafRef = useRef<number>();
+    const rafRef = useRef<number>(0);
     const startRef = useRef<number>(0);
     const pausedRef = useRef(false);
 
