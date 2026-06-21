@@ -24,9 +24,12 @@ export const it: TranslationDictionary = {
     'topbar.menu.account.delete': 'Elimina account',
     'topbar.menu.settings': 'Impostazioni',
     'topbar.menu.logout': 'Disconnettersi',
-    'page.auth.login': 'Login',
-    'page.auth.registration': 'Registrati',
 
+    // ── Profile page ───────────────────────────────────────────────────────
+    'page.profile.learn.more': 'Scopri di più',
+    'page.profile.add.friend': 'Aggiungi agli amici',
+
+    // ── Home page ──────────────────────────────────────────────────────────
     'page.home.new.story': 'Crea una storia',
     'page.home.story.published': 'Pubblicato',
     'page.home.view.story': 'Visualizza la storia',
@@ -79,6 +82,8 @@ export const it: TranslationDictionary = {
     'page.auth.back-to-login': '← Torna al login',
 
     // ── Login page ───────────────────────────────────────────────────────────
+    'page.auth.login': 'Login',
+    'page.auth.registration': 'Registrati',
     'page.auth.login.subtitle': 'Bentornato',
     'page.auth.login.password': 'Password',
     'page.auth.login.forgot-password': 'Password dimenticata?',

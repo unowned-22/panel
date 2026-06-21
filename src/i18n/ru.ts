@@ -24,9 +24,12 @@ export const ru: TranslationDictionary = {
     'topbar.menu.settings': 'Настройки',
     'topbar.menu.logout': 'Выйти',
     'topbar.menu.account.delete': 'Удалить аккаунт',
-    'page.auth.login': 'Логин',
-    'page.auth.registration': 'Регистрация',
 
+    // ── Profile page ───────────────────────────────────────────────────────
+    'page.profile.learn.more': 'Подробнее',
+    'page.profile.add.friend': 'Добавить в друзья',
+
+    // ── Home page ──────────────────────────────────────────────────────────
     'page.home.new.story': 'Новая история',
     'page.home.story.published': 'Опубликовано',
     'page.home.view.story': 'Просмотреть историю',
@@ -79,6 +82,8 @@ export const ru: TranslationDictionary = {
     'page.auth.back-to-login': '← Вернуться ко входу',
 
     // ── Login page ───────────────────────────────────────────────────────────
+    'page.auth.login': 'Логин',
+    'page.auth.registration': 'Регистрация',
     'page.auth.login.subtitle': 'Рады вас видеть',
     'page.auth.login.password': 'Пароль',
     'page.auth.login.forgot-password': 'Забыли пароль?',
