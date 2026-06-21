@@ -3,6 +3,7 @@ import { ArrowUpFromLine } from "lucide-react";
 import { ElementView } from "./ElementView";
 import { backgroundStyle, slideFilterCss } from "../utils";
 import type { CanvasElement, DrawingElement, Slide } from "../types/stories";
+import { useTranslation } from "@/hooks/use-translation";
 
 export function Canvas({
                   slide, selectedId, paintMode, onSelect, onUpdate, onDelete,
@@ -20,6 +21,7 @@ export function Canvas({
   onAddDrawingStroke: (stroke: DrawingElement["paths"][number]) => void;
   onAddTextAt: (x: number, y: number) => void;
 }) {
+  const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -99,12 +101,12 @@ export function Canvas({
                 <div className="h-12 w-12 rounded-lg border-2 border-dashed border-white/50 flex items-center justify-center">
                   <ArrowUpFromLine className="h-5 w-5 text-white/80" />
                 </div>
-                <p className="text-sm text-zinc-200">Drag and drop photo or video here</p>
+                <p className="text-sm text-zinc-200">{t('stories.editor.drag.drop.photo')}</p>
                 <button
                     onClick={() => fileInputRef.current?.click()}
                     className="rounded-lg bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-white"
-                >Select file</button>
-                <button onClick={onPickBackground} className="text-sm font-medium text-zinc-200 hover:text-white">Select background</button>
+                >{t('stories.editor.select.file')}</button>
+                <button onClick={onPickBackground} className="text-sm font-medium text-zinc-200 hover:text-white">{t('stories.editor.select.background')}</button>
               </div>
               <input
                   ref={fileInputRef} type="file" accept="image/*,video/*" className="hidden"
@@ -167,7 +169,7 @@ export function Canvas({
         {/* hint */}
         {!empty && !selectedId && !paintMode && (
             <div className="absolute bottom-3 left-3 right-3 rounded-lg bg-black/60 px-3 py-2 text-center text-xs text-zinc-200">
-              To add text, double click any free space — or use the Text tool
+              {t('stories.editor.hint.double.click')}
             </div>
         )}
       </div>
