@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router';
 import { RequireAuth } from '@/auth/require-auth';
+import { RequireUnAuth } from '../auth/require-un-auth';
 import { ErrorRouting } from '@/errors/error-routing';
 import { MainLayout } from '@/layouts/main/layout';
 import { AuthLayout } from "@/layouts/auth/layout";
@@ -29,13 +30,15 @@ export function AppRoutingSetup() {
                 </Route>
             </Route>
             <Route path="error/*" element={<ErrorRouting />} />
-            <Route element={<AuthLayout />}>
-                <Route index element={<Navigate to="auth/login" replace />} />
-                <Route path="auth/login" element={<LoginPage />} />
-                <Route path="auth/registration" element={<RegistrationPage />} />
-                <Route path="auth/verify-email" element={<VerifyEmailPage />} />
-                <Route path="auth/forgot-password" element={<ForgotPasswordPage />} />
-                <Route path="auth/reset-password" element={<ResetPasswordPage />} />
+            <Route element={<RequireUnAuth />}>
+                <Route element={<AuthLayout />}>
+                    <Route index element={<Navigate to="auth/login" replace />} />
+                    <Route path="auth/login" element={<LoginPage />} />
+                    <Route path="auth/registration" element={<RegistrationPage />} />
+                    <Route path="auth/verify-email" element={<VerifyEmailPage />} />
+                    <Route path="auth/forgot-password" element={<ForgotPasswordPage />} />
+                    <Route path="auth/reset-password" element={<ResetPasswordPage />} />
+                </Route>
             </Route>
             <Route path="*" element={<Navigate to="/error/404" />} />
         </Routes>
