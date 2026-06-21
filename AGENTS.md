@@ -198,6 +198,17 @@ Call `clearPreferencesCache()` on logout.
 | `layouts/main/sidebar.tsx`       | Duplicates `ICON_MAP`, `LABEL_KEY`, and `TO` from `settings-context.ts` — should use `ALL_NAV_ITEMS` |
 | `me/pages/account.tsx`           | `console.table(accounts)` debug code — remove before release                                         |
 | `provider/stories-provider.tsx`  | Hardcoded mock data — should be replaced with API integration                                        |
+
+Stories frontend notes
+----------------------
+
+The Stories UI was migrated from a mock-only provider to call backend endpoints:
+
+- `stories-provider.tsx` now fetches `GET /api/v1/stories/me` for the current user's story rows and `GET /api/v1/stories/feed` for the feed. Slides contain `preview` fields with short-lived presigned URLs for immediate display and `url`/`key` fields containing the storage key persisted on the server.
+- When a viewer opens a slide, the client calls `POST /api/v1/stories/{id}/view` to persist `seen` state. The feed responses include per-slide `seen` flags so the UI can render read/unread states.
+- Visibility semantics: `friends`/`close` are currently treated as `everyone` by the backend; the UI assumes this behavior. Implement social graph support later to restore intended visibility rules.
+
+Agents editing story UI should keep the `preview` vs `key` separation: `preview` is a short-lived presigned URL for immediate display, `key` is the object key stored in the backend.
 | `me/pages/home.tsx`              | ~250 lines; should be split into `<ProfileCard>`, `<CoverSection>`, and `<AvatarSection>`            |
 | `lib/api-client.ts`              | Duplicated 401 retry logic between `request()` and `requestFormData()`                               |
 

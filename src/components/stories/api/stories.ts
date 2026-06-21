@@ -16,11 +16,11 @@ interface StoryMediaResponse {
     media_type: 'image' | 'video';
 }
 
-async function uploadBlobUrl(url: string): Promise<string> {
+async function uploadBlobUrl(url: string): Promise<{ key: string; url: string; mediaType: string }> {
     const blob = await fetch(url).then((r) => r.blob());
     const file = new File([blob], 'story-media', { type: blob.type });
     const res = await apiClient.upload<{ data: StoryMediaResponse }>('/stories/media', file);
-    return res.data.url;
+    return { key: res.data.key, url: res.data.url, mediaType: res.data.media_type };
 }
 
 async function resolveBackground(background: Background | null): Promise<Background | null> {
@@ -28,15 +28,14 @@ async function resolveBackground(background: Background | null): Promise<Backgro
         return background;
     }
 
-    const blob = await fetch(background.url).then((r) => r.blob());
-    const file = new File([blob], 'story-media', { type: blob.type });
-
-    const res = await apiClient.upload<{ data: StoryMediaResponse }>('/stories/media', file);
+    const upload = await uploadBlobUrl(background.url);
 
     return {
         kind: 'media',
-        url: res.data.url,
-        mediaType: res.data.media_type,
+        // store object key in slide JSON; keep preview URL for immediate display
+        url: upload.key,
+        preview: upload.url,
+        mediaType: upload.mediaType as 'image' | 'video',
     } as Background;
 }
 
@@ -44,8 +43,8 @@ async function resolveElement(element: CanvasElement): Promise<CanvasElement> {
     if (element.type !== 'image' || !element.url.startsWith('blob:')) {
         return element;
     }
-    const url = await uploadBlobUrl(element.url);
-    return { ...element, url } as ImageElement;
+    const upload = await uploadBlobUrl(element.url);
+    return { ...element, url: upload.key, preview: upload.url } as ImageElement;
 }
 
 async function resolveSlide(slide: Slide): Promise<Slide> {
@@ -71,6 +70,27 @@ export const storiesActions = {
     async listMine(): Promise<StoryResponse[]> {
         const res = await apiClient.get<{ data: StoryResponse[] }>('/stories/me');
         return res.data;
+    },
+
+    async listFeed(): Promise<StoryResponse[]> {
+        const res = await apiClient.get<{ data: StoryResponse[] }>('/stories/feed');
+        return res.data;
+    },
+
+    async view(storyId: number, slideIndex?: number): Promise<void> {
+        await apiClient.post(`/stories/${storyId}/view`, { slide_index: slideIndex });
+    },
+
+    async like(storyId: number): Promise<void> {
+        await apiClient.post(`/stories/${storyId}/like`);
+    },
+
+    async unlike(storyId: number): Promise<void> {
+        await apiClient.post(`/stories/${storyId}/unlike`);
+    },
+
+    async reply(storyId: number, message: string): Promise<void> {
+        await apiClient.post(`/stories/${storyId}/reply`, { message });
     },
 
     async remove(id: number): Promise<void> {
