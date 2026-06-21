@@ -53,7 +53,8 @@ export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
             setItemIdx((i) => i + 1);
             setProgress(0);
         } else {
-            markSeen(currentUser.id);
+            // mark full story as seen
+            markSeen(currentUser.id, currentItem?.storyId);
             if (userIdx + 1 < visibleUsers.length) {
                 setUserIdx((i) => i + 1);
                 setItemIdx(0);
@@ -104,6 +105,16 @@ export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open, userIdx, itemIdx]);
+
+    // when a slide becomes active, post view for that slide
+    useEffect(() => {
+        if (!open || !currentUser || !currentItem) return;
+        if (!currentUser.isMe) {
+            // notify backend that viewer saw this slide
+            markSeen(currentUser.id, currentItem.storyId, itemIdx);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open, userIdx, itemIdx, currentItem?.storyId]);
 
     if (!currentUser || !currentItem) return null;
 

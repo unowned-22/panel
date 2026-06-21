@@ -23,7 +23,7 @@ const StoryRing = ({ children, seen, isMe }: { children: ReactNode; seen?: boole
 
 export const Stories = () => {
     const { t } = useTranslation();
-    const { users } = useStories();
+    const { users, addMyStory } = useStories();
 
     const [viewerOpen, setViewerOpen] = useState(false);
     const [activeUserId, setActiveUserId] = useState<string | null>(null);
@@ -100,7 +100,7 @@ export const Stories = () => {
                     onClose={() => setStoryEditorOpen(false)}
                     onPublish={async (state: StoryState) => {
                         try {
-                            await storiesActions.publish(state);
+                            await addMyStory(state as any);
                             setStoryEditorOpen(false);
                             toast({ title: t('page.home.story.published') });
                         } catch (err) {

@@ -5,7 +5,7 @@ export type Background =
     | { kind: "color"; value: string }
     | { kind: "gradient"; value: string }
     | { kind: "pattern"; value: string; preview: string }
-    | { kind: "media"; url: string; mediaType: "image" | "video" };
+    | { kind: "media"; url: string; mediaType: "image" | "video"; preview?: string };
 
 export interface Adjustments {
     contrast: number;   // 0..200, default 100
@@ -78,6 +78,7 @@ export interface ImageElement {
     rotation: number;
     zIndex: number;
     url: string;
+    preview?: string;
     naturalRatio: number; // naturalHeight / naturalWidth, used to preserve aspect ratio on resize
 }
 

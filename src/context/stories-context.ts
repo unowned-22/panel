@@ -6,6 +6,8 @@ export type StoryItem = {
     background?: string;
     text?: string;
     createdAt: number;
+    storyId?: number;
+    seen?: boolean;
 };
 
 export type StoryUser = {
@@ -19,8 +21,8 @@ export type StoryUser = {
 
 export type StoriesContextValue = {
     users: StoryUser[];
-    addMyStory: (item: Omit<StoryItem, "id" | "createdAt">) => void;
-    markSeen: (userId: string) => void;
+    addMyStory: (item: Omit<StoryItem, "id" | "createdAt"> | any) => void;
+    markSeen: (userId: string, storyId?: number, slideIndex?: number) => void;
 };
 
 export const StoriesContext = createContext<StoriesContextValue | null>(null);
