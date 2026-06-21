@@ -24,8 +24,10 @@ export interface TranslationDictionary {
     'topbar.menu.settings': string;
     'topbar.menu.logout': string;
     'topbar.menu.account.delete': string;
-    'page.auth.login': string;
-    'page.auth.registration': string;
+
+    // ── Profile page ───────────────────────────────────────────────────────────
+    'page.profile.learn.more': string;
+    'page.profile.add.friend': string;
 
     // ── Home page ───────────────────────────────────────────────────────────
     'page.home.new.story': string;
@@ -80,6 +82,8 @@ export interface TranslationDictionary {
     'page.auth.back-to-login': string;
 
     // ── Login page ───────────────────────────────────────────────────────────
+    'page.auth.login': string;
+    'page.auth.registration': string;
     'page.auth.login.subtitle': string;
     'page.auth.login.password': string;
     'page.auth.login.forgot-password': string;
