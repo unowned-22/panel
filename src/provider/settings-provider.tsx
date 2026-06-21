@@ -10,10 +10,7 @@ import { fetchUserPreferences, saveUserPreferences } from "@/lib/user-preference
 import { useAuthStore } from "@/auth/auth.store";
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
-    // Settings are user-scoped; there's nothing to load (and no point hitting
-    // the API) until someone is actually authenticated — e.g. on the login page.
     const isAuthenticated = useAuthStore((s) => !!s.activeAccountId && !!s.tokens[s.activeAccountId]);
-
     const [isLoading, setIsLoading] = useState(isAuthenticated);
 
     const [visible, setVisible] = useState<Set<NavItemKey>>(() => {

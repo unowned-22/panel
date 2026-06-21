@@ -48,8 +48,7 @@ src/
 │   └── components/
 │       ├── avatar-editor/     # Full wizard: upload → crop → thumbnail
 │       ├── cover-editor/      # Cover image cropping modal
-│       ├── settings/          # SettingsModal + UI elements
-│       └── stories/           # Stories (viewer + editor + actions)
+│       └── settings/          # SettingsModal + UI elements
 │
 ├── profile/                   # External profile feature module
 │   └── pages/profile.tsx

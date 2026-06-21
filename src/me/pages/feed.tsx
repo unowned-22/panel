@@ -1,4 +1,4 @@
-import { Stories } from "@/me/components/stories/Stories";
+import { Stories  } from "@/components/stories";
 import { useTranslation } from "@/hooks/use-translation";
 
 const FeedPage = () => {

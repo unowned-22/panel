@@ -1,0 +1,1 @@
+export type Tool = null | "text" | "photo" | "stickers" | "paint" | "background" | "filters" | "color";

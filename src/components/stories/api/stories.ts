@@ -1,5 +1,5 @@
 import { apiClient } from '@/lib/api-client';
-import type { Background, Slide, StoryState } from './storyTypes';
+import type { Background, CanvasElement, ImageElement, Slide, StoryState } from '../types/stories';
 
 export interface StoryResponse {
     id: number;
@@ -14,6 +14,13 @@ export interface StoryResponse {
 interface StoryMediaResponse {
     url: string;
     media_type: 'image' | 'video';
+}
+
+async function uploadBlobUrl(url: string): Promise<string> {
+    const blob = await fetch(url).then((r) => r.blob());
+    const file = new File([blob], 'story-media', { type: blob.type });
+    const res = await apiClient.upload<{ data: StoryMediaResponse }>('/stories/media', file);
+    return res.data.url;
 }
 
 async function resolveBackground(background: Background | null): Promise<Background | null> {
@@ -33,9 +40,18 @@ async function resolveBackground(background: Background | null): Promise<Backgro
     } as Background;
 }
 
+async function resolveElement(element: CanvasElement): Promise<CanvasElement> {
+    if (element.type !== 'image' || !element.url.startsWith('blob:')) {
+        return element;
+    }
+    const url = await uploadBlobUrl(element.url);
+    return { ...element, url } as ImageElement;
+}
+
 async function resolveSlide(slide: Slide): Promise<Slide> {
     const background = await resolveBackground(slide.background);
-    return { ...slide, background };
+    const elements = await Promise.all(slide.elements.map(resolveElement));
+    return { ...slide, background, elements };
 }
 
 export const storiesActions = {
