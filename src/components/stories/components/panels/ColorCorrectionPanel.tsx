@@ -1,5 +1,6 @@
 import { PanelHeader } from "../PanelHeader";
 import type { Adjustments } from "../../types/stories";
+import { useTranslation } from "@/hooks/use-translation";
 
 export function ColorCorrectionPanel({
                                 adjustments, onClose, onChange, onCommit,
@@ -7,17 +8,18 @@ export function ColorCorrectionPanel({
   adjustments: Adjustments; onClose: () => void;
   onChange: (a: Adjustments) => void; onCommit: (a: Adjustments) => void;
 }) {
+  const { t } = useTranslation();
   const sliders: { key: keyof Adjustments; label: string; min: number; max: number; def: number }[] = [
-    { key: "contrast",   label: "Contrast",   min: 50,   max: 150, def: 100 },
-    { key: "warmth",     label: "Warmth",     min: -100, max: 100, def: 0 },
-    { key: "saturation", label: "Saturation", min: 0,    max: 200, def: 100 },
-    { key: "sharpness",  label: "Sharpness",  min: 0,    max: 100, def: 0 },
-    { key: "noise",      label: "Noise",      min: 0,    max: 100, def: 0 },
-    { key: "vignette",   label: "Vignette",   min: 0,    max: 100, def: 0 },
+    { key: "contrast",   label: t("stories.editor.cc.contrast"),   min: 50,   max: 150, def: 100 },
+    { key: "warmth",     label: t("stories.editor.cc.warmth"),     min: -100, max: 100, def: 0 },
+    { key: "saturation", label: t("stories.editor.cc.saturation"), min: 0,    max: 200, def: 100 },
+    { key: "sharpness",  label: t("stories.editor.cc.sharpness"),  min: 0,    max: 100, def: 0 },
+    { key: "noise",      label: t("stories.editor.cc.noise"),      min: 0,    max: 100, def: 0 },
+    { key: "vignette",   label: t("stories.editor.cc.vignette"),   min: 0,    max: 100, def: 0 },
   ];
   return (
       <div>
-        <PanelHeader title="Color correction" onClose={onClose} />
+        <PanelHeader title={t("stories.editor.cc.title")} onClose={onClose} />
         <div className="p-4 space-y-4">
           {sliders.map((s) => (
               <div key={s.key}>

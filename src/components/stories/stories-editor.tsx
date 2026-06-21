@@ -24,6 +24,7 @@ import {
     type DrawingElement, type ImageElement, type Slide, type StickerElement,
     type StoryState, type TextElement,
 } from "./types/stories";
+import { useTranslation } from "@/hooks/use-translation";
 
 function makeSlide(background: Background | null = null): Slide {
     return {
@@ -89,6 +90,7 @@ function useHistory(initial: StoryState) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 export function StoriesEditor({ onClose, onPublish }: { onClose: () => void; onPublish: (s: StoryState) => void | Promise<void> }) {
+    const { t } = useTranslation();
     const { state, set, undo, redo, canUndo, canRedo } = useHistory(initialState());
     const [tool, setTool] = useState<Tool>(null);
     const [audienceOpen, setAudienceOpen] = useState(false);
@@ -153,13 +155,13 @@ export function StoriesEditor({ onClose, onPublish }: { onClose: () => void; onP
     const addText = useCallback(() => {
         const el: TextElement = {
             id: uid(), type: "text", x: 50, y: 50, width: 70, rotation: 0,
-            zIndex: nextZ(activeSlide), text: "Tap to edit",
+            zIndex: nextZ(activeSlide), text: t("stories.editor.tap.to.edit"),
             style: "modern", size: 56, color: "#111111", align: "center", fill: "none",
         };
         updateSlide((s) => ({ ...s, elements: [...s.elements, el] }));
         setSelected(el.id);
         setTool("text");
-    }, [updateSlide, activeSlide, setSelected]);
+    }, [updateSlide, activeSlide, setSelected, t]);
 
     const addSticker = useCallback((emoji: string) => {
         const el: StickerElement = {
@@ -281,7 +283,7 @@ export function StoriesEditor({ onClose, onPublish }: { onClose: () => void; onP
                             onAddTextAt={(x, y) => {
                                 const el: TextElement = {
                                     id: uid(), type: "text", x, y, width: 60, rotation: 0,
-                                    zIndex: nextZ(activeSlide), text: "Enter text",
+                                    zIndex: nextZ(activeSlide), text: t("stories.editor.enter.text"),
                                     style: "modern", size: 48, color: "#ffffff", align: "center", fill: "none",
                                 };
                                 updateSlide((s) => ({ ...s, elements: [...s.elements, el] }));

@@ -1,15 +1,17 @@
 import { Type, Image as ImageIcon, Smile, Brush, Palette, Contrast, SlidersHorizontal } from "lucide-react";
 import type { Tool } from "../types/editor";
+import { useTranslation } from "@/hooks/use-translation";
 
 export function DefaultMenu({ onPick }: { onPick: (t: NonNullable<Tool>) => void }) {
+  const { t } = useTranslation();
   const items: { id: NonNullable<Tool>; label: string; icon: typeof Type }[] = [
-    { id: "text", label: "Text", icon: Type },
-    { id: "photo", label: "Photo", icon: ImageIcon },
-    { id: "stickers", label: "Stickers", icon: Smile },
-    { id: "paint", label: "Paintbrush", icon: Brush },
-    { id: "background", label: "Background", icon: Palette },
-    { id: "filters", label: "Filters", icon: Contrast },
-    { id: "color", label: "Color correction", icon: SlidersHorizontal },
+    { id: "text", label: t("stories.editor.menu.text"), icon: Type },
+    { id: "photo", label: t("stories.editor.menu.photo"), icon: ImageIcon },
+    { id: "stickers", label: t("stories.editor.menu.stickers"), icon: Smile },
+    { id: "paint", label: t("stories.editor.menu.paintbrush"), icon: Brush },
+    { id: "background", label: t("stories.editor.menu.background"), icon: Palette },
+    { id: "filters", label: t("stories.editor.menu.filters"), icon: Contrast },
+    { id: "color", label: t("stories.editor.menu.color"), icon: SlidersHorizontal },
   ];
   return (
       <div className="p-2">

@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Heart, Send, X } from "lucide-react";
 import { type StoryUser } from "@/context/stories-context";
 import { toast } from "sonner";
 import { useStories } from "@/hooks/use-stories";
+import { useTranslation } from "@/hooks/use-translation";
 
 type Props = {
     open: boolean;
@@ -14,6 +15,7 @@ type Props = {
 const DURATION = 5000;
 
 export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
+    const { t } = useTranslation();
     const { users, markSeen } = useStories();
     const visibleUsers = users.filter((u) => u.items.length > 0);
 
@@ -188,7 +190,7 @@ export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
                                 e.preventDefault();
                                 const text = reply.trim();
                                 if (!text) return;
-                                toast.success(`Ответ отправлен ${currentUser.name}`, { description: text });
+                                toast.success(t('stories.viewer.reply.sent').replace('{name}', currentUser.name), { description: text });
                                 setReply("");
                                 (document.activeElement as HTMLElement | null)?.blur?.();
                             }}
@@ -201,14 +203,14 @@ export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
                                 onChange={(e) => setReply(e.target.value)}
                                 onFocus={() => setInputFocused(true)}
                                 onBlur={() => setInputFocused(false)}
-                                placeholder={`Ответить ${currentUser.name}…`}
+                                placeholder={t('stories.viewer.reply.placeholder').replace('{name}', currentUser.name)}
                                 className="flex-1 h-10 px-4 rounded-full bg-white/10 border border-white/20 text-white text-sm placeholder:text-white/60 outline-none focus:border-white/60"
                             />
                             <button
                                 type="button"
-                                onClick={() => toast.success(`Вы отправили ❤️ ${currentUser.name}`)}
+                                onClick={() => toast.success(t('stories.viewer.like.sent').replace('{name}', currentUser.name))}
                                 className="w-10 h-10 rounded-full flex items-center justify-center text-white hover:bg-white/10"
-                                aria-label="Лайк"
+                                aria-label="Like"
                             >
                                 <Heart className="w-5 h-5" />
                             </button>
@@ -216,7 +218,7 @@ export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
                                 <button
                                     type="submit"
                                     className="w-10 h-10 rounded-full flex items-center justify-center text-white bg-primary hover:opacity-90"
-                                    aria-label="Отправить"
+                                    aria-label="Send"
                                 >
                                     <Send className="w-4 h-4" />
                                 </button>
