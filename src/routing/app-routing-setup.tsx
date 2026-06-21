@@ -7,6 +7,7 @@ import Home from "@/me/pages/home";
 import Settings from "@/me/pages/settings";
 import Account from "@/me/pages/account";
 import AddAccountPage from "@/me/pages/add-account";
+import FeedPage from "@/me/pages/feed";
 
 export function AppRoutingSetup() {
     return (
@@ -17,6 +18,7 @@ export function AppRoutingSetup() {
                     <Route path="/me/settings" element={<Settings />} />
                     <Route path="/me/account" element={<Account />} />
                     <Route path="/me/login" element={<AddAccountPage />} />
+                    <Route path="/me/feed" element={<FeedPage />} />
                 </Route>
             </Route>
             <Route path="error/*" element={<ErrorRouting />} />

@@ -29,6 +29,9 @@ export const ru: TranslationDictionary = {
 
     'page.home.new.story': 'Новая история',
     'page.home.story.published': 'Опубликовано',
+    'page.home.view.story': 'Просмотреть историю',
+    'page.home.my.stories': 'Мои истории',
+    'page.home.story.publish.error': 'Не удалось опубликовать историю. Попробуйте ещё раз.',
     'page.home.open.photo': 'Открыть изображение',
     'page.home.change.cover': 'Изменить обложку',
     'page.home.upload.image': 'Загрузить изображение',
