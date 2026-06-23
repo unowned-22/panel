@@ -76,6 +76,7 @@ export const ru: TranslationDictionary = {
     'page.settings.menu.settings': 'Меню сайта',
     'page.settings.setup.menu.items': 'Настроить отображение пунктов меню',
     'page.settings.section.account': 'Аккаунт и внешний вид',
+    'page.settings.section.notifications': 'Уведомления',
     'page.settings.modal.setup.items': 'Настройка пунктов меню',
 
     // ── Shared auth ──────────────────────────────────────────────────────────

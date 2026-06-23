@@ -76,6 +76,7 @@ export const ua: TranslationDictionary = {
     'page.settings.menu.settings': 'Меню сайту',
     'page.settings.setup.menu.items': 'Налаштувати пункти меню',
     'page.settings.section.account': 'Акаунт і зовнішній вигляд',
+    'page.settings.section.notifications': 'Сповіщення',
     'page.settings.modal.setup.items': 'Налаштування пунктів меню',
 
     // ── Shared auth ──────────────────────────────────────────────────────────

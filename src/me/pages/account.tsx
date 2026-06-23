@@ -10,14 +10,6 @@ const Account = () => {
     const { accounts, activeId, switchAccount, removeAccount } = useAccount();
     const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
-    console.table(
-        accounts.map(acc => ({
-            id: acc.id,
-            username: acc.username,
-            name: acc.name
-        }))
-    );
-
     const handleSwitch = (id: string) => {
         if (id !== activeId) {
             switchAccount(id);

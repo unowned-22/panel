@@ -76,6 +76,7 @@ export const de: TranslationDictionary = {
     'page.settings.menu.settings': 'Website-Menü',
     'page.settings.setup.menu.items': 'Menüpunkte konfigurieren',
     'page.settings.section.account': 'Konto und Erscheinungsbild',
+    'page.settings.section.notifications': 'Benachrichtigungen',
     'page.settings.modal.setup.items': 'Konfiguration der Menüpunkte',
 
     // ── Shared auth ──────────────────────────────────────────────────────────

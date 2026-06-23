@@ -56,6 +56,7 @@ export interface TranslationDictionary {
     'page.settings.menu.settings': string;
     'page.settings.setup.menu.items': string;
     'page.settings.section.account': string;
+    'page.settings.section.notifications': string;
     'page.settings.modal.setup.items': string;
 
     // ── Account page ──────────────────────────────────────────────────────────

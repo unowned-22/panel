@@ -1,6 +1,7 @@
-import { ChevronDown, LogOut, Settings, Trash2, CheckCircle2, Users } from "lucide-react";
+import { ChevronDown, LogOut, Settings, Trash2, CheckCircle2, Users, Bell, MoreHorizontal, CheckCheck, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCallback, useState } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -18,6 +19,8 @@ import { toAbsoluteUrl } from '@/lib/helpers';
 import type { Language } from "@/i18n/types.ts";
 import { useTranslation } from '@/hooks/use-translation';
 import { authActions } from '@/auth/auth-actions';
+import { useNotifications } from "@/hooks/use-notification";
+import { notificationMeta, formatRelativeTime } from "@/lib/notification-meta";
 
 const LANGUAGE_OPTIONS: { code: Language; flag: string; label: string }[] = [
     { code: 'en', flag: toAbsoluteUrl('/flags/united-states.svg'), label: 'English' },
@@ -32,6 +35,7 @@ const LANGUAGE_OPTIONS: { code: Language; flag: string; label: string }[] = [
 export const TopBar = () => {
     const { accounts, activeId, activeAccount, switchAccount, removeAccount } = useAccount();
     const { t, language, setLanguage } = useTranslation();
+    const { notifications, totalUnread, isRead, markRead, markUnread, markAllRead } = useNotifications();
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const currentLang = LANGUAGE_OPTIONS.find(l => l.code === language);
     const avatar = activeAccount.user?.avatar_url ?? null;
@@ -44,8 +48,13 @@ export const TopBar = () => {
         if (isLoggingOut) return;
         setIsLoggingOut(true);
         await authActions.logout();
-        // authActions.logout() редиректит, поэтому состояние дальше не используется
     }, [isLoggingOut]);
+
+    // Last 5 notifications for the popup
+    const popupItems = notifications.slice(0, 5);
+
+    const isItemRead = (id: number) =>
+        notifications.find((n) => n.id === id)?.is_read || isRead(String(id));
 
     return (
         <header className="sticky top-0 z-40 h-15 bg-background/85 backdrop-blur-xl border-b border-border">
@@ -53,6 +62,118 @@ export const TopBar = () => {
                 <Link to="/" className="flex items-center gap-2 shrink-0 w-50">
                     <img src={toAbsoluteUrl('/unowned-d.png')} className="max-h-40" alt="unowned" />
                 </Link>
+
+                {/* ── Bell popover ─────────────────────────────────────── */}
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <button className="relative w-10 h-10 rounded-full hover:bg-secondary flex items-center justify-center transition-colors">
+                            <Bell className="w-5 h-5 text-foreground/80" />
+                            {totalUnread > 0 && (
+                                <span className="absolute top-1 right-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
+                                    {totalUnread > 99 ? '99+' : totalUnread}
+                                </span>
+                            )}
+                        </button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                        align="end"
+                        sideOffset={10}
+                        className="w-105 rounded-xl border-border bg-popover p-0 shadow-elevated"
+                    >
+                        <div className="flex items-center justify-between px-4 py-3">
+                            <div className="text-sm font-semibold">Уведомления</div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={markAllRead}
+                                    disabled={totalUnread === 0}
+                                    className="rounded-md px-2 py-1 text-xs font-medium text-primary hover:bg-secondary disabled:opacity-50"
+                                >
+                                    Прочитать все
+                                </button>
+                                <Link
+                                    to="/me/settings"
+                                    className="rounded-md bg-secondary px-3 py-1.5 text-xs font-medium hover:bg-accent"
+                                >
+                                    Настройки
+                                </Link>
+                            </div>
+                        </div>
+
+                        <div className="px-2 pb-2">
+                            {popupItems.length === 0 && (
+                                <p className="px-3 py-6 text-center text-sm text-muted-foreground">
+                                    Нет новых уведомлений
+                                </p>
+                            )}
+                            {popupItems.map((n) => {
+                                const meta = notificationMeta(n);
+                                const read = isItemRead(n.id);
+                                const strId = String(n.id);
+                                return (
+                                    <div
+                                        key={n.id}
+                                        className={cn(
+                                            "group relative flex items-start gap-3 rounded-lg px-3 py-3 transition-colors hover:bg-secondary/40",
+                                            !read && "bg-primary/5",
+                                        )}
+                                    >
+                                        {!read && (
+                                            <span className="absolute left-0.5 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-primary" />
+                                        )}
+                                        <div
+                                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full overflow-hidden"
+                                            style={{ background: meta.iconBg }}
+                                        >
+                                            {meta.icon}
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex items-start justify-between gap-2">
+                                                <p className="text-sm leading-snug">{meta.title}</p>
+                                                <div className="flex shrink-0 items-center gap-1">
+                                                    <span className="text-xs text-muted-foreground">
+                                                        {formatRelativeTime(n.created_at)}
+                                                    </span>
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <button
+                                                                className="rounded-md p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-secondary group-hover:opacity-100 data-[state=open]:opacity-100"
+                                                                aria-label="Действия"
+                                                            >
+                                                                <MoreHorizontal className="h-4 w-4" />
+                                                            </button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end" className="w-56">
+                                                            {read ? (
+                                                                <DropdownMenuItem onClick={() => markUnread(strId)} className="gap-2">
+                                                                    <Check className="h-4 w-4" />
+                                                                    Отметить как непрочитанное
+                                                                </DropdownMenuItem>
+                                                            ) : (
+                                                                <DropdownMenuItem onClick={() => markRead(strId)} className="gap-2">
+                                                                    <CheckCheck className="h-4 w-4" />
+                                                                    Отметить как прочитанное
+                                                                </DropdownMenuItem>
+                                                            )}
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        <Link
+                            to="/me/notifications"
+                            className="block border-t border-border py-3.5 text-center text-sm font-medium hover:bg-secondary/50"
+                        >
+                            Показать все
+                        </Link>
+                    </PopoverContent>
+                </Popover>
+
+                {/* ── Account dropdown (unchanged) ─────────────────────── */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <button className="ml-auto flex items-center gap-1.5 hover:bg-secondary/60 rounded-full pl-1 pr-2 py-1 transition-colors">

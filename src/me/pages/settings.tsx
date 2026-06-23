@@ -6,10 +6,12 @@ import { useTranslation } from "@/hooks/use-translation";
 import type { TranslationDictionary } from "@/i18n/types";
 
 type SectionKey =
-    | "account";
+    | "account"
+    | "notifications";
 
 const SECTIONS: { key: SectionKey; label: keyof TranslationDictionary; }[] = [
     { key: "account", label: "page.settings.section.account" },
+    { key: "notifications", label: "page.settings.section.notifications" },
 ];
 
 const Settings = () => {
@@ -20,6 +22,7 @@ const Settings = () => {
         <div className="flex gap-4">
             <div className="flex-1 min-w-0 w-full flex flex-col gap-3">
                 {section === "account" && <AccountSection />}
+                {section === "notifications" && <NotificationsSection />}
             </div>
             <aside className="hidden xl:flex flex-col w-70 shrink-0 py-0 gap-3 sticky top-18 self-start max-h-[calc(100vh-72px)]">
                 <div className="panel-card p-2">
@@ -55,6 +58,12 @@ const AccountSection = () => {
                 </button>
             </Row>
         </Card>
+    );
+};
+
+const NotificationsSection = () => {
+    return (
+        <div className="flex flex-col gap-3"></div>
     );
 };
 

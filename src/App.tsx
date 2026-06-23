@@ -7,6 +7,7 @@ import { AppRouting } from '@/routing/app-routing';
 import { AccountProvider } from "./provider/account-provider";
 import { QueryClientProvider } from '@tanstack/react-query';
 import { TranslationProvider } from '@/provider/translation-provider';
+import { NotificationsProvider } from "@/provider/notification-provider";
 import { SettingsProvider } from '@/provider/settings-provider';
 import { StoriesProvider } from "@/provider/stories-provider";
 import { TooltipsProvider } from "@/provider/tooltips-provider";
@@ -21,17 +22,19 @@ function App() {
               <TranslationProvider>
                   <HelmetProvider>
                       <LoadingBarContainer>
-                          <SettingsProvider>
-                              <AccountProvider>
-                                  <StoriesProvider>
-                                      <Toaster />
-                                      <Sonner />
-                                      <BrowserRouter basename={BASE_URL}>
-                                          <AppRouting />
-                                      </BrowserRouter>
-                                  </StoriesProvider>
-                              </AccountProvider>
-                          </SettingsProvider>
+                          <NotificationsProvider>
+                              <SettingsProvider>
+                                  <AccountProvider>
+                                      <StoriesProvider>
+                                          <Toaster />
+                                          <Sonner />
+                                          <BrowserRouter basename={BASE_URL}>
+                                              <AppRouting />
+                                          </BrowserRouter>
+                                      </StoriesProvider>
+                                  </AccountProvider>
+                              </SettingsProvider>
+                          </NotificationsProvider>
                       </LoadingBarContainer>
                   </HelmetProvider>
               </TranslationProvider>

@@ -56,6 +56,7 @@ export const en: TranslationDictionary = {
     'page.settings.menu.settings': 'Menu settings',
     'page.settings.setup.menu.items': 'Set up menu items',
     'page.settings.section.account': 'Account and appearance',
+    'page.settings.section.notifications': 'Notifications',
     'page.settings.modal.setup.items': 'Menu item settings',
 
     // ── Account page ──────────────────────────────────────────────────────────

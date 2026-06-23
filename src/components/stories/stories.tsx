@@ -1,14 +1,14 @@
 import { useState, type ReactNode } from "react";
 import { Plus } from "lucide-react";
-import { useStories} from "@/hooks/use-stories";
+import { useStories } from "@/hooks/use-stories";
 import { toAbsoluteUrl } from "@/lib/helpers";
 import type { StoryState } from "./types/stories";
-import { storiesActions } from "./api/stories";
 import { toast } from "@/hooks/use-toast.ts";
 import { ApiError } from "@/lib/api-client.ts";
 import { useTranslation } from "@/hooks/use-translation";
 import { StoriesEditor } from "./stories-editor";
 import { StoriesViewer } from "./stories-viewer";
+import { getInitials } from "@/hooks/use-account";
 
 const StoryRing = ({ children, seen, isMe }: { children: ReactNode; seen?: boolean; isMe?: boolean }) => (
     <div
@@ -47,14 +47,17 @@ export const Stories = () => {
                 >
                     <div className="relative">
                         <StoryRing isMe={me.items.length === 0} seen={false}>
-                            <img
-                                src={toAbsoluteUrl(me.avatar)}
-                                alt="My story"
-                                width={64}
-                                height={64}
-                                loading="lazy"
-                                className="w-16 h-16 rounded-full object-cover"
-                            />
+                            {me.avatar === ""
+                                ? <div className="flex w-16 h-16 items-center justify-center text-white text-3xl font-semibold">{getInitials(me.name)}</div>
+                                : <img
+                                    src={toAbsoluteUrl(me.avatar)}
+                                    alt="My story"
+                                    width={64}
+                                    height={64}
+                                    loading="lazy"
+                                    className="w-16 h-16 rounded-full object-cover"
+                                />
+                            }
                         </StoryRing>
                         <div
                             onClick={(e) => {
