@@ -67,6 +67,7 @@ export const fr: TranslationDictionary = {
     'page.account.add.back': 'Retour aux comptes',
     'page.account.add.submit': 'Ajouter un compte',
     'page.account.add.error': 'Impossible d\'ajouter le compte. Vérifiez vos identifiants.',
+    'page.account.more': 'Plus',
 
     // ── Settings page ──────────────────────────────────────────────────────────
     'page.settings.general': 'Général',

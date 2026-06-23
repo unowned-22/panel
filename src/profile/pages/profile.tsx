@@ -230,7 +230,7 @@ const ProfilePage = () => {
                 const data = await profileApi.get(username);
                 setProfile(data);
             } catch (err) {
-                console.error("Ошибка при загрузке профиля:", err);
+                console.error("err:", err);
             } finally {
                 //
             }
@@ -270,7 +270,7 @@ const ProfilePage = () => {
                         </div>
                     </div>
                     <div className="ml-37 min-w-0 flex-1">
-                        <h1 className="text-xl font-bold">Jane Str</h1>
+                        <h1 className="text-xl font-bold">{profile?.full_name ?? profile?.username}</h1>
                         <button className="mt-0.5 flex items-center gap-1 text-sm text-primary hover:underline">
                             <Info className="h-4 w-4" /> {t('page.profile.learn.more')}
                         </button>
@@ -289,7 +289,7 @@ const ProfilePage = () => {
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <button className="button-pill gap-2 rounded-lg px-4">
-                                    More
+                                    {t('page.account.more')}
                                     <ChevronDown className="h-4 w-4" />
                                 </button>
                             </DropdownMenuTrigger>

@@ -78,6 +78,7 @@ export interface TranslationDictionary {
     'page.account.add.back': string;
     'page.account.add.submit': string;
     'page.account.add.error': string;
+    'page.account.more': string;
 
     // ── Shared auth ──────────────────────────────────────────────────────────
     'page.auth.back-to-login': string;

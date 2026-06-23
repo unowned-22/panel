@@ -78,6 +78,7 @@ export const en: TranslationDictionary = {
     'page.account.add.back': 'Back to accounts',
     'page.account.add.submit': 'Add account',
     'page.account.add.error': 'Failed to add account. Check your credentials.',
+    'page.account.more': 'More',
 
     // ── Shared auth ──────────────────────────────────────────────────────────
     'page.auth.back-to-login': '← Back to login',

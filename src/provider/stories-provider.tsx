@@ -9,7 +9,7 @@ export const StoriesProvider = ({ children }: { children: ReactNode }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Load "my" stories from API and update the local "me" entry.
+    console.log("users", users)
     const mapSlidesToItems = (slides: any[], storyId?: number) => {
         return (slides || []).map((s: any, idx: number) => {
             const id = s.id ?? `${storyId ?? 'me'}-${idx}`;

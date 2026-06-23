@@ -67,6 +67,7 @@ export const ua: TranslationDictionary = {
     'page.account.add.back': 'Назад до акаунтів',
     'page.account.add.submit': 'Додати акаунт',
     'page.account.add.error': 'Не вдалося додати акаунт. Перевірте дані для входу.',
+    'page.account.more': 'Ще',
 
     // ── Settings page ──────────────────────────────────────────────────────────
     'page.settings.general': 'Загальне',
