@@ -22,9 +22,8 @@ import { authActions } from "@/auth/auth-actions";
 import { getInitials, useAccount } from "@/hooks/use-account";
 import { useTranslation } from "@/hooks/use-translation";
 import { Link } from "react-router-dom";
-import { StoriesViewer, StoriesEditor, type StoryState, storiesActions  } from "@/components/stories";
-import { ApiError } from '@/lib/api-client';
-import { toast } from "@/hooks/use-toast";
+import { Stories } from "@/components/stories";
+// ApiError and toast unused here; removed
 
 const Home = () => {
     const { t } = useTranslation();
@@ -43,8 +42,7 @@ const Home = () => {
     const [coverMenuOpen, setCoverMenuOpen] = useState(false);
     const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
     const [avatarUploaderOpen, setAvatarUploaderOpen] = useState(false);
-    const [storyEditorOpen, setStoryEditorOpen] = useState(false);
-    const [storyOpen, setStoryOpen] = useState(false);
+    // story editor/viewer are handled by global Stories component
 
     const openAvatarUpload = () => {
         setAvatarMenuOpen(false);
@@ -138,12 +136,12 @@ const Home = () => {
                                     className="gap-3 py-3"
                                     onClick={() => {
                                         setAvatarMenuOpen(false);
-                                        setStoryEditorOpen(true);
+                                        window.dispatchEvent(new CustomEvent('stories.open', { detail: { type: 'editor' } }));
                                     }}
                                 >
                                     <Camera className="h-4 w-4 text-primary" />{t('page.home.new.story')}
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setStoryOpen(true)} className="gap-3 py-3">
+                                <DropdownMenuItem onClick={() => window.dispatchEvent(new CustomEvent('stories.open', { detail: { type: 'viewer', userId: 'me' } }))} className="gap-3 py-3">
                                     <ImageIcon className="h-4 w-4 text-primary" />{t('page.home.view.story')}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={openAvatarUpload} className="gap-3 py-3">
@@ -219,24 +217,7 @@ const Home = () => {
                 allowedTypes={["image/jpeg", "image/png", "image/webp", "image/gif", "image/heic", "image/heif"]}
             />
 
-            <StoriesViewer open={storyOpen} onOpenChange={setStoryOpen} startUserId="1" />
-            {storyEditorOpen && (
-                <StoriesEditor
-                    onClose={() => setStoryEditorOpen(false)}
-                    onPublish={async (state: StoryState) => {
-                        try {
-                            await storiesActions.publish(state);
-                            setStoryEditorOpen(false);
-                            toast({ title: t('page.home.story.published') });
-                        } catch (err) {
-                            toast({
-                                title: err instanceof ApiError ? err.message : t('page.home.story.publish.error'),
-                                variant: "destructive"
-                            });
-                        }
-                    }}
-                />
-            )}
+            <Stories />
         </>
     );
 }

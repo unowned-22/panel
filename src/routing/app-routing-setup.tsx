@@ -24,7 +24,7 @@ export function AppRoutingSetup() {
                     <Route path="/me/feed" element={<FeedPage />} />
                     <Route path="/me/notifications" element={<Notification />} />
                     <Route path="/me/friends" element={<Friends />} />
-                    <Route path="/profile/:id" element={<ProfilePage />} />
+                    <Route path="/profile/:username" element={<ProfilePage />} />
                 </Route>
             </Route>
             <Route path="error/*" element={<ErrorRouting />} />
