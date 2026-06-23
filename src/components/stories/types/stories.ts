@@ -98,6 +98,7 @@ export interface Slide {
     filterId: string;
     adjustments: Adjustments;
     elements: CanvasElement[];
+    rendered_url?: string; // optional storage key for a pre-rendered composite image
 }
 
 export interface StoryState {

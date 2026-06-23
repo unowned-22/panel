@@ -11,6 +11,26 @@ export interface StoryResponse {
     expires_at: string;
 }
 
+export interface FeedSlide {
+    id: string;
+    rendered_url?: string;
+    seen?: boolean;
+}
+
+export interface FeedStoryResponse {
+    id: number;
+    user_id?: number;
+    author_name?: string;
+    author_username?: string;
+    author_avatar?: string;
+    visibility: string;
+    duration: number;
+    hidden_from: number[];
+    slides: FeedSlide[];
+    created_at: string;
+    expires_at: string;
+}
+
 interface StoryMediaResponse {
     url: string;
     key: string;
@@ -50,7 +70,25 @@ async function resolveElement(element: CanvasElement): Promise<CanvasElement> {
 async function resolveSlide(slide: Slide): Promise<Slide> {
     const background = await resolveBackground(slide.background);
     const elements = await Promise.all(slide.elements.map(resolveElement));
-    return { ...slide, background, elements };
+    const resolved = { ...slide, background, elements };
+
+    // Try to render and upload a composite image for quick viewing. Failure
+    // should not block publication.
+    try {
+        const { renderSlideToBlob } = await import('../utils/renderSlide');
+        const blob = await renderSlideToBlob(resolved);
+        const file = new File([blob], 'rendered-slide.png', { type: 'image/png' });
+        const up = await apiClient.upload<{ data: StoryMediaResponse }>('/stories/media', file);
+        if (up && up.data && up.data.key) {
+            return { ...resolved, rendered_url: up.data.key } as Slide;
+        }
+    } catch (err) {
+        // non-fatal: continue without rendered_url
+        // eslint-disable-next-line no-console
+        console.warn('[stories] renderAndUploadSlide failed, skipping rendered_url:', err);
+    }
+
+    return resolved;
 }
 
 export const storiesActions = {
@@ -72,8 +110,8 @@ export const storiesActions = {
         return res.data;
     },
 
-    async listFeed(): Promise<StoryResponse[]> {
-        const res = await apiClient.get<{ data: StoryResponse[] }>('/stories/feed');
+    async listFeed(): Promise<FeedStoryResponse[]> {
+        const res = await apiClient.get<{ data: FeedStoryResponse[] }>('/stories/feed');
         return res.data;
     },
 

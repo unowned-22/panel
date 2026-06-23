@@ -17,7 +17,10 @@ export const StoriesProvider = ({ children }: { children: ReactNode }) => {
             let image: string | undefined;
             let background: string | undefined;
             let text: string | undefined;
-            if (s.background && s.background.kind === 'media' && s.background.url) {
+            // Prefer a pre-rendered composite image when available
+            if (s.rendered_url) {
+                image = s.rendered_url;
+            } else if (s.background && s.background.kind === 'media' && s.background.url) {
                 image = s.background.url;
             }
             if (!image && Array.isArray(s.elements)) {
@@ -29,6 +32,14 @@ export const StoriesProvider = ({ children }: { children: ReactNode }) => {
                 background = s.background.value || s.background.preview || undefined;
             }
             return { id: String(id), image, background, text, createdAt, storyId } as StoryItem;
+        });
+    };
+
+    const mapFeedSlidesToItems = (slides: any[], storyId?: number, rowCreatedAt?: string) => {
+        return (slides || []).map((s: any, idx: number) => {
+            const id = s.id ?? `${storyId ?? 'feed'}-${idx}`;
+            const createdAt = rowCreatedAt ? Date.parse(rowCreatedAt) : Date.now();
+            return { id: String(id), image: s.rendered_url, background: undefined, text: undefined, createdAt, storyId, seen: !!s.seen } as StoryItem;
         });
     };
 
@@ -78,12 +89,15 @@ export const StoriesProvider = ({ children }: { children: ReactNode }) => {
                 }
                 const feedUsers: StoryUser[] = [];
                 for (const [uid, bucket] of byUser.entries()) {
-                    const mergedSlides: any[] = [];
-                    for (const r of bucket.rows) {
-                        if (Array.isArray(r.slides)) for (const sl of r.slides) mergedSlides.push({ ...(sl as any), created_at: (sl as any).created_at });
-                    }
-                    const items = mapSlidesToItems(mergedSlides, bucket.rows.length > 0 ? bucket.rows[0].id : undefined).sort((a, b) => b.createdAt - a.createdAt);
-                    feedUsers.push({ id: String(uid), name: bucket.rows[0]?.author_name || `User ${uid}`, avatar: bucket.rows[0]?.author_avatar || '/avatar-default.jpg', isMe: false, seen: items.some((it) => it.seen), items });
+                        const items: StoryItem[] = [];
+                        for (const r of bucket.rows) {
+                            if (Array.isArray(r.slides)) {
+                                const rowItems = mapFeedSlidesToItems(r.slides, r.id, r.created_at);
+                                items.push(...rowItems);
+                            }
+                        }
+                        items.sort((a, b) => b.createdAt - a.createdAt);
+                        feedUsers.push({ id: String(uid), name: bucket.rows[0]?.author_name || `User ${uid}`, avatar: bucket.rows[0]?.author_avatar || '/avatar-default.jpg', isMe: false, seen: items.some((it) => it.seen), items });
                 }
 
                 setUsers((prev) => {
