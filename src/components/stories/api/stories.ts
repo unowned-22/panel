@@ -13,6 +13,7 @@ export interface StoryResponse {
 
 interface StoryMediaResponse {
     url: string;
+    key: string;
     media_type: 'image' | 'video';
 }
 
@@ -32,7 +33,6 @@ async function resolveBackground(background: Background | null): Promise<Backgro
 
     return {
         kind: 'media',
-        // store object key in slide JSON; keep preview URL for immediate display
         url: upload.key,
         preview: upload.url,
         mediaType: upload.mediaType as 'image' | 'video',
@@ -82,11 +82,11 @@ export const storiesActions = {
     },
 
     async like(storyId: number): Promise<void> {
-        await apiClient.post(`/stories/${storyId}/like`);
+        await apiClient.post(`/stories/${storyId}/like`, undefined);
     },
 
     async unlike(storyId: number): Promise<void> {
-        await apiClient.post(`/stories/${storyId}/unlike`);
+        await apiClient.post(`/stories/${storyId}/unlike`, undefined);
     },
 
     async reply(storyId: number, message: string): Promise<void> {

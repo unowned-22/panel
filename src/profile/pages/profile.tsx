@@ -16,21 +16,213 @@ import {
     Bookmark,
     MessageCirclePlus,
     AlertCircle,
-    CircleDot
+    CircleDot,
+    UserPlus,
+    UserCheck,
+    Clock,
+    UserX,
+    Loader2,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "@/hooks/use-translation";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import {
     Tooltip,
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { StoriesViewer } from "@/components/stories";
+import { friendshipApi, type FriendshipRecord } from "@/api/friendship";
+import { useAuthStore } from "@/auth/auth.store";
+
+type FriendStatus = "none" | "friends" | "incoming" | "outgoing";
+
+interface AddFriendButtonProps {
+    profileUserId: number;
+    currentUserId: number;
+}
+
+const AddFriendButton = ({ profileUserId, currentUserId }: AddFriendButtonProps) => {
+    const [status, setStatus] = useState<FriendStatus>("none");
+    const [friendship, setFriendship] = useState<FriendshipRecord | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [actionLoading, setActionLoading] = useState(false);
+
+    useEffect(() => {
+        if (!profileUserId || profileUserId === currentUserId) return;
+
+        const check = async () => {
+            setLoading(true);
+            try {
+                // Check accepted friends
+                const friends = await friendshipApi.listFriends(1, 100);
+                const found = friends.data?.find(
+                    (f) =>
+                        (f.requester_id === currentUserId && f.addressee_id === profileUserId) ||
+                        (f.addressee_id === currentUserId && f.requester_id === profileUserId)
+                );
+                if (found) {
+                    setStatus("friends");
+                    setFriendship(found);
+                    return;
+                }
+
+                // Check incoming
+                const inc = await friendshipApi.listIncoming(1, 100);
+                const incFound = inc.data?.find((f) => f.requester_id === profileUserId);
+                if (incFound) {
+                    setStatus("incoming");
+                    setFriendship(incFound);
+                    return;
+                }
+
+                // Check outgoing
+                const out = await friendshipApi.listOutgoing(1, 100);
+                const outFound = out.data?.find((f) => f.addressee_id === profileUserId);
+                if (outFound) {
+                    setStatus("outgoing");
+                    setFriendship(outFound);
+                    return;
+                }
+
+                setStatus("none");
+                setFriendship(null);
+            } catch {
+                setStatus("none");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        check();
+    }, [profileUserId, currentUserId]);
+
+    const handleSend = async () => {
+        setActionLoading(true);
+        try {
+            const f = await friendshipApi.sendRequest(profileUserId);
+            setFriendship(f);
+            setStatus("outgoing");
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleCancel = async () => {
+        if (!friendship) return;
+        setActionLoading(true);
+        try {
+            await friendshipApi.cancel(friendship.id);
+            setFriendship(null);
+            setStatus("none");
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleAccept = async () => {
+        if (!friendship) return;
+        setActionLoading(true);
+        try {
+            const f = await friendshipApi.accept(friendship.id);
+            setFriendship(f);
+            setStatus("friends");
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleRemove = async () => {
+        if (!friendship) return;
+        setActionLoading(true);
+        try {
+            await friendshipApi.remove(friendship.id);
+            setFriendship(null);
+            setStatus("none");
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <button className="button-pill rounded-lg px-5 opacity-60" disabled>
+                <Loader2 className="w-4 h-4 animate-spin" />
+            </button>
+        );
+    }
+
+    if (status === "friends") {
+        return (
+            <button
+                onClick={handleRemove}
+                disabled={actionLoading}
+                className="button-pill rounded-lg px-5 bg-secondary! flex items-center gap-2"
+            >
+                {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserCheck className="w-4 h-4" />}
+                Вы друзья
+            </button>
+        );
+    }
+
+    if (status === "outgoing") {
+        return (
+            <button
+                onClick={handleCancel}
+                disabled={actionLoading}
+                className="button-pill rounded-lg px-5 bg-secondary! flex items-center gap-2"
+            >
+                {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Clock className="w-4 h-4" />}
+                Заявка отправлена
+            </button>
+        );
+    }
+
+    if (status === "incoming") {
+        return (
+            <div className="flex items-center gap-2">
+                <button
+                    onClick={handleAccept}
+                    disabled={actionLoading}
+                    className="button-pill rounded-lg px-5 flex items-center gap-2"
+                >
+                    {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserCheck className="w-4 h-4" />}
+                    Принять
+                </button>
+                <button
+                    onClick={handleCancel}
+                    disabled={actionLoading}
+                    className="button-pill rounded-lg px-3 bg-secondary! flex items-center gap-1"
+                >
+                    <UserX className="w-4 h-4" />
+                </button>
+            </div>
+        );
+    }
+
+    return (
+        <button
+            onClick={handleSend}
+            disabled={actionLoading}
+            className="button-pill rounded-lg px-5 flex items-center gap-2"
+        >
+            {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+            Добавить в друзья
+        </button>
+    );
+};
 
 const ProfilePage = () => {
     const { t } = useTranslation();
+    const { username } = useParams<{ username: string }>();
     const [storyOpen, setStoryOpen] = useState(false);
+    const currentUser = useAuthStore((s) => s.user);
+
+    // TODO: fetch actual profile by username and get their real id
+    // For now we derive a dummy numeric id — replace this when you have a users API
+    const profileUserId = username ? NaN : NaN; // will be replaced by real API call
+
+    const isSelf = currentUser?.username === username;
 
     return (
         <>
@@ -66,7 +258,19 @@ const ProfilePage = () => {
                         </button>
                     </div>
                     <div className="flex items-center gap-2">
-                        <button className="button-pill rounded-lg px-5">{t('page.profile.add.friend')}</button>
+                        {!isSelf && currentUser && !isNaN(profileUserId) && (
+                            <AddFriendButton
+                                profileUserId={profileUserId}
+                                currentUserId={currentUser.id}
+                            />
+                        )}
+                        {!isSelf && isNaN(profileUserId) && (
+                            // Fallback until real profile API: show static button
+                            <button className="button-pill rounded-lg px-5 flex items-center gap-2">
+                                <UserPlus className="w-4 h-4" />
+                                {t('page.profile.add.friend')}
+                            </button>
+                        )}
                         <Link to="/me/messenger" className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary hover:bg-accent" aria-label={t('sidebar.messenger')}>
                             <MessageCircle className="h-5 w-5" />
                         </Link>
@@ -119,7 +323,7 @@ const ProfilePage = () => {
 
                                 <DropdownMenuItem className="h-11 rounded-lg px-3 text-red-400">
                                     <Ban className="mr-3 h-5 w-5" />
-                                    Block Sergey
+                                    Block
                                 </DropdownMenuItem>
 
                                 <DropdownMenuItem className="h-11 rounded-lg px-3 text-red-400">
@@ -136,4 +340,4 @@ const ProfilePage = () => {
     );
 }
 
-export default ProfilePage
+export default ProfilePage;

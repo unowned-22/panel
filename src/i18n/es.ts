@@ -76,6 +76,7 @@ export const es: TranslationDictionary = {
     'page.settings.menu.settings': 'Menú del sitio',
     'page.settings.setup.menu.items': 'Configurar elementos del menú',
     'page.settings.section.account': 'Cuenta y apariencia',
+    'page.settings.section.notifications': 'Notificaciones',
     'page.settings.modal.setup.items': 'Configuración de los elementos del menú',
 
     // ── Shared auth ──────────────────────────────────────────────────────────
