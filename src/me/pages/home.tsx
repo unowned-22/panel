@@ -19,16 +19,18 @@ import { useState } from "react";
 import { AvatarUploader, type AvatarUploaderResult } from "@/me/components/avatar-editor";
 import { CoverEditorModal, type CoverCropResult } from "@/me/components/cover-editor";
 import { authActions } from "@/auth/auth-actions";
+import { useStories } from "@/hooks/use-stories";
 import { getInitials, useAccount } from "@/hooks/use-account";
 import { useTranslation } from "@/hooks/use-translation";
 import { Link } from "react-router-dom";
-import { StoriesViewer, StoriesEditor, type StoryState, storiesActions  } from "@/components/stories";
-import { ApiError } from '@/lib/api-client';
-import { toast } from "@/hooks/use-toast";
+import { type StoryState, StoriesEditor, StoriesViewer } from "@/components/stories";
+import { toast } from "@/hooks/use-toast.ts";
+import { ApiError } from "@/lib/api-client.ts";
 
 const Home = () => {
     const { t } = useTranslation();
     const { activeAccount } = useAccount();
+    const { addMyStory } = useStories();
 
     const [avatar, setAvatar] = useState<string|null>(() => {
         return activeAccount.user?.avatar_url ?? null;
@@ -43,8 +45,8 @@ const Home = () => {
     const [coverMenuOpen, setCoverMenuOpen] = useState(false);
     const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
     const [avatarUploaderOpen, setAvatarUploaderOpen] = useState(false);
+    const [viewerOpen, setViewerOpen] = useState(false);
     const [storyEditorOpen, setStoryEditorOpen] = useState(false);
-    const [storyOpen, setStoryOpen] = useState(false);
 
     const openAvatarUpload = () => {
         setAvatarMenuOpen(false);
@@ -143,7 +145,7 @@ const Home = () => {
                                 >
                                     <Camera className="h-4 w-4 text-primary" />{t('page.home.new.story')}
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setStoryOpen(true)} className="gap-3 py-3">
+                                <DropdownMenuItem onClick={() => setViewerOpen(true)} className="gap-3 py-3">
                                     <ImageIcon className="h-4 w-4 text-primary" />{t('page.home.view.story')}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={openAvatarUpload} className="gap-3 py-3">
@@ -195,6 +197,29 @@ const Home = () => {
                 </div>
             </div>
 
+            <StoriesViewer
+                open={viewerOpen}
+                onOpenChange={setViewerOpen}
+                startUserId={activeAccount.user === undefined ? null : `${activeAccount.user.id}`}
+            />
+            {storyEditorOpen && (
+                <StoriesEditor
+                    onClose={() => setStoryEditorOpen(false)}
+                    onPublish={async (state: StoryState) => {
+                        try {
+                            await addMyStory(state as any);
+                            setStoryEditorOpen(false);
+                            toast({ title: t('page.home.story.published') });
+                        } catch (err) {
+                            toast({
+                                title: err instanceof ApiError ? err.message : t('page.home.story.publish.error'),
+                                variant: "destructive"
+                            });
+                        }
+                    }}
+                />
+            )}
+
             <CoverEditorModal
                 open={coverEditorOpen}
                 image={coverEditorFresh ? undefined : (activeAccount.user?.cover_url ?? cover ?? undefined)}
@@ -218,25 +243,6 @@ const Home = () => {
                 maxFileSize={20 * 1024 * 1024}
                 allowedTypes={["image/jpeg", "image/png", "image/webp", "image/gif", "image/heic", "image/heif"]}
             />
-
-            <StoriesViewer open={storyOpen} onOpenChange={setStoryOpen} startUserId="1" />
-            {storyEditorOpen && (
-                <StoriesEditor
-                    onClose={() => setStoryEditorOpen(false)}
-                    onPublish={async (state: StoryState) => {
-                        try {
-                            await storiesActions.publish(state);
-                            setStoryEditorOpen(false);
-                            toast({ title: t('page.home.story.published') });
-                        } catch (err) {
-                            toast({
-                                title: err instanceof ApiError ? err.message : t('page.home.story.publish.error'),
-                                variant: "destructive"
-                            });
-                        }
-                    }}
-                />
-            )}
         </>
     );
 }

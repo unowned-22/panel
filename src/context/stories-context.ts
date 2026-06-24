@@ -23,6 +23,9 @@ export type StoriesContextValue = {
     users: StoryUser[];
     addMyStory: (item: Omit<StoryItem, "id" | "createdAt"> | any) => void;
     markSeen: (userId: string, storyId?: number, slideIndex?: number) => void;
+    removeMyStory?: (storyId: number) => Promise<void>;
+    isLoading?: boolean;
+    error?: string | null;
 };
 
 export const StoriesContext = createContext<StoriesContextValue | null>(null);

@@ -78,6 +78,7 @@ export interface TranslationDictionary {
     'page.account.add.back': string;
     'page.account.add.submit': string;
     'page.account.add.error': string;
+    'page.account.more': string;
 
     // ── Shared auth ──────────────────────────────────────────────────────────
     'page.auth.back-to-login': string;
@@ -209,4 +210,30 @@ export interface TranslationDictionary {
     'stories.editor.text.fill.none': string;
     'stories.editor.text.fill.filled': string;
     'stories.editor.text.fill.outline': string;
+    // ── Friends page ──────────────────────────────────────────────────────────
+    'page.friends.tabs.all': string;
+    'page.friends.tabs.incoming': string;
+    'page.friends.tabs.outgoing': string;
+    'page.friends.find': string;
+    'page.friends.search.placeholder': string;
+    'page.friends.empty.noFriends': string;
+    'page.friends.empty.findPrompt': string;
+    'page.friends.section.friends': string;
+    'page.friends.label.friend': string;
+    'page.friends.action.remove': string;
+    'page.friends.empty.incoming': string;
+    'page.friends.empty.incoming.desc': string;
+    'page.friends.section.incoming': string;
+    'page.friends.action.accept': string;
+    'page.friends.action.reject': string;
+    'page.friends.empty.outgoing': string;
+    'page.friends.empty.outgoing.desc': string;
+    'page.friends.section.outgoing': string;
+    'page.friends.label.sent': string; // use .replace('{date}', date)
+    'page.friends.action.cancel': string;
+    'page.friends.section.suggestions': string;
+    'page.friends.empty.suggestions': string;
+    'page.friends.action.add': string;
+    'page.friends.sidebar.title': string;
+    'page.friends.sidebar.find': string;
 }

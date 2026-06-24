@@ -16,13 +16,14 @@ const DURATION = 5000;
 
 export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
     const { t } = useTranslation();
-    const { users, markSeen } = useStories();
+    const { users, markSeen, removeMyStory } = useStories();
     const visibleUsers = users.filter((u) => u.items.length > 0);
 
     const [userIdx, setUserIdx] = useState(0);
     const [itemIdx, setItemIdx] = useState(0);
     const [progress, setProgress] = useState(0);
     const [reply, setReply] = useState("");
+    const [likedMap, setLikedMap] = useState<Record<number, boolean>>({});
     const [inputFocused, setInputFocused] = useState(false);
     const [holdPause, setHoldPause] = useState(false);
     const rafRef = useRef<number>(0);
@@ -159,6 +160,27 @@ export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
                         >
                             <X className="w-5 h-5" />
                         </button>
+                        {currentUser.isMe && currentItem?.storyId && (
+                            <button
+                                onClick={async () => {
+                                    try {
+                                        const sid = currentItem.storyId;
+                                        if (sid == null) return;
+                                        if (removeMyStory) {
+                                            await removeMyStory(sid);
+                                        } else {
+                                            await import('@/components/stories/api/stories').then(m => m.storiesActions.remove(sid));
+                                        }
+                                        onOpenChange(false);
+                                    } catch (err) {
+                                        toast.error(t('stories.viewer.delete.error' as any))
+                                    }
+                                }}
+                                className="ml-2 w-8 h-8 rounded-full flex items-center justify-center text-white hover:bg-white/10"
+                            >
+                                <X className="w-5 h-5 rotate-45" />
+                            </button>
+                        )}
                     </div>
 
                     {/* Content */}
@@ -197,14 +219,21 @@ export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
                     {/* Reply bar */}
                     {!currentUser.isMe && (
                         <form
-                            onSubmit={(e) => {
-                                e.preventDefault();
-                                const text = reply.trim();
-                                if (!text) return;
-                                toast.success(t('stories.viewer.reply.sent').replace('{name}', currentUser.name), { description: text });
-                                setReply("");
-                                (document.activeElement as HTMLElement | null)?.blur?.();
-                            }}
+                            onSubmit={async (e) => {
+                                    e.preventDefault();
+                                    const text = reply.trim();
+                                    if (!text) return;
+                                    if (!currentItem?.storyId) return;
+                                    try {
+                                        if (currentItem.storyId == null) return;
+                                        await import('@/components/stories/api/stories').then(m => m.storiesActions.reply(currentItem.storyId!, text));
+                                        toast.success(t('stories.viewer.reply.sent').replace('{name}', currentUser.name), { description: text });
+                                        setReply("");
+                                        (document.activeElement as HTMLElement | null)?.blur?.();
+                                    } catch (err) {
+                                        toast.error(t('stories.viewer.reply.error' as any))
+                                    }
+                                }}
                             className="absolute bottom-0 left-0 right-0 z-30 p-3 flex items-center gap-2 bg-linear-to-t from-black/70 to-transparent"
                             onPointerDown={(e) => e.stopPropagation()}
                         >
@@ -219,7 +248,24 @@ export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
                             />
                             <button
                                 type="button"
-                                onClick={() => toast.success(t('stories.viewer.like.sent').replace('{name}', currentUser.name))}
+                                onClick={async () => {
+                                    if (!currentItem?.storyId) return;
+                                    const sid = currentItem.storyId;
+                                    const cur = !!likedMap[sid];
+                                    // optimistic
+                                    setLikedMap((m) => ({ ...m, [sid]: !cur }));
+                                    try {
+                                        if (!cur) {
+                                            await import('@/components/stories/api/stories').then(m => m.storiesActions.like(sid));
+                                        } else {
+                                            await import('@/components/stories/api/stories').then(m => m.storiesActions.unlike(sid));
+                                        }
+                                    } catch (e) {
+                                        // revert
+                                        setLikedMap((m) => ({ ...m, [sid]: cur }));
+                                        toast.error(t('stories.viewer.like.error' as any))
+                                    }
+                                }}
                                 className="w-10 h-10 rounded-full flex items-center justify-center text-white hover:bg-white/10"
                                 aria-label="Like"
                             >

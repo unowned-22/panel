@@ -32,8 +32,10 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { StoriesViewer } from "@/components/stories";
+import { profileApi, type ProfileRecord } from "@/api/profile";
 import { friendshipApi, type FriendshipRecord } from "@/api/friendship";
 import { useAuthStore } from "@/auth/auth.store";
+import {getInitials} from "@/hooks/use-account.ts";
 
 type FriendStatus = "none" | "friends" | "incoming" | "outgoing";
 
@@ -47,6 +49,7 @@ const AddFriendButton = ({ profileUserId, currentUserId }: AddFriendButtonProps)
     const [friendship, setFriendship] = useState<FriendshipRecord | null>(null);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
+    const { t } = useTranslation();
 
     useEffect(() => {
         if (!profileUserId || profileUserId === currentUserId) return;
@@ -207,7 +210,7 @@ const AddFriendButton = ({ profileUserId, currentUserId }: AddFriendButtonProps)
             className="button-pill rounded-lg px-5 flex items-center gap-2"
         >
             {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
-            Добавить в друзья
+            {t('page.profile.add.friend')}
         </button>
     );
 };
@@ -217,12 +220,24 @@ const ProfilePage = () => {
     const { username } = useParams<{ username: string }>();
     const [storyOpen, setStoryOpen] = useState(false);
     const currentUser = useAuthStore((s) => s.user);
+    const [profile, setProfile] = useState<ProfileRecord | null>(null);
 
-    // TODO: fetch actual profile by username and get their real id
-    // For now we derive a dummy numeric id — replace this when you have a users API
-    const profileUserId = username ? NaN : NaN; // will be replaced by real API call
+    useEffect(() => {
+        if (username === undefined) return;
 
-    const isSelf = currentUser?.username === username;
+        const fetchProfile = async () => {
+            try {
+                const data = await profileApi.get(username);
+                setProfile(data);
+            } catch (err) {
+                console.error("err:", err);
+            } finally {
+                //
+            }
+        };
+
+        fetchProfile();
+    }, [username])
 
     return (
         <>
@@ -237,7 +252,10 @@ const ProfilePage = () => {
                                 className="h-32 w-32 overflow-hidden rounded-full border-4 border-background ring-4 ring-background"
                                 style={{ background: "hsl(var(--background))" }}
                             >
-                                <div className="flex h-full w-full items-center justify-center text-white text-3xl font-semibold">JS</div>
+                                {profile?.avatar_url
+                                    ? <img src={profile?.avatar_url} alt={profile?.full_name} className="h-full w-full object-cover" />
+                                    : <div className="flex h-full w-full items-center justify-center text-white text-3xl font-semibold">{getInitials(profile?.full_name ?? "")}</div>
+                                }
                             </div>
                             <Tooltip>
                                 <TooltipTrigger asChild>
@@ -252,32 +270,26 @@ const ProfilePage = () => {
                         </div>
                     </div>
                     <div className="ml-37 min-w-0 flex-1">
-                        <h1 className="text-xl font-bold">Jane Str</h1>
+                        <h1 className="text-xl font-bold">{profile?.full_name ?? profile?.username}</h1>
                         <button className="mt-0.5 flex items-center gap-1 text-sm text-primary hover:underline">
                             <Info className="h-4 w-4" /> {t('page.profile.learn.more')}
                         </button>
                     </div>
                     <div className="flex items-center gap-2">
-                        {!isSelf && currentUser && !isNaN(profileUserId) && (
-                            <AddFriendButton
-                                profileUserId={profileUserId}
-                                currentUserId={currentUser.id}
-                            />
-                        )}
-                        {!isSelf && isNaN(profileUserId) && (
-                            // Fallback until real profile API: show static button
-                            <button className="button-pill rounded-lg px-5 flex items-center gap-2">
+                        {!(currentUser?.username === profile?.username) && currentUser && (profile?.id ?? 0) > 0
+                            ? <AddFriendButton profileUserId={profile?.id ?? 0} currentUserId={currentUser.id} />
+                            : <button className="button-pill rounded-lg px-5 flex items-center gap-2">
                                 <UserPlus className="w-4 h-4" />
                                 {t('page.profile.add.friend')}
-                            </button>
-                        )}
+                              </button>
+                        }
                         <Link to="/me/messenger" className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary hover:bg-accent" aria-label={t('sidebar.messenger')}>
                             <MessageCircle className="h-5 w-5" />
                         </Link>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <button className="button-pill gap-2 rounded-lg px-4">
-                                    More
+                                    {t('page.account.more')}
                                     <ChevronDown className="h-4 w-4" />
                                 </button>
                             </DropdownMenuTrigger>
