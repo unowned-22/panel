@@ -9,7 +9,6 @@ export const StoriesProvider = ({ children }: { children: ReactNode }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    console.log("users", users)
     const mapSlidesToItems = (slides: any[], storyId?: number) => {
         return (slides || []).map((s: any, idx: number) => {
             const id = s.id ?? `${storyId ?? 'me'}-${idx}`;
@@ -47,37 +46,7 @@ export const StoriesProvider = ({ children }: { children: ReactNode }) => {
         let mounted = true;
         (async () => {
             try {
-                const resp = await storiesActions.listMine();
-                if (!mounted) return;
-                // resp is array of story rows (possibly multiple publishes). Merge slides from all rows.
-                const allSlides: any[] = [];
-                for (const row of resp) {
-                    if (row && Array.isArray(row.slides)) {
-                        for (const sl of row.slides) allSlides.push({ ...(sl as any), created_at: (sl as any).created_at });
-                    }
-                }
-                const items = mapSlidesToItems(allSlides, resp.length > 0 ? (resp[0] as any).id : undefined).sort((a, b) => b.createdAt - a.createdAt);
-                setUsers((prev) => {
-                    const me = prev.find((u) => u.isMe) ?? { id: 'me', name: 'Моя история', avatar: activeAccount.user?.avatar_url ?? '/avatar-me.jpg', isMe: true, items: [] };
-                    const others = prev.filter((u) => !u.isMe);
-                    return [ { ...me, items }, ...others ];
-                });
-            } catch (err) {
-                // set error state and clear users (no mocks)
-                setError('failed to load my stories');
-                setUsers((prev) => prev.filter((u) => u.isMe ? { ...u, items: [] } : u));
-            } finally {
-                setIsLoading(false);
-            }
-        })();
-        return () => { mounted = false };
-    }, [activeAccount]);
-
-    // Load feed (other users' stories) and merge with local users list.
-    useEffect(() => {
-        let mounted = true;
-        (async () => {
-            try {
+                setIsLoading(true)
                 const feed: any[] = await storiesActions.listFeed();
                 if (!mounted) return;
                 // Group feed rows by user_id and merge slides into a single StoryUser per author
@@ -89,15 +58,22 @@ export const StoriesProvider = ({ children }: { children: ReactNode }) => {
                 }
                 const feedUsers: StoryUser[] = [];
                 for (const [uid, bucket] of byUser.entries()) {
-                        const items: StoryItem[] = [];
-                        for (const r of bucket.rows) {
-                            if (Array.isArray(r.slides)) {
-                                const rowItems = mapFeedSlidesToItems(r.slides, r.id, r.created_at);
-                                items.push(...rowItems);
-                            }
+                    const items: StoryItem[] = [];
+                    for (const r of bucket.rows) {
+                        if (Array.isArray(r.slides)) {
+                            const rowItems = mapFeedSlidesToItems(r.slides, r.id, r.created_at);
+                            items.push(...rowItems);
                         }
-                        items.sort((a, b) => b.createdAt - a.createdAt);
-                        feedUsers.push({ id: String(uid), name: bucket.rows[0]?.author_name || `User ${uid}`, avatar: bucket.rows[0]?.author_avatar || '/avatar-default.jpg', isMe: false, seen: items.some((it) => it.seen), items });
+                    }
+                    items.sort((a, b) => b.createdAt - a.createdAt);
+                    feedUsers.push({
+                        id: String(uid),
+                        name: bucket.rows[0]?.author_name || "",
+                        avatar: bucket.rows[0]?.author_avatar || '',
+                        isMe: activeAccount.user?.id === uid,
+                        seen: items.some((it) => it.seen),
+                        items
+                    });
                 }
 
                 setUsers((prev) => {
@@ -107,6 +83,8 @@ export const StoriesProvider = ({ children }: { children: ReactNode }) => {
             } catch (err) {
                 setError('failed to load feed');
                 setUsers((prev) => prev.filter((u) => u.isMe));
+            } finally {
+                setIsLoading(false)
             }
         })();
         return () => { mounted = false };

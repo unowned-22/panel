@@ -29,7 +29,6 @@ export const Stories = () => {
     const [activeUserId, setActiveUserId] = useState<string | null>(null);
     const [storyEditorOpen, setStoryEditorOpen] = useState(false);
 
-    console.log(users)
     const me = users.find((u) => u.isMe) ?? { id: 'me', name: t('page.home.my.stories') ?? 'My story', avatar: '', isMe: true, items: [] };
     const others = users.filter((u) => !u.isMe && (u.items || []).length > 0);
 

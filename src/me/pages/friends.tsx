@@ -15,6 +15,8 @@ import {
 import { toAbsoluteUrl } from "@/lib/helpers.ts";
 import { friendshipApi, type FriendshipRecord, type UserSuggestion } from "@/api/friendship";
 import { useAuthStore } from "@/auth/auth.store";
+import { useTranslation } from '@/hooks/use-translation';
+import type { TranslationDictionary } from '@/i18n/types';
 
 type Tab = "all" | "incoming" | "outgoing" | "find";
 
@@ -235,10 +237,12 @@ const Friends = () => {
         ? friends.filter((f) => String(otherUserId(f)).includes(query))
         : friends;
 
-    const tabs: { key: Tab; label: string; count: number }[] = [
-        { key: "all", label: "Все друзья", count: friendsTotal },
-        { key: "incoming", label: "Заявки", count: incomingTotal },
-        { key: "outgoing", label: "Исходящие", count: outgoingTotal },
+    const { t, language } = useTranslation();
+
+    const tabs: { key: Tab; label: keyof TranslationDictionary; count: number }[] = [
+        { key: "all", label: 'page.friends.tabs.all', count: friendsTotal },
+        { key: "incoming", label: 'page.friends.tabs.incoming', count: incomingTotal },
+        { key: "outgoing", label: 'page.friends.tabs.outgoing', count: outgoingTotal },
     ];
 
     return (
@@ -247,21 +251,21 @@ const Friends = () => {
                 <div className="panel-card p-4">
                     {/* Tabs */}
                     <div className="flex items-center gap-2 mb-4 flex-wrap">
-                        {tabs.map((t) => (
+                        {tabs.map((tb) => (
                             <button
-                                key={t.key}
-                                onClick={() => setTab(t.key)}
-                                className={`button-pill ${tab === t.key ? "bg-secondary" : "bg-transparent text-muted-foreground"}`}
+                                key={tb.key}
+                                onClick={() => setTab(tb.key)}
+                                className={`button-pill ${tab === tb.key ? "bg-secondary" : "bg-transparent text-muted-foreground"}`}
                             >
-                                {t.label}
-                                {t.count > 0 && <span className="ml-1">{t.count}</span>}
+                                {t(tb.label)}
+                                {tb.count > 0 && <span className="ml-1">{tb.count}</span>}
                             </button>
                         ))}
                         <button
                             onClick={() => setTab("find")}
                             className={`button-pill ml-auto flex items-center gap-2 ${tab === "find" ? "bg-secondary" : ""}`}
                         >
-                            <UserPlus className="w-4 h-4" /> Найти друзей
+                            <UserPlus className="w-4 h-4" /> {t('page.friends.find')}
                         </button>
                     </div>
 
@@ -273,11 +277,10 @@ const Friends = () => {
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 className="w-full h-10 pl-9 pr-4 rounded-xl bg-secondary text-sm placeholder:text-muted-foreground focus:outline-none"
-                                placeholder="Поиск среди друзей"
+                                placeholder={t('page.friends.search.placeholder')}
                             />
                         </div>
                     )}
-
                     {/* All friends */}
                     {tab === "all" && (
                         friendsLoading ? (
@@ -287,18 +290,18 @@ const Friends = () => {
                         ) : filteredFriends.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-16 gap-3">
                                 <Users className="w-10 h-10 text-muted-foreground" strokeWidth={1.5} />
-                                <div className="font-semibold">Нет друзей</div>
+                                <div className="font-semibold">{t('page.friends.empty.noFriends')}</div>
                                 <p className="text-sm text-muted-foreground text-center max-w-xs">
-                                    Перейдите в раздел «Найти друзей», чтобы добавить кого-нибудь
+                                    {t('page.friends.empty.findPrompt')}
                                 </p>
                                 <button onClick={() => setTab("find")} className="button-pill mt-2">
-                                    Найти друзей
+                                    {t('page.friends.find')}
                                 </button>
                             </div>
                         ) : (
                             <div className="flex flex-col gap-1">
                                 <div className="flex items-center gap-2 px-1 mb-1 text-xs text-muted-foreground">
-                                    <UserCheck className="w-3.5 h-3.5" /> Друзья
+                                    <UserCheck className="w-3.5 h-3.5" /> {t('page.friends.section.friends')}
                                 </div>
                                 {filteredFriends.map((f) => (
                                     <div key={f.id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-secondary/60 transition-colors">
@@ -311,7 +314,7 @@ const Friends = () => {
                                             <Link to={`/profile/${otherUserId(f)}`} className="text-sm font-medium hover:underline truncate block">
                                                 Пользователь #{otherUserId(f)}
                                             </Link>
-                                            <div className="text-xs text-muted-foreground">Друг</div>
+                                            <div className="text-xs text-muted-foreground">{t('page.friends.label.friend')}</div>
                                         </div>
                                         <button
                                             onClick={() => handleRemoveFriend(f)}
@@ -323,7 +326,7 @@ const Friends = () => {
                                             ) : (
                                                 <UserX className="w-3.5 h-3.5" />
                                             )}
-                                            Удалить
+                                            {t('page.friends.action.remove')}
                                         </button>
                                     </div>
                                 ))}
@@ -341,15 +344,15 @@ const Friends = () => {
                         ) : incoming.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-16 gap-3">
                                 <Clock className="w-10 h-10 text-muted-foreground" strokeWidth={1.5} />
-                                <div className="font-semibold">Нет входящих заявок</div>
+                                <div className="font-semibold">{t('page.friends.empty.incoming')}</div>
                                 <p className="text-sm text-muted-foreground text-center max-w-xs">
-                                    Когда кто-то отправит вам заявку в друзья, она появится здесь
+                                    {t('page.friends.empty.incoming.desc')}
                                 </p>
                             </div>
                         ) : (
                             <div className="flex flex-col gap-1">
                                 <div className="flex items-center gap-2 px-1 mb-1 text-xs text-muted-foreground">
-                                    <Clock className="w-3.5 h-3.5" /> Входящие заявки
+                                    <Clock className="w-3.5 h-3.5" /> {t('page.friends.section.incoming')}
                                 </div>
                                 {incoming.map((f) => (
                                     <div key={f.id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-secondary/60 transition-colors">
@@ -363,7 +366,7 @@ const Friends = () => {
                                                 Пользователь #{f.requester_id}
                                             </Link>
                                             <div className="text-xs text-muted-foreground">
-                                                {new Date(f.created_at).toLocaleDateString("ru-RU")}
+                                                {new Date(f.created_at).toLocaleDateString(language)}
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-2">
@@ -377,7 +380,7 @@ const Friends = () => {
                                                 ) : (
                                                     <UserCheck className="w-3.5 h-3.5" />
                                                 )}
-                                                Принять
+                                                {t('page.friends.action.accept')}
                                             </button>
                                             <button
                                                 onClick={() => handleReject(f.id)}
@@ -385,7 +388,7 @@ const Friends = () => {
                                                 className="button-pill bg-secondary! flex items-center gap-1"
                                             >
                                                 <UserX className="w-3.5 h-3.5" />
-                                                Отклонить
+                                                {t('page.friends.action.reject')}
                                             </button>
                                         </div>
                                     </div>
@@ -404,15 +407,15 @@ const Friends = () => {
                         ) : outgoing.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-16 gap-3">
                                 <UserPlus className="w-10 h-10 text-muted-foreground" strokeWidth={1.5} />
-                                <div className="font-semibold">Нет исходящих заявок</div>
+                                <div className="font-semibold">{t('page.friends.empty.outgoing')}</div>
                                 <p className="text-sm text-muted-foreground text-center max-w-xs">
-                                    Заявки, которые вы отправляете другим, появятся здесь
+                                    {t('page.friends.empty.outgoing.desc')}
                                 </p>
                             </div>
                         ) : (
                             <div className="flex flex-col gap-1">
                                 <div className="flex items-center gap-2 px-1 mb-1 text-xs text-muted-foreground">
-                                    <UserPlus className="w-3.5 h-3.5" /> Исходящие заявки
+                                    <UserPlus className="w-3.5 h-3.5" /> {t('page.friends.section.outgoing')}
                                 </div>
                                 {outgoing.map((f) => (
                                     <div key={f.id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-secondary/60 transition-colors">
@@ -426,7 +429,7 @@ const Friends = () => {
                                                 Пользователь #{f.addressee_id}
                                             </Link>
                                             <div className="text-xs text-muted-foreground">
-                                                Отправлено {new Date(f.created_at).toLocaleDateString("ru-RU")}
+                                                {t('page.friends.label.sent').replace('{date}', new Date(f.created_at).toLocaleDateString(language))}
                                             </div>
                                         </div>
                                         <button
@@ -437,7 +440,7 @@ const Friends = () => {
                                             {actionLoading[f.id] ? (
                                                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
                                             ) : null}
-                                            Отменить
+                                            {t('page.friends.action.cancel')}
                                         </button>
                                     </div>
                                 ))}
@@ -455,11 +458,11 @@ const Friends = () => {
                         ) : (
                             <div className="flex flex-col gap-1">
                                 <div className="flex items-center gap-2 px-1 mb-1 text-xs text-muted-foreground">
-                                    <Users className="w-3.5 h-3.5" /> Возможные друзья
+                                    <Users className="w-3.5 h-3.5" /> {t('page.friends.section.suggestions')}
                                 </div>
                                 {suggestions.length === 0 ? (
                                     <div className="text-sm text-muted-foreground py-10 text-center">
-                                        Нет предложений
+                                        {t('page.friends.empty.suggestions')}
                                     </div>
                                 ) : (
                                     suggestions.map((s) => (
@@ -485,7 +488,7 @@ const Friends = () => {
                                                 ) : (
                                                     <UserPlus className="w-3.5 h-3.5" />
                                                 )}
-                                                Добавить
+                                                {t('page.friends.action.add')}
                                             </button>
                                         </div>
                                     ))
@@ -501,18 +504,18 @@ const Friends = () => {
             <aside className="hidden xl:flex flex-col w-70 shrink-0 py-0 gap-3 sticky top-18 self-start max-h-[calc(100vh-72px)]">
                 <div className="panel-card p-2">
                     <button className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-semibold hover:bg-secondary/60">
-                        Мои друзья <Calendar className="w-4 h-4 text-muted-foreground" />
+                        {t('page.friends.sidebar.title')} <Calendar className="w-4 h-4 text-muted-foreground" />
                     </button>
-                    {tabs.map((t) => (
+                    {tabs.map((tb) => (
                         <button
-                            key={t.key}
-                            onClick={() => setTab(t.key)}
-                            className={`w-full text-left flex items-center justify-between px-3 py-2 rounded-lg text-sm mt-1 ${tab === t.key ? "bg-secondary" : "hover:bg-secondary/60"}`}
+                            key={tb.key}
+                            onClick={() => setTab(tb.key)}
+                            className={`w-full text-left flex items-center justify-between px-3 py-2 rounded-lg text-sm mt-1 ${tab === tb.key ? "bg-secondary" : "hover:bg-secondary/60"}`}
                         >
-                            {t.label}
-                            {t.count > 0 && (
+                            {t(tb.label)}
+                            {tb.count > 0 && (
                                 <span className="ml-auto text-xs bg-primary text-primary-foreground rounded-full px-1.5 py-0.5">
-                                    {t.count}
+                                    {tb.count}
                                 </span>
                             )}
                         </button>
@@ -521,7 +524,7 @@ const Friends = () => {
                         onClick={() => setTab("find")}
                         className={`w-full text-left px-3 py-2 rounded-lg text-sm mt-1 ${tab === "find" ? "bg-secondary" : "hover:bg-secondary/60"}`}
                     >
-                        Поиск друзей
+                        {t('page.friends.sidebar.find')}
                     </button>
                 </div>
             </aside>
