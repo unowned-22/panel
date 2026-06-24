@@ -2,6 +2,7 @@ import type { TranslationDictionary } from './types';
 
 export const it: TranslationDictionary = {
     'name': 'Unowned',
+    'errors.error': 'Errore',
     'sidebar.profile': 'Profilo',
     'sidebar.feed': 'Feed',
     'sidebar.messenger': 'Messenger',
@@ -234,4 +235,23 @@ export const it: TranslationDictionary = {
     'page.friends.action.add': 'Aggiungi',
     'page.friends.sidebar.title': 'I miei amici',
     'page.friends.sidebar.find': 'Cerca amici',
+
+    // ── Photos module  ───────────────────────────────
+    'page.photos.title': 'Le mie foto',
+    'photos.album.create.success': 'Album creato',
+    'photos.album.create.error': 'Impossibile creare l\'album',
+    'photos.album.updated': 'Album aggiornato',
+    'photos.album.delete.confirm': 'Eliminare l\'album? Questa azione non può essere annullata.',
+    'photos.album.delete.success': 'Album eliminato',
+    'photos.album.delete.error': 'Impossibile eliminare l\'album',
+    'photos.delete.confirm': 'Eliminare la foto?',
+    'photos.delete.success': 'Foto eliminata',
+    'photos.delete.error': 'Impossibile eliminare la foto',
+    'photos.move.success': 'Foto spostata',
+    'photos.move.error': 'Impossibile spostare la foto',
+    'photos.setcover.success': 'Copertina dell\'album impostata',
+    'photos.setcover.error': 'Impossibile impostare la copertina',
+    'photos.comments.loading': 'Caricamento dei commenti…',
+    'photos.comments.empty': 'Nessun commento per ora. Sii il primo!',
+    'photos.comment.placeholder': 'Scrivi un commento… Usa @ per menzionare qualcuno',
 };

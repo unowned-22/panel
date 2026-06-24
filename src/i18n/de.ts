@@ -2,6 +2,7 @@ import type { TranslationDictionary } from './types';
 
 export const de: TranslationDictionary = {
     'name': 'Unowned',
+    'errors.error': 'Fehler',
     'sidebar.profile': 'Profil',
     'sidebar.feed': 'Feed',
     'sidebar.messenger': 'Messenger',
@@ -234,4 +235,23 @@ export const de: TranslationDictionary = {
     'page.friends.action.add': 'Hinzufügen',
     'page.friends.sidebar.title': 'Meine Freunde',
     'page.friends.sidebar.find': 'Freunde suchen',
+
+    // ── Photos module ───────────────────────────────
+    'page.photos.title': 'Meine Fotos',
+    'photos.album.create.success': 'Album erstellt',
+    'photos.album.create.error': 'Album konnte nicht erstellt werden',
+    'photos.album.updated': 'Album aktualisiert',
+    'photos.album.delete.confirm': 'Album löschen? Diese Aktion kann nicht rückgängig gemacht werden.',
+    'photos.album.delete.success': 'Album gelöscht',
+    'photos.album.delete.error': 'Album konnte nicht gelöscht werden',
+    'photos.delete.confirm': 'Foto löschen?',
+    'photos.delete.success': 'Foto gelöscht',
+    'photos.delete.error': 'Foto konnte nicht gelöscht werden',
+    'photos.move.success': 'Foto verschoben',
+    'photos.move.error': 'Foto konnte nicht verschoben werden',
+    'photos.setcover.success': 'Albumcover festgelegt',
+    'photos.setcover.error': 'Cover konnte nicht festgelegt werden',
+    'photos.comments.loading': 'Kommentare werden geladen…',
+    'photos.comments.empty': 'Noch keine Kommentare. Seien Sie der Erste!',
+    'photos.comment.placeholder': 'Kommentar schreiben… Verwenden Sie @, um jemanden zu erwähnen',
 };

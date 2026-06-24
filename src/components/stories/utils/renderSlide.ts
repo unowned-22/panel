@@ -6,7 +6,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
         const img = new Image();
         img.crossOrigin = "anonymous";
         img.onload = () => res(img);
-        img.onerror = (e) => rej(new Error("failed to load image: " + src));
+        img.onerror = () => rej(new Error("failed to load image: " + src));
         img.src = src;
     });
 }

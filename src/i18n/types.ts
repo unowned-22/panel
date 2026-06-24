@@ -2,6 +2,7 @@ export type Language = 'en' | 'ua' | 'it' | 'es' | 'fr' | 'de' | 'ru';
 
 export interface TranslationDictionary {
     'name': string;
+    'errors.error': string;
     'sidebar.profile': string;
     'sidebar.feed': string;
     'sidebar.messenger': string;
@@ -236,4 +237,22 @@ export interface TranslationDictionary {
     'page.friends.action.add': string;
     'page.friends.sidebar.title': string;
     'page.friends.sidebar.find': string;
+    // ── Photos module ───────────────────────────────────────────────────────
+    'page.photos.title': string;
+    'photos.album.create.success': string;
+    'photos.album.create.error': string;
+    'photos.album.updated': string;
+    'photos.album.delete.confirm': string;
+    'photos.album.delete.success': string;
+    'photos.album.delete.error': string;
+    'photos.delete.confirm': string;
+    'photos.delete.success': string;
+    'photos.delete.error': string;
+    'photos.move.success': string;
+    'photos.move.error': string;
+    'photos.setcover.success': string;
+    'photos.setcover.error': string;
+    'photos.comments.loading': string;
+    'photos.comments.empty': string;
+    'photos.comment.placeholder': string;
 }

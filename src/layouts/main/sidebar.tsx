@@ -7,6 +7,7 @@ import {
 import { SidebarNavItem } from "./sidebar-nav-item";
 import type { NavItemKey } from "@/context/settings-context";
 import type { TranslationDictionary } from "@/i18n/types";
+import { useFriendRequests } from "@/hooks/use-friend-requests";
 
 const ICON_MAP: Record<NavItemKey, LucideIcon> = {
     profile:   User,
@@ -81,6 +82,7 @@ interface SidebarProps {
 }
 
 export const Sidebar = ({ visible }: SidebarProps) => {
+    const { pendingCount } = useFriendRequests();
     const items = ORDERED_KEYS.filter((k) => visible.has(k));
 
     const groups: NavItemKey[][] = [];
@@ -107,6 +109,7 @@ export const Sidebar = ({ visible }: SidebarProps) => {
                                 label={LABEL_KEY[key]}
                                 icon={ICON_MAP[key]}
                                 dot={key === "games"}
+                                badge={key === "friends" ? pendingCount : undefined}
                             />
                         ))}
                     </nav>

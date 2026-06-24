@@ -6,6 +6,7 @@ export interface NavItem {
     label: keyof TranslationDictionary;
     icon: LucideIcon;
     dot?: boolean;
+    badge?: number;
 }
 
 export type NavConfig = NavItem[];
