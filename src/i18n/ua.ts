@@ -2,6 +2,7 @@ import type { TranslationDictionary } from './types';
 
 export const ua: TranslationDictionary = {
     'name': 'Unowned',
+    'errors.error': 'Помилка',
     'sidebar.profile': 'Профіль',
     'sidebar.feed': 'Стрічка',
     'sidebar.messenger': 'Месенджер',
@@ -234,4 +235,23 @@ export const ua: TranslationDictionary = {
     'page.friends.action.add': 'Додати',
     'page.friends.sidebar.title': 'Мої друзі',
     'page.friends.sidebar.find': 'Пошук друзів',
+
+    // ── Photos module  ───────────────────────────────
+    'page.photos.title': 'Мої фотографії',
+    'photos.album.create.success': 'Альбом створено',
+    'photos.album.create.error': 'Не вдалося створити альбом',
+    'photos.album.updated': 'Альбом оновлено',
+    'photos.album.delete.confirm': 'Видалити альбом? Цю дію неможливо скасувати.',
+    'photos.album.delete.success': 'Альбом видалено',
+    'photos.album.delete.error': 'Не вдалося видалити альбом',
+    'photos.delete.confirm': 'Видалити фото?',
+    'photos.delete.success': 'Фото видалено',
+    'photos.delete.error': 'Не вдалося видалити фото',
+    'photos.move.success': 'Фото переміщено',
+    'photos.move.error': 'Не вдалося перемістити фото',
+    'photos.setcover.success': 'Обкладинку альбому встановлено',
+    'photos.setcover.error': 'Не вдалося встановити обкладинку',
+    'photos.comments.loading': 'Завантаження коментарів…',
+    'photos.comments.empty': 'Коментарів поки немає. Будьте першим!',
+    'photos.comment.placeholder': 'Напишіть коментар… Використовуйте @ для згадки користувача',
 };

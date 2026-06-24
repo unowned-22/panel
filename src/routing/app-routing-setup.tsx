@@ -11,6 +11,7 @@ import FeedPage from "@/me/pages/feed";
 import Notification from "@/me/pages/notification";
 import ProfilePage from "@/profile/pages/profile";
 import Friends from "@/me/pages/friends";
+import Photos from "@/me/pages/photos";
 
 export function AppRoutingSetup() {
     return (
@@ -24,6 +25,7 @@ export function AppRoutingSetup() {
                     <Route path="/me/feed" element={<FeedPage />} />
                     <Route path="/me/notifications" element={<Notification />} />
                     <Route path="/me/friends" element={<Friends />} />
+                    <Route path="/me/photos" element={<Photos />} />
                     <Route path="/profile/:username" element={<ProfilePage />} />
                 </Route>
             </Route>

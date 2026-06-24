@@ -2,6 +2,7 @@ import type { TranslationDictionary } from './types';
 
 export const ru: TranslationDictionary = {
     'name': 'Unowned',
+    'errors.error': 'Ошибка',
     'sidebar.profile': 'Профиль',
     'sidebar.feed': 'Лента',
     'sidebar.messenger': 'Мессенджер',
@@ -234,4 +235,23 @@ export const ru: TranslationDictionary = {
     'page.friends.action.add': 'Добавить',
     'page.friends.sidebar.title': 'Мои друзья',
     'page.friends.sidebar.find': 'Поиск друзей',
+
+    // ── Photos module ───────────────────────────────────────────────────────
+    'page.photos.title': 'Мои фотографии',
+    'photos.album.create.success': 'Альбом создан',
+    'photos.album.create.error': 'Не удалось создать альбом',
+    'photos.album.updated': 'Альбом обновлён',
+    'photos.album.delete.confirm': 'Удалить альбом? Это действие необратимо.',
+    'photos.album.delete.success': 'Альбом удалён',
+    'photos.album.delete.error': 'Не удалось удалить альбом',
+    'photos.delete.confirm': 'Удалить фото?',
+    'photos.delete.success': 'Фото удалено',
+    'photos.delete.error': 'Не удалось удалить фото',
+    'photos.move.success': 'Фото перемещено',
+    'photos.move.error': 'Не удалось переместить фото',
+    'photos.setcover.success': 'Установлена обложка альбома',
+    'photos.setcover.error': 'Не удалось установить обложку',
+    'photos.comments.loading': 'Загрузка комментариев…',
+    'photos.comments.empty': 'Пока нет комментариев. Будьте первым!',
+    'photos.comment.placeholder': 'Написать комментарий…  Используйте @ для упоминания',
 };

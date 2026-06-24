@@ -2,6 +2,7 @@ import type { TranslationDictionary } from './types';
 
 export const en: TranslationDictionary = {
     'name': 'Unowned',
+    'errors.error': 'Error',
     'sidebar.profile': 'Profile',
     'sidebar.feed': 'Feed',
     'sidebar.messenger': 'Messenger',
@@ -234,4 +235,22 @@ export const en: TranslationDictionary = {
     'page.friends.action.add': 'Add',
     'page.friends.sidebar.title': 'My friends',
     'page.friends.sidebar.find': 'Find friends',
+    // ── Photos module ───────────────────────────────────────────────────────
+    'page.photos.title': 'My photos',
+    'photos.album.create.success': 'Album created',
+    'photos.album.create.error': 'Failed to create album',
+    'photos.album.updated': 'Album updated',
+    'photos.album.delete.confirm': 'Delete album? This action is irreversible.',
+    'photos.album.delete.success': 'Album deleted',
+    'photos.album.delete.error': 'Failed to delete album',
+    'photos.delete.confirm': 'Delete photo?',
+    'photos.delete.success': 'Photo deleted',
+    'photos.delete.error': 'Failed to delete photo',
+    'photos.move.success': 'Photo moved',
+    'photos.move.error': 'Failed to move photo',
+    'photos.setcover.success': 'Album cover set',
+    'photos.setcover.error': 'Failed to set album cover',
+    'photos.comments.loading': 'Loading comments…',
+    'photos.comments.empty': 'No comments yet. Be the first!',
+    'photos.comment.placeholder': 'Write a comment… Use @ to mention',
 };

@@ -33,6 +33,10 @@ export function typeToSection(type: string): SectionKey {
         case 'story_like':
         case 'story_comment':
         case 'story_reply':
+        case 'photo_liked':
+        case 'photo_commented':
+        case 'comment_replied':
+        case 'comment_liked':
             return 'feedback';
         case 'mention':
         case 'message':
