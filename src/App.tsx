@@ -16,7 +16,7 @@ import { queryClient } from '@/lib/query-client';
 
 import { RepostsProvider } from "@/components/feed/RepostsContext.tsx";
 import { PlayerProvider } from "@/components/PlayerContext.tsx";
-import { MessengerProvider } from "@/components/MessengerContext.tsx";
+import { MessengerProvider } from "@/provider/messenger-provider";
 
 const { BASE_URL } = import.meta.env;
 

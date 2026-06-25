@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useMessenger } from "../MessengerContext";
+import { useMessenger } from "@/hooks/use-messenger";
 
 type Kind = "group" | "private";
 

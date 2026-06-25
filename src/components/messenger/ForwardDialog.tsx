@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useMessenger } from "../MessengerContext";
+import { useMessenger } from "@/hooks/use-messenger";
 import { Check, Search } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 

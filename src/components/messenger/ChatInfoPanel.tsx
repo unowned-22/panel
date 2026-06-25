@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { BellOff, FileText, Image as ImageIcon, LogOut, Star, UserPlus, X, Download } from "lucide-react";
-import { useMessenger } from "../MessengerContext";
+import { useMessenger } from "@/hooks/use-messenger";
 
 interface ChatInfoPanelProps {
   chatId: string;

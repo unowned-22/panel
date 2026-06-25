@@ -1,5 +1,5 @@
 import { FileText, Download } from "lucide-react";
-import type { MessageFile } from "../MessengerContext";
+import type { MessageFile } from "@/context/messenger-context";
 
 const formatSize = (b: number) => {
   if (b < 1024) return `${b} Б`;
