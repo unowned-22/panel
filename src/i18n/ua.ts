@@ -238,12 +238,14 @@ export const ua: TranslationDictionary = {
 
     // ── Photos module  ───────────────────────────────
     'page.photos.title': 'Мої фотографії',
+    'page.photos.photos': 'Фото',
     'photos.album.create.success': 'Альбом створено',
     'photos.album.create.error': 'Не вдалося створити альбом',
     'photos.album.updated': 'Альбом оновлено',
     'photos.album.delete.confirm': 'Видалити альбом? Цю дію неможливо скасувати.',
     'photos.album.delete.success': 'Альбом видалено',
     'photos.album.delete.error': 'Не вдалося видалити альбом',
+    'photos.album.loading': 'Завантаження альбому…',
     'photos.delete.confirm': 'Видалити фото?',
     'photos.delete.success': 'Фото видалено',
     'photos.delete.error': 'Не вдалося видалити фото',

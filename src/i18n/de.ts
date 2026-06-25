@@ -238,12 +238,14 @@ export const de: TranslationDictionary = {
 
     // ── Photos module ───────────────────────────────
     'page.photos.title': 'Meine Fotos',
+    'page.photos.photos': 'Fotos',
     'photos.album.create.success': 'Album erstellt',
     'photos.album.create.error': 'Album konnte nicht erstellt werden',
     'photos.album.updated': 'Album aktualisiert',
     'photos.album.delete.confirm': 'Album löschen? Diese Aktion kann nicht rückgängig gemacht werden.',
     'photos.album.delete.success': 'Album gelöscht',
     'photos.album.delete.error': 'Album konnte nicht gelöscht werden',
+    'photos.album.loading': 'Album wird geladen…',
     'photos.delete.confirm': 'Foto löschen?',
     'photos.delete.success': 'Foto gelöscht',
     'photos.delete.error': 'Foto konnte nicht gelöscht werden',

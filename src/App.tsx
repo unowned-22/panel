@@ -14,6 +14,10 @@ import { StoriesProvider } from "@/provider/stories-provider";
 import { TooltipsProvider } from "@/provider/tooltips-provider";
 import { queryClient } from '@/lib/query-client';
 
+import { RepostsProvider } from "@/components/feed/RepostsContext.tsx";
+import { PlayerProvider } from "@/components/PlayerContext.tsx";
+import { MessengerProvider } from "@/components/MessengerContext.tsx";
+
 const { BASE_URL } = import.meta.env;
 
 function App() {
@@ -24,19 +28,25 @@ function App() {
                   <HelmetProvider>
                       <LoadingBarContainer>
                           <NotificationsProvider>
-                              <FriendRequestsProvider>
-                                  <SettingsProvider>
-                                      <AccountProvider>
-                                          <StoriesProvider>
-                                              <Toaster />
-                                              <Sonner />
-                                              <BrowserRouter basename={BASE_URL}>
-                                                  <AppRouting />
-                                              </BrowserRouter>
-                                          </StoriesProvider>
-                                      </AccountProvider>
-                                  </SettingsProvider>
-                              </FriendRequestsProvider>
+                              <RepostsProvider>
+                                  <FriendRequestsProvider>
+                                      <SettingsProvider>
+                                          <PlayerProvider>
+                                              <MessengerProvider>
+                                                  <AccountProvider>
+                                                      <StoriesProvider>
+                                                          <Toaster />
+                                                          <Sonner />
+                                                          <BrowserRouter basename={BASE_URL}>
+                                                              <AppRouting />
+                                                          </BrowserRouter>
+                                                      </StoriesProvider>
+                                                  </AccountProvider>
+                                              </MessengerProvider>
+                                          </PlayerProvider>
+                                      </SettingsProvider>
+                                  </FriendRequestsProvider>
+                              </RepostsProvider>
                           </NotificationsProvider>
                       </LoadingBarContainer>
                   </HelmetProvider>

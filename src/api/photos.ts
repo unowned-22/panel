@@ -55,7 +55,6 @@ export interface PaginatedResponse<T> {
 }
 
 export const photosApi = {
-    // Upload using XMLHttpRequest to provide progress events
     async uploadPhoto(file: File, onProgress?: (percent: number) => void, albumId?: number | null): Promise<Photo> {
         const base = import.meta.env.VITE_API_URL ?? '';
         const url = `${base.replace(/\/$/, '')}/photos`;
@@ -97,10 +96,6 @@ export const photosApi = {
 
     async listMyPhotos(page = 1, limit = 24): Promise<PaginatedResponse<Photo>> {
         const res = await apiClient.get<any>(`/photos?page=${page}&limit=${limit}`);
-        // support multiple response shapes:
-        // 1) { data: { data: Photo[], page, limit, total } }
-        // 2) { data: Photo[] }
-        // 3) Photo[]
         if (Array.isArray(res)) {
             return { items: res as Photo[], total: (res as Photo[]).length, page, limit };
         }
@@ -268,7 +263,7 @@ export const photosApi = {
 
     async listAlbumPhotos(albumId: number, page = 1, limit = 24): Promise<PaginatedResponse<Photo>> {
         const res = await apiClient.get<any>(`/albums/${albumId}/photos?page=${page}&limit=${limit}`);
-        console.log('[listAlbumPhotos] raw res:', JSON.stringify(res));
+
         if (Array.isArray(res)) return { items: res as Photo[], total: res.length, page, limit };
         const maybeData = res?.data ?? res;
         if (Array.isArray(maybeData)) return { items: maybeData as Photo[], total: maybeData.length, page, limit };

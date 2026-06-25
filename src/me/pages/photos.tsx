@@ -153,7 +153,7 @@ const Photos = () => {
 
                 <div className="panel-card p-5">
                     {openAlbumId && !openAlbumResolved ? (
-                        <div className="text-sm text-muted-foreground text-center py-20">Загрузка альбома…</div>
+                        <div className="text-sm text-muted-foreground text-center py-20">{t('photos.album.loading')}</div>
                     ) : openAlbumResolved ? (
                         <AlbumView
                             album={openAlbumResolved}
@@ -177,7 +177,7 @@ const Photos = () => {
                                             tab === "photos" ? "bg-secondary" : "bg-transparent text-muted-foreground",
                                         )}
                                     >
-                                        Фото
+                                        {t('page.photos.photos')}
                                     </button>
                                     <button
                                         onClick={() => setTab("albums")}

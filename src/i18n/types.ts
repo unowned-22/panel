@@ -239,12 +239,14 @@ export interface TranslationDictionary {
     'page.friends.sidebar.find': string;
     // ── Photos module ───────────────────────────────────────────────────────
     'page.photos.title': string;
+    'page.photos.photos': string;
     'photos.album.create.success': string;
     'photos.album.create.error': string;
     'photos.album.updated': string;
     'photos.album.delete.confirm': string;
     'photos.album.delete.success': string;
     'photos.album.delete.error': string;
+    'photos.album.loading': string;
     'photos.delete.confirm': string;
     'photos.delete.success': string;
     'photos.delete.error': string;

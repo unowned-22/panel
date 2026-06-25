@@ -12,15 +12,6 @@ export function usePhotoComments(photoId: number | null, page = 1, limit = 50) {
         enabled: !!photoId,
     });
 
-    if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.DEV) {
-        try {
-            console.debug('usePhotoComments query key:', JSON.stringify(key));
-            console.debug('usePhotoComments data snapshot:', JSON.stringify(query.data));
-        } catch (e) {
-            console.debug('usePhotoComments (raw):', { key, data: query.data });
-        }
-    }
-
     const addMutation = useMutation<Comment, Error, { body: string; parent_id?: number | null }, { prev?: PaginatedResponse<Comment> }>({
         mutationFn: async (payload) => {
             if (!photoId) throw new Error('photoId required');
