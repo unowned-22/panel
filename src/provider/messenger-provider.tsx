@@ -154,14 +154,13 @@ interface WsPresencePayload {
     last_seen_at?: string | null;
 }
 
-// ─── Provider ─────────────────────────────────────────────────────────────────
-
 export const MessengerProvider = ({ children }: { children: ReactNode }) => {
     const user = useAuthStore(s => s.user);
     const activeAccountId = useAuthStore(s => s.activeAccountId);
     const myID = user?.id ? Number(user.id) : 0;
     const { subscribe } = useSocket();
 
+    const [activeChatId, setActiveChatId] = useState<string | null>(null);
     const [contacts, setContacts] = useState<ChatContact[]>([]);
     const [messages, setMessages] = useState<Record<string, Message[]>>({});
     const [typing] = useState<Set<string>>(new Set());
@@ -170,7 +169,26 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
     const loadedConvs = useRef<Set<string>>(new Set());
     const mountedRef = useRef(true);
 
-    // ── Load conversations ────────────────────────────────────────────────────
+    const setActiveChat = useCallback((chatId: string | null) => {
+        setActiveChatId(chatId);
+    }, []);
+
+    useEffect(() => {
+        if (!activeChatId) return;
+
+        const messagesInChat = messages[activeChatId] ?? [];
+        const lastMessage = messagesInChat[messagesInChat.length - 1];
+
+        if (lastMessage) {
+            messengerApi.markRead(Number(activeChatId), Number(lastMessage.id))
+                .then(() => {
+                    setContacts(prev => prev.map(c =>
+                        c.id === activeChatId ? { ...c, unread: undefined, read: true } : c
+                    ));
+                })
+                .catch(err => console.error('[messenger] failed to mark read', err));
+        }
+    }, [activeChatId, messages]);
 
     const loadConversations = useCallback(async () => {
         try {
@@ -181,8 +199,6 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
             console.error('[messenger] failed to load conversations', err);
         }
     }, [myID]);
-
-    // ── Load messages for a conversation ─────────────────────────────────────
 
     const loadMessages = useCallback(async (chatId: string) => {
         if (loadedConvs.current.has(chatId)) return;
@@ -213,18 +229,28 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [myID, activeAccountId]);
 
-    // ── Realtime: подписки на нужные типы фреймов через общий сокет ──────────
-
     useEffect(() => {
         const unsubs = [
             subscribe<WsMsgPayload>('messenger.message_sent', (p) => {
                 const chatId = String(p.conversation_id);
                 const newMsg = mapMessage(p.message, myID);
 
-                setMessages(prev => ({
-                    ...prev,
-                    [chatId]: [...(prev[chatId] ?? []), newMsg],
-                }));
+                setMessages(prev => {
+                    const list = prev[chatId] ?? [];
+                    const exists = list.some(m => m.id === newMsg.id);
+
+                    if (exists) {
+                        return {
+                            ...prev,
+                            [chatId]: list.map(m => m.id === newMsg.id ? newMsg : m)
+                        }
+                    }
+
+                    return {
+                        ...prev,
+                        [chatId]: [...list, newMsg],
+                    }
+                });
 
                 setContacts(prev => prev.map(c => {
                     if (c.id !== chatId) return c;
@@ -489,6 +515,8 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
         messages,
         typing,
         availableMembers,
+        activeChatId,
+        setActiveChat,
         sendMessage,
         sendPayload,
         pinMessage,
@@ -501,8 +529,8 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
         getPinnedFromChat,
         ensureLoaded,
     }), [
-        contacts, messages, typing, availableMembers,
-        sendMessage, sendPayload, pinMessage, forwardMessage, deleteMessage,
+        contacts, messages, typing, availableMembers, activeChatId,
+        sendMessage, sendPayload, pinMessage, forwardMessage, deleteMessage, setActiveChat,
         createChat, getMembers, getMediaFromChat, getFilesFromChat, getPinnedFromChat,
         ensureLoaded,
     ]);

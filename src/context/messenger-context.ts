@@ -73,6 +73,8 @@ export interface Ctx {
     messages: Record<string, Message[]>;
     typing: Set<string>;
     availableMembers: AvailableMember[];
+    activeChatId: string | null;
+    setActiveChat: (chatId: string | null) => void;
     sendMessage: (chatId: string, text: string, replyTo?: { senderName: string; text: string }) => void;
     sendPayload: (chatId: string, payload: SendPayload) => void;
     pinMessage: (chatId: string, messageId: string) => void;
