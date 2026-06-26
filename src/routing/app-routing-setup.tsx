@@ -12,6 +12,23 @@ import Notification from "@/me/pages/notification";
 import ProfilePage from "@/profile/pages/profile";
 import Friends from "@/me/pages/friends";
 import Photos from "@/me/pages/photos";
+import Calls from "@/me/pages/calls";
+import Video from "@/me/pages/video";
+import Groups from "@/me/pages/groups";
+import Messenger from "@/me/pages/messenger";
+import Analytics from "@/me/pages/analytics";
+import Bookmarks from "@/me/pages/bookmarks";
+import Stickers from "@/me/pages/stickers";
+import Services from "@/me/pages/services";
+import Clips from "@/me/pages/clips";
+import Games from "@/me/pages/games";
+import Market from "@/me/pages/market";
+import Music from "@/me/pages/music";
+import Search from "@/me/pages/search";
+import Feed from "@/me/pages/me/feed";
+import SettingsPage from "@/me/pages/me/settings";
+import Profile from "@/me/pages/me/profile";
+import UserProfile from "@/me/pages/user-profile";
 
 export function AppRoutingSetup() {
     return (
@@ -23,10 +40,28 @@ export function AppRoutingSetup() {
                     <Route path="/me/account" element={<Account />} />
                     <Route path="/me/login" element={<AddAccountPage />} />
                     <Route path="/me/feed" element={<FeedPage />} />
+                    <Route path="/me/games" element={<Games />} />
+                    <Route path="/me/market" element={<Market />} />
+                    <Route path="/me/music" element={<Music />} />
                     <Route path="/me/notifications" element={<Notification />} />
                     <Route path="/me/friends" element={<Friends />} />
                     <Route path="/me/photos" element={<Photos />} />
+                    <Route path="/me/calls" element={<Calls />} />
+                    <Route path="/me/video" element={<Video />} />
+                    <Route path="/me/groups" element={<Groups />} />
+                    <Route path="/me/analytics" element={<Analytics />} />
+                    <Route path="/me/messenger" element={<Messenger />} />
+                    <Route path="/me/messenger/:username" element={<Messenger />} />
+                    <Route path="/me/bookmarks" element={<Bookmarks />} />
+                    <Route path="/me/stickers" element={<Stickers />} />
+                    <Route path="/me/services" element={<Services />} />
+                    <Route path="/me/clips" element={<Clips />} />
+                    <Route path="/me/search" element={<Search />} />
                     <Route path="/profile/:username" element={<ProfilePage />} />
+                    <Route path="/user-profile/:id" element={<UserProfile />} />
+                    <Route path="/user/feed" element={<Feed />} />
+                    <Route path="/user/profile" element={<Profile />} />
+                    <Route path="/user/settings" element={<SettingsPage />} />
                 </Route>
             </Route>
             <Route path="error/*" element={<ErrorRouting />} />

@@ -75,7 +75,7 @@ export function useAlbumPhotos(albumId: number | null, page = 1, limit = 24) {
     const qc = useQueryClient();
     const key = ['albumPhotos', albumId, page, limit] as const;
     const query = useQuery<PaginatedResponse<Photo>, Error>({ queryKey: key, queryFn: () => (albumId ? photosApi.listAlbumPhotos(albumId, page, limit) : Promise.resolve({ items: [], total: 0, page, limit })), enabled: !!albumId });
-    console.log('[useAlbumPhotos] albumId:', albumId, 'data:', query.data, 'isLoading:', query.isLoading, 'error:', query.error);
+
     const likeMutation = useMutation<void, Error, { id: number; liked: boolean }>({
         mutationFn: async ({ id, liked }) => {
             if (liked) return photosApi.unlikePhoto(id);

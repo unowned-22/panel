@@ -281,11 +281,17 @@ const ProfilePage = () => {
                             : <button className="button-pill rounded-lg px-5 flex items-center gap-2">
                                 <UserPlus className="w-4 h-4" />
                                 {t('page.profile.add.friend')}
-                              </button>
+                            </button>
                         }
-                        <Link to="/me/messenger" className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary hover:bg-accent" aria-label={t('sidebar.messenger')}>
-                            <MessageCircle className="h-5 w-5" />
-                        </Link>
+                        {profile?.username && !(currentUser?.username === profile?.username) && (
+                            <Link
+                                to={`/me/messenger/${profile.username}`}
+                                className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary hover:bg-accent"
+                                aria-label={t('sidebar.messenger')}
+                            >
+                                <MessageCircle className="h-5 w-5" />
+                            </Link>
+                        )}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <button className="button-pill gap-2 rounded-lg px-4">

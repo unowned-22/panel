@@ -1,6 +1,9 @@
-import { ChevronDown, LogOut, Settings, Trash2, CheckCircle2, Users, Bell, MoreHorizontal, CheckCheck, Check } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useCallback, useState } from "react";
+import {
+    ChevronDown, LogOut, Settings, Trash2, CheckCircle2, Users, Bell, MoreHorizontal, CheckCheck,
+    Check, Search, Music, Video, UsersRound, Newspaper, UserIcon
+} from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { useCallback, useState, useRef } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
     DropdownMenu,
@@ -21,6 +24,35 @@ import { useTranslation } from '@/hooks/use-translation';
 import { authActions } from '@/auth/auth-actions';
 import { useNotifications } from "@/hooks/use-notification";
 import { notificationMeta, formatRelativeTime } from "@/lib/notification-meta";
+import { PlayerPopover } from "@/components/player/PlayerPopover";
+
+export type SearchEntry = {
+    id: string;
+    type: "people" | "group" | "post" | "music" | "video";
+    title: string;
+    subtitle?: string;
+    href: string;
+};
+
+export const SEARCH_INDEX: SearchEntry[] = [
+    { id: "p1", type: "people", title: "Анна Соколова", subtitle: "Москва", href: "/friends" },
+    { id: "p2", type: "people", title: "Иван Петров", subtitle: "Санкт-Петербург", href: "/friends" },
+    { id: "p3", type: "people", title: "Мария Кузнецова", subtitle: "Казань", href: "/friends" },
+    { id: "p4", type: "people", title: "Дмитрий Орлов", subtitle: "Новосибирск", href: "/friends" },
+    { id: "g1", type: "group", title: "Лепра", subtitle: "1.2M подписчиков", href: "/groups" },
+    { id: "g2", type: "group", title: "MDK", subtitle: "8.5M подписчиков", href: "/groups" },
+    { id: "g3", type: "group", title: "Лентач", subtitle: "2.1M подписчиков", href: "/groups" },
+    { id: "po1", type: "post", title: "Лучшие места Москвы летом", href: "/feed" },
+    { id: "po2", type: "post", title: "Подборка фильмов на выходные", href: "/feed" },
+    { id: "m1", type: "music", title: "Земфира — Хочешь", href: "/music" },
+    { id: "m2", type: "music", title: "Король и Шут — Лесник", href: "/music" },
+    { id: "v1", type: "video", title: "Обзор нового VK", href: "/video" },
+    { id: "v2", type: "video", title: "Топ-10 клипов 2026", href: "/clips" },
+];
+
+const TYPE_ICONS: Record<SearchEntry["type"], any> = {
+    people: UserIcon, group: UsersRound, post: Newspaper, music: Music, video: Video,
+};
 
 const LANGUAGE_OPTIONS: { code: Language; flag: string; label: string }[] = [
     { code: 'en', flag: toAbsoluteUrl('/flags/united-states.svg'), label: 'English' },
@@ -40,6 +72,22 @@ export const TopBar = () => {
     const currentLang = LANGUAGE_OPTIONS.find(l => l.code === language);
     const avatar = activeAccount.user?.avatar_url ?? null;
 
+    const navigate = useNavigate();
+
+    const [query, setQuery] = useState("");
+    const [openSearch, setOpenSearch] = useState(false);
+    const [searchLoading, setSearchLoading] = useState(false);
+    const [searchError, setSearchError] = useState<string | null>(null);
+    const [suggestions, setSuggestions] = useState<SearchEntry[]>([]);
+    const searchRef = useRef<HTMLDivElement>(null);
+
+    const submitSearch = (q: string) => {
+        const value = q.trim();
+        if (!value) return;
+        setOpenSearch(false);
+        navigate(`/me/search?q=${encodeURIComponent(value)}`);
+    };
+
     const handleLanguageChange = useCallback((langCode: string) => {
         setLanguage(langCode as Language);
     }, [setLanguage]);
@@ -50,7 +98,6 @@ export const TopBar = () => {
         await authActions.logout();
     }, [isLoggingOut]);
 
-    // Last 5 notifications for the popup
     const popupItems = notifications.slice(0, 5);
 
     const isItemRead = (id: number) =>
@@ -63,7 +110,93 @@ export const TopBar = () => {
                     <img src={toAbsoluteUrl('/unowned-d.png')} className="max-h-40" alt="unowned" />
                 </Link>
 
-                {/* ── Bell popover ─────────────────────────────────────── */}
+                <div ref={searchRef} className="flex-1 max-w-105 relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input
+                        type="text"
+                        placeholder="Поиск"
+                        value={query}
+                        onChange={(e) => { setQuery(e.target.value); setOpenSearch(true); }}
+                        onFocus={() => setOpenSearch(true)}
+                        onKeyDown={(e) => { if (e.key === "Enter") submitSearch(query); }}
+                        className="w-full h-10 pl-9 pr-3 rounded-full bg-secondary text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    />
+                    {openSearch && query.trim().length >= 2 && (
+                        <div className="absolute left-0 right-0 top-12 z-50 rounded-xl border border-border bg-popover shadow-elevated overflow-hidden">
+                            {searchLoading && (
+                                <div className="py-3 px-3 space-y-2">
+                                    {Array.from({ length: 4 }).map((_, i) => (
+                                        <div key={i} className="flex items-center gap-3">
+                                            <div className="h-8 w-8 rounded-full bg-muted animate-pulse shrink-0" />
+                                            <div className="min-w-0 flex-1 space-y-1.5">
+                                                <div className="h-3.5 w-1/2 rounded bg-muted animate-pulse" />
+                                                <div className="h-3 w-1/3 rounded bg-muted animate-pulse" />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {!searchLoading && searchError && (
+                                <div className="px-4 py-6 text-center">
+                                    <p className="text-sm text-destructive mb-2">{searchError}</p>
+                                    <button
+                                        onClick={() => {
+                                            setSearchError(null);
+                                            setSearchLoading(true);
+                                            setTimeout(() => {
+                                                const q = query.trim().toLowerCase();
+                                                setSuggestions(
+                                                    SEARCH_INDEX
+                                                        .filter((e) => e.title.toLowerCase().includes(q) || e.subtitle?.toLowerCase().includes(q))
+                                                        .slice(0, 8)
+                                                );
+                                                setSearchLoading(false);
+                                            }, 500);
+                                        }}
+                                        className="text-sm font-medium text-primary hover:underline"
+                                    >
+                                        Повторить
+                                    </button>
+                                </div>
+                            )}
+
+                            {!searchLoading && !searchError && suggestions.length === 0 && (
+                                <div className="px-4 py-6 text-center text-sm text-muted-foreground">Ничего не найдено</div>
+                            )}
+
+                            {!searchLoading && !searchError && suggestions.length > 0 && (
+                                <div className="py-1 max-h-90 overflow-y-auto">
+                                    {suggestions.map((s) => {
+                                        const Icon = TYPE_ICONS[s.type];
+                                        return (
+                                            <button
+                                                key={s.id}
+                                                onClick={() => submitSearch(s.title)}
+                                                className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-secondary/60"
+                                            >
+                                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary shrink-0">
+                                                    <Icon className="h-4 w-4 text-foreground/70" />
+                                                </div>
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="truncate text-sm">{s.title}</div>
+                                                    {s.subtitle && <div className="truncate text-xs text-muted-foreground">{s.subtitle}</div>}
+                                                </div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                            <button
+                                onClick={() => submitSearch(query)}
+                                className="block w-full border-t border-border py-2.5 text-center text-sm font-medium text-primary hover:bg-secondary/50"
+                            >
+                                Показать все результаты
+                            </button>
+                        </div>
+                    )}
+                </div>
+
                 <Popover>
                     <PopoverTrigger asChild>
                         <button className="relative w-10 h-10 rounded-full hover:bg-secondary flex items-center justify-center transition-colors">
@@ -173,7 +306,8 @@ export const TopBar = () => {
                     </PopoverContent>
                 </Popover>
 
-                {/* ── Account dropdown (unchanged) ─────────────────────── */}
+                <PlayerPopover />
+
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <button className="ml-auto flex items-center gap-1.5 hover:bg-secondary/60 rounded-full pl-1 pr-2 py-1 transition-colors">
