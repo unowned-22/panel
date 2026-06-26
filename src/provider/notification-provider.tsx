@@ -9,15 +9,9 @@ import {
 import { NotificationsContext, type Ctx } from "@/context/notification-context";
 import { notificationsApi, type ApiNotification } from "@/api/notifications";
 import { useAuthStore } from "@/auth/auth.store";
+import { useSocket } from "@/hooks/use-socket";
 
 const PAGE_LIMIT = 30;
-const WS_RECONNECT_DELAY_MS = 5_000;
-
-function buildWsUrl(token: string): string {
-    const base = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
-    const wsBase = base.replace(/^http/, "ws");
-    return `${wsBase}/ws/notifications?token=${encodeURIComponent(token)}`;
-}
 
 function safeArray<T>(value: unknown): T[] {
     return Array.isArray(value) ? (value as T[]) : [];
@@ -25,7 +19,7 @@ function safeArray<T>(value: unknown): T[] {
 
 export const NotificationsProvider = ({ children }: { children: ReactNode }) => {
     const activeAccountId = useAuthStore((s) => s.activeAccountId);
-    const tokens = useAuthStore((s) => s.tokens);
+    const { subscribe } = useSocket();
 
     const [notifications, setNotifications] = useState<ApiNotification[]>([]);
     const [readIds, setReadIds] = useState<Set<string>>(new Set());
@@ -35,68 +29,28 @@ export const NotificationsProvider = ({ children }: { children: ReactNode }) => 
     const [total, setTotal] = useState(0);
 
     const mountedRef = useRef(true);
-    const wsRef = useRef<WebSocket | null>(null);
-    const wsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const hasMore = notifications.length < total;
 
-    const closeWs = useCallback(() => {
-        if (wsTimerRef.current) clearTimeout(wsTimerRef.current);
-        wsRef.current?.close();
-        wsRef.current = null;
-    }, []);
-
     const reset = useCallback(() => {
-        closeWs();
         setNotifications([]);
         setReadIds(new Set());
         setIsLoading(false);
         setTotalUnread(0);
         setPage(1);
         setTotal(0);
-    }, [closeWs]);
+    }, []);
 
-    // ─── WebSocket ────────────────────────────────────────────────────────────
+    // ─── Realtime: подписка на новые уведомления через общий сокет ──────────
 
-    const connectWs = useCallback((token: string) => {
-        if (!mountedRef.current) return;
-        closeWs();
-
-        let ws: WebSocket;
-        try {
-            ws = new WebSocket(buildWsUrl(token));
-        } catch {
-            return; // protocol or URL error — skip silently
-        }
-
-        wsRef.current = ws;
-
-        ws.onmessage = (evt) => {
-            try {
-                const msg = JSON.parse(evt.data) as { type: string; data: ApiNotification };
-                if (msg.type === "notification" && msg.data) {
-                    if (!mountedRef.current) return;
-                    setNotifications((prev) => [msg.data, ...prev]);
-                    setTotal((t) => t + 1);
-                    setTotalUnread((c) => c + 1);
-                }
-            } catch {
-                // ignore malformed frames
-            }
-        };
-
-        ws.onerror = () => {
-            // Backend may not yet support WS token auth — reconnect silently
-        };
-
-        ws.onclose = (evt) => {
-            if (!mountedRef.current) return;
-            // 1000 = normal close, 1001 = going away — don't reconnect
-            if (evt.code !== 1000 && evt.code !== 1001) {
-                wsTimerRef.current = setTimeout(() => connectWs(token), WS_RECONNECT_DELAY_MS);
-            }
-        };
-    }, [closeWs]);
+    useEffect(() => {
+        return subscribe<ApiNotification>("notification", (data) => {
+            if (!mountedRef.current || !data) return;
+            setNotifications((prev) => [data, ...prev]);
+            setTotal((t) => t + 1);
+            setTotalUnread((c) => c + 1);
+        });
+    }, [subscribe]);
 
     // ─── Load first page + unread count ──────────────────────────────────────
 
@@ -104,12 +58,6 @@ export const NotificationsProvider = ({ children }: { children: ReactNode }) => 
         mountedRef.current = true;
 
         if (!activeAccountId) {
-            reset();
-            return;
-        }
-
-        const token = tokens[activeAccountId]?.access_token;
-        if (!token) {
             reset();
             return;
         }
@@ -134,11 +82,8 @@ export const NotificationsProvider = ({ children }: { children: ReactNode }) => 
                 if (mountedRef.current) setIsLoading(false);
             });
 
-        connectWs(token);
-
         return () => {
             mountedRef.current = false;
-            closeWs();
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activeAccountId]);

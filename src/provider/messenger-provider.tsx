@@ -1,271 +1,515 @@
-import { type ReactNode, useCallback, useMemo, useState } from "react";
-import { MessengerContext } from "@/context/messenger-context";
-import type { AvailableMember, ChatContact, Message, MessageFile, SendPayload, Ctx } from "@/context/messenger-context";
+import {
+    type ReactNode,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
+import { MessengerContext } from '@/context/messenger-context';
+import type {
+    AvailableMember,
+    ChatContact,
+    CreateChatInput,
+    Ctx,
+    Message,
+    MessageFile,
+} from '@/context/messenger-context';
+import { messengerApi, type ApiConversation, type ApiMessage } from '@/api/messenger';
+import { useAuthStore } from '@/auth/auth.store';
+import { useSocket } from '@/hooks/use-socket';
 
-const CURRENT_USER = { id: "self", name: "Вы" };
+// ─── Formatters ───────────────────────────────────────────────────────────────
 
-const nowTime = () =>
-    new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
-
-const initialContacts: ChatContact[] = [
-    { id: "vk", name: "ВКонтакте", preview: "Совершён вход в ваш аккаунт · 1д", time: "", verified: true, isVK: true },
-    { id: "family", name: "❤️ Family chat", preview: "Thanks to all of you 🙌", time: "12:56", unread: 4, read: true, isGroup: true, avatar: "https://i.pravatar.cc/100?img=58" },
-    { id: "leah", name: "Leah Collins", preview: "Do you have any vacation pla…", time: "10:45", online: true, pinned: true, avatar: "https://i.pravatar.cc/100?img=47" },
-    { id: "curry", name: "Curry Club — Ninjas fr…", preview: "Вы: Primavera Sound 2021…", time: "10:48", read: true, pinned: true, isGroup: true, avatar: "https://i.pravatar.cc/100?img=65", memberIds: ["m2", "m3", "m4"] },
-    { id: "mamie", name: "Mamie Cruz", preview: "Do you have any pets? 🐶", time: "16:20", online: true, pinned: true, avatar: "https://i.pravatar.cc/100?img=26" },
-    { id: "telegraf", name: "Telegraf.Design", preview: "You might miss this last week…", time: "18:20", unread: 1, avatar: "https://i.pravatar.cc/100?img=12" },
-    { id: "evan", name: "Evan West", preview: "What do you think the best invent…", time: "17:22", online: true, avatar: "https://i.pravatar.cc/100?img=53" },
-    { id: "nannie", name: "Nannie Watts", preview: "Let's meet around 14:00 near the…", time: "17:11", avatar: "https://i.pravatar.cc/100?img=45" },
-    { id: "vicente", name: "Vicente de la Cruz", preview: "A new font type is awesome, let's…", time: "15:36", read: true, avatar: "https://i.pravatar.cc/100?img=33" },
-    { id: "kari", name: "Kari Granleese", preview: "I need your advice", time: "14:21", avatar: "https://i.pravatar.cc/100?img=32" },
-];
-
-const availableMembersList: AvailableMember[] = [
-    { id: "m2", name: "Alex Djos", avatar: "https://i.pravatar.cc/100?img=11", status: "в сети", online: true },
-    { id: "m3", name: "Michael Borisov", avatar: "https://i.pravatar.cc/100?img=15", status: "был(а) недавно" },
-    { id: "m4", name: "Sofia Lee", avatar: "https://i.pravatar.cc/100?img=23", status: "в сети", online: true },
-    { id: "leah", name: "Leah Collins", avatar: "https://i.pravatar.cc/100?img=47", status: "в сети", online: true },
-    { id: "mamie", name: "Mamie Cruz", avatar: "https://i.pravatar.cc/100?img=26", status: "в сети", online: true },
-    { id: "evan", name: "Evan West", avatar: "https://i.pravatar.cc/100?img=53", status: "был(а) 2ч назад" },
-    { id: "nannie", name: "Nannie Watts", avatar: "https://i.pravatar.cc/100?img=45", status: "был(а) вчера" },
-    { id: "vicente", name: "Vicente de la Cruz", avatar: "https://i.pravatar.cc/100?img=33", status: "был(а) недавно" },
-    { id: "kari", name: "Kari Granleese", avatar: "https://i.pravatar.cc/100?img=32", status: "в сети", online: true },
-];
-
-const seedMessages: Record<string, Message[]> = {
-    vk: [
-        {
-            id: "v1", senderId: "vk", senderName: "ВКонтакте",
-            text: "Для вашей страницы запрошено восстановление доступа. Никому не сообщайте номер телефона, с которого поступит проверочный звонок!",
-            time: "18:40", date: "29 апреля 2026",
-        },
-        {
-            id: "v2", senderId: "vk", senderName: "ВКонтакте",
-            text: "Совершён вход в ваш аккаунт. Дата входа: 21 апреля 2026 в 14:11. Устройство: Safari. Если это не вы — срочно смените пароль.",
-            time: "14:11", date: "вчера",
-        },
-    ],
-    curry: [
-        {
-            id: "c1", senderId: "m2", senderName: "Alex Djos",
-            text: "Curry Club, ready for the Barcelona trip this summer? Photos from Pukkelpop fest 🙌⛺",
-            time: "10:32", date: "28 ноября 2025",
-            images: [
-                "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=400&h=300&fit=crop",
-                "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400&h=300&fit=crop",
-            ],
-        },
-        {
-            id: "c2", senderId: "m2", senderName: "Alex Djos",
-            text: "Check this out: https://www.youtube.com/watch?v=V6fFHS_ytWw",
-            time: "10:45", date: "28 ноября 2025",
-        },
-        {
-            id: "c3", senderId: "m3", senderName: "Michael Borisov",
-            text: "", time: "10:46", date: "28 ноября 2025",
-            audio: { url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", duration: "0:42" },
-        },
-        {
-            id: "c5", senderId: "m4", senderName: "Sofia Lee",
-            text: "Бронь отеля во вложении 📎", time: "10:47", date: "28 ноября 2025",
-            files: [{ name: "Barcelona_hotel.pdf", size: 248_320, url: "#", mime: "application/pdf" }],
-        },
-        {
-            id: "c4", senderId: "self", senderName: "Вы",
-            text: "Primavera Sound 2021 tickets bought!", time: "10:48", isOwn: true, date: "2 декабря 2025",
-        },
-    ],
+const fmtTime = (iso?: string | null): string => {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 };
 
-const BOT_REPLIES = ["Понял! 👍", "Класс 🔥", "Окей, договорились", "Жду", "Хаха 😄", "Звучит супер 🙌"];
-const BOTS: Record<string, { id: string; name: string }[]> = {
-    curry: [
-        { id: "m2", name: "Alex Djos" },
-        { id: "m3", name: "Michael Borisov" },
-    ],
+const fmtDate = (iso?: string | null): string => {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    const now = new Date();
+    const diff = now.getTime() - d.getTime();
+    const oneDayMs = 86_400_000;
+    if (diff < oneDayMs && d.getDate() === now.getDate()) return '';
+    if (diff < 2 * oneDayMs) return 'вчера';
+    return d.toLocaleDateString('ru', { day: 'numeric', month: 'long', year: 'numeric' });
 };
 
-const previewFromPayload = (p: SendPayload): string => {
-    if (p.text) return `Вы: ${p.text}`;
-    if (p.images?.length) return `Вы: 🖼️ Фото${p.images.length > 1 ? ` (${p.images.length})` : ""}`;
-    if (p.files?.length) return `Вы: 📎 ${p.files[0].name}`;
-    return "Вы:";
+const convName = (c: ApiConversation, myID: number): string => {
+    if (c.type !== 'direct') return c.title || 'Без названия';
+    const other = c.members?.find(m => m.user_id !== myID);
+    return other?.user_name || c.title || 'Диалог';
 };
+
+const convAvatar = (c: ApiConversation, myID: number): string | undefined => {
+    if (c.type !== 'direct') return c.avatar_url || undefined;
+    const other = c.members?.find(m => m.user_id !== myID);
+    return other?.user_avatar || c.avatar_url || undefined;
+};
+
+const mapConversation = (c: ApiConversation, myID: number): ChatContact => {
+    const lastMsg = c.last_message;
+    let preview = '';
+    if (lastMsg) {
+        const isMine = lastMsg.sender_id === myID;
+        const body = lastMsg.body || (lastMsg.attachments?.length ? '📎 Вложение' : '');
+        preview = isMine ? `Вы: ${body}` : body;
+    }
+    return {
+        id: String(c.id),
+        name: convName(c, myID),
+        preview,
+        time: fmtTime(c.last_message_at),
+        avatar: convAvatar(c, myID),
+        unread: c.unread_count > 0 ? c.unread_count : undefined,
+        isGroup: c.type === 'group' || c.type === 'channel',
+        description: c.description || undefined,
+        memberIds: c.members?.map(m => String(m.user_id)),
+        read: c.unread_count === 0 && !!c.last_message_id,
+    };
+};
+
+const mapMessage = (m: ApiMessage, myID: number): Message => {
+    const images: string[] = [];
+    const files: MessageFile[] = [];
+    let audio: Message['audio'] | undefined;
+    let video: Message['video'] | undefined;
+
+    for (const a of m.attachments ?? []) {
+        if (a.type === 'image') {
+            images.push(a.url);
+        } else if (a.type === 'audio') {
+            const mins = Math.floor((a.duration_s ?? 0) / 60);
+            const secs = (a.duration_s ?? 0) % 60;
+            audio = { url: a.url, duration: `${mins}:${secs.toString().padStart(2, '0')}` };
+        } else if (a.type === 'video') {
+            const mins = Math.floor((a.duration_s ?? 0) / 60);
+            const secs = (a.duration_s ?? 0) % 60;
+            video = { url: a.url, thumbnail: '', duration: `${mins}:${secs.toString().padStart(2, '0')}` };
+        } else {
+            files.push({ name: a.filename || 'Файл', size: a.size_bytes, url: a.url, mime: a.mime_type });
+        }
+    }
+
+    return {
+        id: String(m.id),
+        senderId: String(m.sender_id),
+        senderName: m.sender_name || 'Пользователь',
+        text: m.body || '',
+        time: fmtTime(m.created_at),
+        date: fmtDate(m.created_at) || undefined,
+        isOwn: m.sender_id === myID,
+        images: images.length ? images : undefined,
+        files: files.length ? files : undefined,
+        audio,
+        video,
+        pinned: m.pinned,
+        likesCount: m.likes_count,
+        likedByMe: m.liked_by_me,
+        deliveryStatus: m.delivery_status,
+        replyTo: m.reply_to ? { senderName: m.sender_name, text: m.reply_to.body } : undefined,
+        forwardedFrom: m.forwarded_from_id ? String(m.forwarded_from_id) : undefined,
+    };
+};
+
+// ─── WebSocket payload types (точно по backend messenger_payloads.go) ─────────
+// Сами фреймы теперь читает SocketProvider; здесь только типы данных под
+// каждый конкретный `type` события.
+
+interface WsMsgPayload {
+    conversation_id: number;
+    message: ApiMessage;
+}
+
+interface WsPinPayload {
+    conversation_id: number;
+    message_id: number;
+    pinned: boolean;
+    actor_id: number;
+}
+
+interface WsReactionPayload {
+    conversation_id: number;
+    message_id: number;
+    user_id: number;
+    likes_count: number;
+    action: string;
+}
+
+interface WsDeliveryPayload {
+    conversation_id: number;
+    message_id: number;
+    user_id: number;
+    status: string;
+}
+
+interface WsPresencePayload {
+    user_id: number;
+    is_online: boolean;
+    last_seen_at?: string | null;
+}
+
+// ─── Provider ─────────────────────────────────────────────────────────────────
 
 export const MessengerProvider = ({ children }: { children: ReactNode }) => {
-    const [contacts, setContacts] = useState<ChatContact[]>(initialContacts);
-    const [messages, setMessages] = useState<Record<string, Message[]>>(seedMessages);
-    const [typing, setTyping] = useState<Set<string>>(new Set());
+    const user = useAuthStore(s => s.user);
+    const activeAccountId = useAuthStore(s => s.activeAccountId);
+    const myID = user?.id ? Number(user.id) : 0;
+    const { subscribe } = useSocket();
 
-    const triggerBot = useCallback((chatId: string) => {
-        const bots = BOTS[chatId];
-        if (!bots) return;
-        setTyping((s) => new Set(s).add(chatId));
-        const bot = bots[Math.floor(Math.random() * bots.length)];
-        setTimeout(() => {
-            const reply = BOT_REPLIES[Math.floor(Math.random() * BOT_REPLIES.length)];
-            const t = nowTime();
-            const botMsg: Message = {
-                id: `m-${Date.now()}-b`,
-                senderId: bot.id,
-                senderName: bot.name,
-                text: reply,
-                time: t,
-            };
-            setMessages((p) => ({ ...p, [chatId]: [...(p[chatId] ?? []), botMsg] }));
-            setContacts((p) => p.map((c) => (c.id === chatId ? { ...c, preview: reply, time: t, read: false } : c)));
-            setTyping((s) => {
-                const n = new Set(s);
-                n.delete(chatId);
-                return n;
-            });
-        }, 1100 + Math.random() * 1200);
-    }, []);
+    const [contacts, setContacts] = useState<ChatContact[]>([]);
+    const [messages, setMessages] = useState<Record<string, Message[]>>({});
+    const [typing] = useState<Set<string>>(new Set());
+    const [availableMembers] = useState<AvailableMember[]>([]);
 
-    const sendPayload = useCallback<Ctx["sendPayload"]>((chatId, payload) => {
-        const text = (payload.text ?? "").trim();
-        if (!text && !payload.images?.length && !payload.files?.length) return;
-        const time = nowTime();
-        const msg: Message = {
-            id: `m-${Date.now()}`,
-            senderId: CURRENT_USER.id,
-            senderName: CURRENT_USER.name,
+    const loadedConvs = useRef<Set<string>>(new Set());
+    const mountedRef = useRef(true);
+
+    // ── Load conversations ────────────────────────────────────────────────────
+
+    const loadConversations = useCallback(async () => {
+        try {
+            const res = await messengerApi.listConversations();
+            if (!mountedRef.current) return;
+            setContacts((res.data.items ?? []).map(c => mapConversation(c, myID)));
+        } catch (err) {
+            console.error('[messenger] failed to load conversations', err);
+        }
+    }, [myID]);
+
+    // ── Load messages for a conversation ─────────────────────────────────────
+
+    const loadMessages = useCallback(async (chatId: string) => {
+        if (loadedConvs.current.has(chatId)) return;
+        loadedConvs.current.add(chatId);
+        try {
+            const res = await messengerApi.listMessages(Number(chatId));
+            if (!mountedRef.current) return;
+            const mapped = (res.data.items ?? []).map(m => mapMessage(m, myID));
+            setMessages(prev => ({ ...prev, [chatId]: mapped.reverse() }));
+        } catch (err) {
+            console.error('[messenger] failed to load messages for', chatId, err);
+            loadedConvs.current.delete(chatId);
+        }
+    }, [myID]);
+
+    // ── Bootstrap on auth change ──────────────────────────────────────────────
+
+    useEffect(() => {
+        mountedRef.current = true;
+
+        if (!myID || !activeAccountId) return;
+
+        loadConversations();
+
+        return () => {
+            mountedRef.current = false;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [myID, activeAccountId]);
+
+    // ── Realtime: подписки на нужные типы фреймов через общий сокет ──────────
+
+    useEffect(() => {
+        const unsubs = [
+            subscribe<WsMsgPayload>('messenger.message_sent', (p) => {
+                const chatId = String(p.conversation_id);
+                const newMsg = mapMessage(p.message, myID);
+
+                setMessages(prev => ({
+                    ...prev,
+                    [chatId]: [...(prev[chatId] ?? []), newMsg],
+                }));
+
+                setContacts(prev => prev.map(c => {
+                    if (c.id !== chatId) return c;
+                    const isMine = p.message.sender_id === myID;
+                    const body = p.message.body || (p.message.attachments?.length ? '📎 Вложение' : '');
+                    return {
+                        ...c,
+                        preview: isMine ? `Вы: ${body}` : body,
+                        time: fmtTime(p.message.created_at),
+                        unread: isMine ? undefined : (c.unread ?? 0) + 1,
+                        read: isMine,
+                    };
+                }));
+            }),
+
+            subscribe<WsPinPayload>('messenger.message_pinned', (p) => {
+                const chatId = String(p.conversation_id);
+                const msgId = String(p.message_id);
+                setMessages(prev => ({
+                    ...prev,
+                    [chatId]: (prev[chatId] ?? []).map(m =>
+                        m.id === msgId ? { ...m, pinned: true } : m
+                    ),
+                }));
+            }),
+
+            subscribe<WsPinPayload>('messenger.message_unpinned', (p) => {
+                const chatId = String(p.conversation_id);
+                const msgId = String(p.message_id);
+                setMessages(prev => ({
+                    ...prev,
+                    [chatId]: (prev[chatId] ?? []).map(m =>
+                        m.id === msgId ? { ...m, pinned: false } : m
+                    ),
+                }));
+            }),
+
+            subscribe<WsReactionPayload>('messenger.reaction_added', (p) => {
+                const chatId = String(p.conversation_id);
+                const msgId = String(p.message_id);
+                setMessages(prev => ({
+                    ...prev,
+                    [chatId]: (prev[chatId] ?? []).map(m => {
+                        if (m.id !== msgId) return m;
+                        return {
+                            ...m,
+                            likesCount: p.likes_count,
+                            likedByMe: p.user_id === myID ? true : m.likedByMe,
+                        };
+                    }),
+                }));
+            }),
+
+            subscribe<WsReactionPayload>('messenger.reaction_removed', (p) => {
+                const chatId = String(p.conversation_id);
+                const msgId = String(p.message_id);
+                setMessages(prev => ({
+                    ...prev,
+                    [chatId]: (prev[chatId] ?? []).map(m => {
+                        if (m.id !== msgId) return m;
+                        return {
+                            ...m,
+                            likesCount: p.likes_count,
+                            likedByMe: p.user_id === myID ? false : m.likedByMe,
+                        };
+                    }),
+                }));
+            }),
+
+            subscribe<WsDeliveryPayload>('messenger.delivery_updated', (p) => {
+                const chatId = String(p.conversation_id);
+                const msgId = String(p.message_id);
+                setMessages(prev => ({
+                    ...prev,
+                    [chatId]: (prev[chatId] ?? []).map(m =>
+                        m.id === msgId ? { ...m, deliveryStatus: p.status } : m
+                    ),
+                }));
+            }),
+
+            // Присутствие друзей онлайн/офлайн — раньше эта тема приходила в
+            // оба провайдера и игнорировалась обоими.
+            subscribe<WsPresencePayload>('messenger.presence', (p) => {
+                const uid = String(p.user_id);
+                setContacts(prev => prev.map(c => {
+                    if (c.isGroup) return c;
+                    if (!c.memberIds?.includes(uid)) return c;
+                    return { ...c, online: p.is_online };
+                }));
+            }),
+
+            // Отложенное сообщение «выстрелило» — придёт отдельным
+            // message_sent, здесь делать нечего.
+            subscribe('messenger.scheduled_ready', () => undefined),
+        ];
+
+        return () => unsubs.forEach(unsub => unsub());
+    }, [subscribe, myID]);
+
+    // ── Context methods ───────────────────────────────────────────────────────
+
+    const sendPayload = useCallback<Ctx['sendPayload']>(async (chatId, payload) => {
+        const text = (payload.text ?? '').trim();
+
+        const tempId = `optimistic-${Date.now()}`;
+        const optimistic: Message = {
+            id: tempId,
+            senderId: String(myID),
+            senderName: user?.full_name || 'Вы',
             text,
-            time,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
             isOwn: true,
             images: payload.images,
             files: payload.files,
             replyTo: payload.replyTo,
             forwardedFrom: payload.forwardedFrom,
         };
-        setMessages((p) => ({ ...p, [chatId]: [...(p[chatId] ?? []), msg] }));
-        setContacts((p) =>
-            p.map((c) =>
-                c.id === chatId
-                    ? { ...c, preview: previewFromPayload({ ...payload, text }), time, read: true, unread: undefined }
-                    : c
-            )
-        );
-        triggerBot(chatId);
-    }, [triggerBot]);
 
-    const sendMessage = useCallback<Ctx["sendMessage"]>((chatId, text, replyTo) => {
+        setMessages(prev => ({ ...prev, [chatId]: [...(prev[chatId] ?? []), optimistic] }));
+        setContacts(prev => prev.map(c =>
+            c.id === chatId
+                ? { ...c, preview: `Вы: ${text || (payload.images?.length ? '🖼 Фото' : '📎 Файл')}`, time: optimistic.time, read: true, unread: undefined }
+                : c
+        ));
+
+        try {
+            const res = await messengerApi.sendMessage(Number(chatId), text);
+            const confirmed = mapMessage(res.data, myID);
+            setMessages(prev => ({
+                ...prev,
+                [chatId]: (prev[chatId] ?? []).map(m => m.id === tempId ? confirmed : m),
+            }));
+        } catch (err) {
+            console.error('[messenger] send failed', err);
+            setMessages(prev => ({
+                ...prev,
+                [chatId]: (prev[chatId] ?? []).filter(m => m.id !== tempId),
+            }));
+        }
+    }, [myID, user]);
+
+    const sendMessage = useCallback<Ctx['sendMessage']>((chatId, text, replyTo) => {
         sendPayload(chatId, { text, replyTo });
     }, [sendPayload]);
 
-    const pinMessage = useCallback<Ctx["pinMessage"]>((chatId, messageId) => {
-        setMessages((p) => ({
-            ...p,
-            [chatId]: (p[chatId] ?? []).map((m) =>
-                m.id === messageId ? { ...m, pinned: !m.pinned } : m
+    const pinMessage = useCallback<Ctx['pinMessage']>(async (chatId, messageId) => {
+        const msg = (messages[chatId] ?? []).find(m => m.id === messageId);
+        const isPinned = msg?.pinned ?? false;
+
+        // Optimistic toggle
+        setMessages(prev => ({
+            ...prev,
+            [chatId]: (prev[chatId] ?? []).map(m =>
+                m.id === messageId ? { ...m, pinned: !isPinned } : m
             ),
         }));
-    }, []);
 
-    const deleteMessage = useCallback<Ctx["deleteMessage"]>((chatId, messageId) => {
-        setMessages((p) => ({
-            ...p,
-            [chatId]: (p[chatId] ?? []).filter((m) => m.id !== messageId),
-        }));
-    }, []);
-
-    const forwardMessage = useCallback<Ctx["forwardMessage"]>((sourceChatId, messageId, targetChatIds) => {
-        const src = (messages[sourceChatId] ?? []).find((m) => m.id === messageId);
-        if (!src) return;
-        targetChatIds.forEach((cid) => {
-            sendPayload(cid, {
-                text: src.text,
-                images: src.images,
-                files: src.files,
-                forwardedFrom: src.senderName,
-            });
-        });
-    }, [messages, sendPayload]);
-
-    const createChat = useCallback<Ctx["createChat"]>((input) => {
-        const id = `chat-${Date.now()}`;
-        const time = nowTime();
-        const newContact: ChatContact = {
-            id,
-            name: input.name,
-            preview: input.isGroup ? "Группа создана" : "Чат создан",
-            time,
-            avatar: input.avatar,
-            isGroup: input.isGroup,
-            memberIds: input.memberIds,
-            description: input.description,
-            pinned: false,
-        };
-        setContacts((p) => [newContact, ...p]);
-        setMessages((p) => ({ ...p, [id]: [] }));
-        return id;
-    }, []);
-
-    const getMembers = useCallback<Ctx["getMembers"]>(
-        (chatId) => {
-            const c = contacts.find((x) => x.id === chatId);
-            if (!c) return [];
-            if (c.isGroup) {
-                const ids = c.memberIds ?? [];
-                return availableMembersList.filter((m) => ids.includes(m.id));
+        try {
+            if (isPinned) {
+                await messengerApi.unpinMessage(Number(messageId));
+            } else {
+                await messengerApi.pinMessage(Number(messageId));
             }
-            return [
-                {
-                    id: c.id,
-                    name: c.name,
-                    avatar: c.avatar ?? "",
-                    status: c.online ? "в сети" : "был(а) недавно",
-                    online: c.online,
-                },
-            ];
-        },
-        [contacts]
-    );
+            // WS event (messenger.message_pinned/unpinned) подтвердит финальное состояние
+        } catch (err) {
+            console.error('[messenger] pin failed', err);
+            // Revert
+            setMessages(prev => ({
+                ...prev,
+                [chatId]: (prev[chatId] ?? []).map(m =>
+                    m.id === messageId ? { ...m, pinned: isPinned } : m
+                ),
+            }));
+        }
+    }, [messages]);
 
-    const getMediaFromChat = useCallback<Ctx["getMediaFromChat"]>(
-        (chatId) => {
-            const list = messages[chatId] ?? [];
-            const out: string[] = [];
-            list.forEach((m) => m.images?.forEach((i) => out.push(i)));
-            return out;
-        },
+    const deleteMessage = useCallback<Ctx['deleteMessage']>(async (chatId, messageId) => {
+        // Optimistic — бэкенд не пушит WS событие удаления, только HTTP
+        setMessages(prev => ({
+            ...prev,
+            [chatId]: (prev[chatId] ?? []).filter(m => m.id !== messageId),
+        }));
+        try {
+            await messengerApi.deleteMessage(Number(messageId));
+        } catch (err) {
+            console.error('[messenger] delete failed', err);
+            // Reload to restore
+            loadedConvs.current.delete(chatId);
+            loadMessages(chatId);
+        }
+    }, [loadMessages]);
+
+    const forwardMessage = useCallback<Ctx['forwardMessage']>(async (_, messageId, targetChatIds) => {
+        try {
+            await messengerApi.forwardMessage(Number(messageId), targetChatIds.map(Number));
+            for (const cid of targetChatIds) {
+                loadedConvs.current.delete(cid);
+                await loadMessages(cid);
+            }
+        } catch (err) {
+            console.error('[messenger] forward failed', err);
+        }
+    }, [loadMessages]);
+
+    const createChat = useCallback<Ctx['createChat']>(async (input: CreateChatInput): Promise<string> => {
+        try {
+            let conv: ApiConversation;
+            if (input.isGroup) {
+                const res = await messengerApi.createGroup(
+                    input.name,
+                    input.description ?? '',
+                    (input.memberIds ?? []).map(Number).filter(Boolean),
+                );
+                conv = res.data;
+            } else {
+                const targetID = Number(input.memberIds?.[0]);
+                if (!targetID) return '';
+                const res = await messengerApi.getOrCreateDirect(targetID);
+                conv = res.data;
+            }
+            const contact = mapConversation(conv, myID);
+            setContacts(prev => [contact, ...prev.filter(c => c.id !== contact.id)]);
+            setMessages(prev => ({ ...prev, [contact.id]: [] }));
+            return contact.id;
+        } catch (err) {
+            console.error('[messenger] createChat failed', err);
+            return '';
+        }
+    }, [myID]);
+
+    const ensureLoaded = useCallback((chatId: string) => {
+        if (chatId) loadMessages(chatId);
+    }, [loadMessages]);
+
+    const getMembers = useCallback<Ctx['getMembers']>((chatId) => {
+        const c = contacts.find(x => x.id === chatId);
+        if (!c) return [];
+        return (c.memberIds ?? []).map(id => ({ id, name: 'Участник', avatar: '', status: 'неизвестно' }));
+    }, [contacts]);
+
+    const getMediaFromChat = useCallback<Ctx['getMediaFromChat']>((chatId) => {
+        const out: string[] = [];
+        (messages[chatId] ?? []).forEach(m => m.images?.forEach(i => out.push(i)));
+        return out;
+    }, [messages]);
+
+    const getFilesFromChat = useCallback<Ctx['getFilesFromChat']>((chatId) => {
+        const out: MessageFile[] = [];
+        (messages[chatId] ?? []).forEach(m => m.files?.forEach(f => out.push(f)));
+        return out;
+    }, [messages]);
+
+    const getPinnedFromChat = useCallback<Ctx['getPinnedFromChat']>((chatId) =>
+            (messages[chatId] ?? []).filter(m => m.pinned),
         [messages]
     );
 
-    const getFilesFromChat = useCallback<Ctx["getFilesFromChat"]>(
-        (chatId) => {
-            const list = messages[chatId] ?? [];
-            const out: MessageFile[] = [];
-            list.forEach((m) => m.files?.forEach((f) => out.push(f)));
-            return out;
-        },
-        [messages]
-    );
+    // ── Context value ─────────────────────────────────────────────────────────
 
-    const getPinnedFromChat = useCallback<Ctx["getPinnedFromChat"]>(
-        (chatId) => (messages[chatId] ?? []).filter((m) => m.pinned),
-        [messages]
-    );
+    const value = useMemo<Ctx>(() => ({
+        contacts,
+        messages,
+        typing,
+        availableMembers,
+        sendMessage,
+        sendPayload,
+        pinMessage,
+        forwardMessage,
+        deleteMessage,
+        createChat,
+        getMembers,
+        getMediaFromChat,
+        getFilesFromChat,
+        getPinnedFromChat,
+        ensureLoaded,
+    }), [
+        contacts, messages, typing, availableMembers,
+        sendMessage, sendPayload, pinMessage, forwardMessage, deleteMessage,
+        createChat, getMembers, getMediaFromChat, getFilesFromChat, getPinnedFromChat,
+        ensureLoaded,
+    ]);
 
-    const value = useMemo(
-        () => ({
-            contacts,
-            messages,
-            typing,
-            availableMembers: availableMembersList,
-            sendMessage,
-            sendPayload,
-            pinMessage,
-            forwardMessage,
-            deleteMessage,
-            createChat,
-            getMembers,
-            getMediaFromChat,
-            getFilesFromChat,
-            getPinnedFromChat,
-        }),
-        [contacts, messages, typing, sendMessage, sendPayload, pinMessage, forwardMessage, deleteMessage, createChat, getMembers, getMediaFromChat, getFilesFromChat, getPinnedFromChat]
+    return (
+        <MessengerContext.Provider value={value}>
+            {children}
+        </MessengerContext.Provider>
     );
-
-    return <MessengerContext.Provider value={value}>{children}</MessengerContext.Provider>;
 };

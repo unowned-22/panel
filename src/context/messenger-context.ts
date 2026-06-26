@@ -22,6 +22,9 @@ export interface Message {
     replyTo?: { senderName: string; text: string };
     pinned?: boolean;
     forwardedFrom?: string;
+    likesCount?: number;
+    likedByMe?: boolean;
+    deliveryStatus?: string;
 }
 
 export interface ChatContact {
@@ -49,8 +52,6 @@ export interface AvailableMember {
     online?: boolean;
 }
 
-
-
 export interface CreateChatInput {
     name: string;
     isGroup: boolean;
@@ -77,11 +78,12 @@ export interface Ctx {
     pinMessage: (chatId: string, messageId: string) => void;
     forwardMessage: (sourceChatId: string, messageId: string, targetChatIds: string[]) => void;
     deleteMessage: (chatId: string, messageId: string) => void;
-    createChat: (input: CreateChatInput) => string;
+    createChat: (input: CreateChatInput) => Promise<string>;
     getMembers: (chatId: string) => AvailableMember[];
     getMediaFromChat: (chatId: string) => string[];
     getFilesFromChat: (chatId: string) => MessageFile[];
     getPinnedFromChat: (chatId: string) => Message[];
+    ensureLoaded: (chatId: string) => void;
 }
 
 export const MessengerContext = createContext<Ctx | null>(null);

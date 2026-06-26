@@ -7,6 +7,7 @@ import { AppRouting } from '@/routing/app-routing';
 import { AccountProvider } from "./provider/account-provider";
 import { QueryClientProvider } from '@tanstack/react-query';
 import { TranslationProvider } from '@/provider/translation-provider';
+import { SocketProvider } from "@/provider/socket-provider";
 import { NotificationsProvider } from "@/provider/notification-provider";
 import { FriendRequestsProvider } from "@/provider/friend-requests-provider";
 import { SettingsProvider } from '@/provider/settings-provider';
@@ -21,39 +22,41 @@ import { MessengerProvider } from "@/provider/messenger-provider";
 const { BASE_URL } = import.meta.env;
 
 function App() {
-  return (
-      <QueryClientProvider client={queryClient}>
-          <TooltipsProvider>
-              <TranslationProvider>
-                  <HelmetProvider>
-                      <LoadingBarContainer>
-                          <NotificationsProvider>
-                              <RepostsProvider>
-                                  <FriendRequestsProvider>
-                                      <SettingsProvider>
-                                          <PlayerProvider>
-                                              <MessengerProvider>
-                                                  <AccountProvider>
-                                                      <StoriesProvider>
-                                                          <Toaster />
-                                                          <Sonner />
-                                                          <BrowserRouter basename={BASE_URL}>
-                                                              <AppRouting />
-                                                          </BrowserRouter>
-                                                      </StoriesProvider>
-                                                  </AccountProvider>
-                                              </MessengerProvider>
-                                          </PlayerProvider>
-                                      </SettingsProvider>
-                                  </FriendRequestsProvider>
-                              </RepostsProvider>
-                          </NotificationsProvider>
-                      </LoadingBarContainer>
-                  </HelmetProvider>
-              </TranslationProvider>
-          </TooltipsProvider>
-      </QueryClientProvider>
-  )
+    return (
+        <QueryClientProvider client={queryClient}>
+            <TooltipsProvider>
+                <TranslationProvider>
+                    <HelmetProvider>
+                        <LoadingBarContainer>
+                            <SocketProvider>
+                                <NotificationsProvider>
+                                    <RepostsProvider>
+                                        <FriendRequestsProvider>
+                                            <SettingsProvider>
+                                                <PlayerProvider>
+                                                    <MessengerProvider>
+                                                        <AccountProvider>
+                                                            <StoriesProvider>
+                                                                <Toaster />
+                                                                <Sonner />
+                                                                <BrowserRouter basename={BASE_URL}>
+                                                                    <AppRouting />
+                                                                </BrowserRouter>
+                                                            </StoriesProvider>
+                                                        </AccountProvider>
+                                                    </MessengerProvider>
+                                                </PlayerProvider>
+                                            </SettingsProvider>
+                                        </FriendRequestsProvider>
+                                    </RepostsProvider>
+                                </NotificationsProvider>
+                            </SocketProvider>
+                        </LoadingBarContainer>
+                    </HelmetProvider>
+                </TranslationProvider>
+            </TooltipsProvider>
+        </QueryClientProvider>
+    )
 }
 
 export default App
