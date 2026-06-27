@@ -4,8 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { PhotoViewer } from "@/me/components/photo-view";
-import { PhotosGrid, AlbumsGrid, AlbumView, AlbumFormDialog, MoveToAlbumDialog } from "@/components/photos";
+import { PhotosGrid, AlbumsGrid, AlbumView, AlbumFormDialog, MoveToAlbumDialog, PhotoViewer } from "@/components/photos";
 import { usePhotos, useAlbums, useAlbumPhotos } from '@/hooks/use-photos';
 import { photosApi } from '@/api/photos';
 import { useToast } from '@/hooks/use-toast';
@@ -39,6 +38,7 @@ const Photos = () => {
         : null;
     const editingAlbum = editAlbumId ? (albumsQuery.data?.items ?? []).find((a) => a.id === editAlbumId) ?? null : null;
 
+    const upload = usePhotoUpload();
     const toast = useToast();
     const { t } = useTranslation();
 
@@ -81,8 +81,6 @@ const Photos = () => {
         }
     };
 
-    // ===== Upload =====
-    const upload = usePhotoUpload();
     const triggerFileSelect = (target: number | null) => {
         setUploadAlbumId(target);
         fileInputRef.current?.click();
@@ -95,8 +93,6 @@ const Photos = () => {
         setUploadOpen(true);
         e.target.value = "";
     };
-
-
 
     const confirmUpload = async () => {
         await upload.start(uploadAlbumId);

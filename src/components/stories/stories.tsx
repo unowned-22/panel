@@ -8,7 +8,7 @@ import { ApiError } from "@/lib/api-client.ts";
 import { useTranslation } from "@/hooks/use-translation";
 import { StoriesEditor } from "./stories-editor";
 import { StoriesViewer } from "./stories-viewer";
-import { getInitials } from "@/hooks/use-account";
+import {getInitials, useAccount} from "@/hooks/use-account";
 
 const StoryRing = ({ children, seen, isMe }: { children: ReactNode; seen?: boolean; isMe?: boolean }) => (
     <div
@@ -23,6 +23,7 @@ const StoryRing = ({ children, seen, isMe }: { children: ReactNode; seen?: boole
 
 export const Stories = () => {
     const { t } = useTranslation();
+    const { activeAccount } = useAccount();
     const { users, addMyStory } = useStories();
 
     const [viewerOpen, setViewerOpen] = useState(false);
@@ -37,7 +38,6 @@ export const Stories = () => {
         setViewerOpen(true);
     };
 
-    // listen to global events (e.g. from other parts of the app) to open editor/viewer
     useEffect(() => {
         const handler = (ev: any) => {
             const d = ev.detail || {};
@@ -61,16 +61,16 @@ export const Stories = () => {
                 >
                     <div className="relative">
                         <StoryRing isMe={me.items.length === 0} seen={false}>
-                            {me.avatar === ""
-                                ? <div className="flex w-16 h-16 items-center justify-center text-white text-3xl font-semibold">{getInitials(me.name)}</div>
-                                : <img
-                                    src={toAbsoluteUrl(me.avatar)}
-                                    alt="My story"
+                            {activeAccount.user?.avatar_url
+                                ? <img
+                                    src={activeAccount.user?.avatar_url}
+                                    alt={activeAccount.name}
                                     width={64}
                                     height={64}
                                     loading="lazy"
                                     className="w-16 h-16 rounded-full object-cover"
                                 />
+                                : <div className="flex w-16 h-16 items-center justify-center text-white text-3xl font-semibold">{getInitials(activeAccount.name)}</div>
                             }
                         </StoryRing>
                         <div
