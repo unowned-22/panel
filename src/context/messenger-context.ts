@@ -7,6 +7,12 @@ export interface MessageFile {
     mime?: string;
 }
 
+export interface ReactionSummary {
+    emoji: string;
+    count: number;
+    reactedByMe: boolean;
+}
+
 export interface Message {
     id: string;
     senderId: string;
@@ -22,8 +28,7 @@ export interface Message {
     replyTo?: { senderName: string; text: string };
     pinned?: boolean;
     forwardedFrom?: string;
-    likesCount?: number;
-    likedByMe?: boolean;
+    reactions?: ReactionSummary[];
     deliveryStatus?: string;
 }
 
@@ -64,6 +69,9 @@ export interface SendPayload {
     text?: string;
     images?: string[];
     files?: MessageFile[];
+    imageFiles?: File[];
+    attachmentFiles?: File[];
+    replyToId?: string;
     replyTo?: { senderName: string; text: string };
     forwardedFrom?: string;
 }
@@ -73,9 +81,13 @@ export interface Ctx {
     messages: Record<string, Message[]>;
     typing: Set<string>;
     availableMembers: AvailableMember[];
+    activeChatId: string | null;
+    setActiveChat: (chatId: string | null) => void;
+    toggleReaction: (chatId: string, messageId: string, emoji: string) => void;
     sendMessage: (chatId: string, text: string, replyTo?: { senderName: string; text: string }) => void;
     sendPayload: (chatId: string, payload: SendPayload) => void;
     pinMessage: (chatId: string, messageId: string) => void;
+    notifyTyping: (chatId: string) => void;
     forwardMessage: (sourceChatId: string, messageId: string, targetChatIds: string[]) => void;
     deleteMessage: (chatId: string, messageId: string) => void;
     createChat: (input: CreateChatInput) => Promise<string>;

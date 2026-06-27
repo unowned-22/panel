@@ -14,12 +14,11 @@ import type {
     Ctx,
     Message,
     MessageFile,
+    ReactionSummary
 } from '@/context/messenger-context';
-import { messengerApi, type ApiConversation, type ApiMessage } from '@/api/messenger';
+import { messengerApi, type ApiConversation, type ApiMessage, type ApiReactionSummary } from '@/api/messenger';
 import { useAuthStore } from '@/auth/auth.store';
 import { useSocket } from '@/hooks/use-socket';
-
-// ─── Formatters ───────────────────────────────────────────────────────────────
 
 const fmtTime = (iso?: string | null): string => {
     if (!iso) return '';
@@ -41,9 +40,9 @@ const fmtDate = (iso?: string | null): string => {
 };
 
 const convName = (c: ApiConversation, myID: number): string => {
-    if (c.type !== 'direct') return c.title || 'Без названия';
+    if (c.type !== 'direct') return c.title || 'Группа без названия';
     const other = c.members?.find(m => m.user_id !== myID);
-    return other?.user_name || c.title || 'Диалог';
+    return other?.user_name || c.title || `Диалог #${c.id}`;
 };
 
 const convAvatar = (c: ApiConversation, myID: number): string | undefined => {
@@ -109,10 +108,18 @@ const mapMessage = (m: ApiMessage, myID: number): Message => {
         audio,
         video,
         pinned: m.pinned,
-        likesCount: m.likes_count,
-        likedByMe: m.liked_by_me,
+        reactions: (m.reactions ?? []).map(r => ({
+            emoji: r.emoji,
+            count: r.count,
+            reactedByMe: r.reacted_by_me,
+        })),
         deliveryStatus: m.delivery_status,
-        replyTo: m.reply_to ? { senderName: m.sender_name, text: m.reply_to.body } : undefined,
+        replyTo: m.reply_to
+            ? {
+                senderName: m.reply_to.sender_name ?? `Пользователь ${m.reply_to.sender_id}`,
+                text: m.reply_to.body,
+            }
+            : undefined,
         forwardedFrom: m.forwarded_from_id ? String(m.forwarded_from_id) : undefined,
     };
 };
@@ -137,8 +144,8 @@ interface WsReactionPayload {
     conversation_id: number;
     message_id: number;
     user_id: number;
-    likes_count: number;
-    action: string;
+    emoji: string;
+    reactions: ApiReactionSummary[];
 }
 
 interface WsDeliveryPayload {
@@ -154,7 +161,13 @@ interface WsPresencePayload {
     last_seen_at?: string | null;
 }
 
-// ─── Provider ─────────────────────────────────────────────────────────────────
+interface WsTypingPayload {
+    conversation_id: number;
+    user_id: number;
+    is_typing: boolean;
+}
+
+const TYPING_IDLE_MS = 3000;
 
 export const MessengerProvider = ({ children }: { children: ReactNode }) => {
     const user = useAuthStore(s => s.user);
@@ -162,15 +175,36 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
     const myID = user?.id ? Number(user.id) : 0;
     const { subscribe } = useSocket();
 
+    const [activeChatId, setActiveChatId] = useState<string | null>(null);
     const [contacts, setContacts] = useState<ChatContact[]>([]);
     const [messages, setMessages] = useState<Record<string, Message[]>>({});
-    const [typing] = useState<Set<string>>(new Set());
+    const [typing, setTyping] = useState<Set<string>>(new Set());
     const [availableMembers] = useState<AvailableMember[]>([]);
 
     const loadedConvs = useRef<Set<string>>(new Set());
     const mountedRef = useRef(true);
+    const typingTimersRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
-    // ── Load conversations ────────────────────────────────────────────────────
+    const setActiveChat = useCallback((chatId: string | null) => {
+        setActiveChatId(chatId);
+    }, []);
+
+    useEffect(() => {
+        if (!activeChatId) return;
+
+        const messagesInChat = messages[activeChatId] ?? [];
+        const lastMessage = messagesInChat[messagesInChat.length - 1];
+
+        if (lastMessage) {
+            messengerApi.markRead(Number(activeChatId), Number(lastMessage.id))
+                .then(() => {
+                    setContacts(prev => prev.map(c =>
+                        c.id === activeChatId ? { ...c, unread: undefined, read: true } : c
+                    ));
+                })
+                .catch(err => console.error('[messenger] failed to mark read', err));
+        }
+    }, [activeChatId, messages]);
 
     const loadConversations = useCallback(async () => {
         try {
@@ -181,8 +215,6 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
             console.error('[messenger] failed to load conversations', err);
         }
     }, [myID]);
-
-    // ── Load messages for a conversation ─────────────────────────────────────
 
     const loadMessages = useCallback(async (chatId: string) => {
         if (loadedConvs.current.has(chatId)) return;
@@ -198,8 +230,6 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [myID]);
 
-    // ── Bootstrap on auth change ──────────────────────────────────────────────
-
     useEffect(() => {
         mountedRef.current = true;
 
@@ -213,7 +243,31 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [myID, activeAccountId]);
 
-    // ── Realtime: подписки на нужные типы фреймов через общий сокет ──────────
+    const applyReactionSnapshot = (p: WsReactionPayload) => {
+        const chatId = String(p.conversation_id);
+        const msgId = String(p.message_id);
+        setMessages(prev => ({
+            ...prev,
+            [chatId]: (prev[chatId] ?? []).map(m =>
+                m.id === msgId
+                    ? {
+                        ...m,
+                        reactions: p.reactions.map(r => ({
+                            emoji: r.emoji,
+                            count: r.count,
+                            reactedByMe: r.reacted_by_me,
+                        })),
+                    }
+                    : m
+            ),
+        }));
+    };
+
+    useEffect(() => {
+        return () => {
+            Object.values(typingTimersRef.current).forEach(clearTimeout);
+        };
+    }, []);
 
     useEffect(() => {
         const unsubs = [
@@ -221,10 +275,22 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
                 const chatId = String(p.conversation_id);
                 const newMsg = mapMessage(p.message, myID);
 
-                setMessages(prev => ({
-                    ...prev,
-                    [chatId]: [...(prev[chatId] ?? []), newMsg],
-                }));
+                setMessages(prev => {
+                    const list = prev[chatId] ?? [];
+                    const exists = list.some(m => m.id === newMsg.id);
+
+                    if (exists) {
+                        return {
+                            ...prev,
+                            [chatId]: list.map(m => m.id === newMsg.id ? newMsg : m)
+                        }
+                    }
+
+                    return {
+                        ...prev,
+                        [chatId]: [...list, newMsg],
+                    }
+                });
 
                 setContacts(prev => prev.map(c => {
                     if (c.id !== chatId) return c;
@@ -238,6 +304,31 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
                         read: isMine,
                     };
                 }));
+
+                // Если только что пришло сообщение от собеседника — его
+                // "печатает" точно закончился, гасим индикатор сразу,
+                // не дожидаясь отдельного typing:false от сервера.
+                if (p.message.sender_id !== myID) {
+                    setTyping(prev => {
+                        if (!prev.has(chatId)) return prev;
+                        const next = new Set(prev);
+                        next.delete(chatId);
+                        return next;
+                    });
+                }
+            }),
+
+            subscribe<WsTypingPayload>('messenger.typing', (p) => {
+                if (p.user_id === myID) return; // не показываем себе свой же индикатор
+                const chatId = String(p.conversation_id);
+                setTyping(prev => {
+                    const has = prev.has(chatId);
+                    if (p.is_typing === has) return prev;
+                    const next = new Set(prev);
+                    if (p.is_typing) next.add(chatId);
+                    else next.delete(chatId);
+                    return next;
+                });
             }),
 
             subscribe<WsPinPayload>('messenger.message_pinned', (p) => {
@@ -262,37 +353,9 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
                 }));
             }),
 
-            subscribe<WsReactionPayload>('messenger.reaction_added', (p) => {
-                const chatId = String(p.conversation_id);
-                const msgId = String(p.message_id);
-                setMessages(prev => ({
-                    ...prev,
-                    [chatId]: (prev[chatId] ?? []).map(m => {
-                        if (m.id !== msgId) return m;
-                        return {
-                            ...m,
-                            likesCount: p.likes_count,
-                            likedByMe: p.user_id === myID ? true : m.likedByMe,
-                        };
-                    }),
-                }));
-            }),
+            subscribe<WsReactionPayload>('messenger.reaction_added', applyReactionSnapshot),
 
-            subscribe<WsReactionPayload>('messenger.reaction_removed', (p) => {
-                const chatId = String(p.conversation_id);
-                const msgId = String(p.message_id);
-                setMessages(prev => ({
-                    ...prev,
-                    [chatId]: (prev[chatId] ?? []).map(m => {
-                        if (m.id !== msgId) return m;
-                        return {
-                            ...m,
-                            likesCount: p.likes_count,
-                            likedByMe: p.user_id === myID ? false : m.likedByMe,
-                        };
-                    }),
-                }));
-            }),
+            subscribe<WsReactionPayload>('messenger.reaction_removed', applyReactionSnapshot),
 
             subscribe<WsDeliveryPayload>('messenger.delivery_updated', (p) => {
                 const chatId = String(p.conversation_id);
@@ -305,19 +368,17 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
                 }));
             }),
 
-            // Присутствие друзей онлайн/офлайн — раньше эта тема приходила в
-            // оба провайдера и игнорировалась обоими.
             subscribe<WsPresencePayload>('messenger.presence', (p) => {
                 const uid = String(p.user_id);
+                console.log(uid)
                 setContacts(prev => prev.map(c => {
+                    console.log(c)
                     if (c.isGroup) return c;
                     if (!c.memberIds?.includes(uid)) return c;
                     return { ...c, online: p.is_online };
                 }));
             }),
 
-            // Отложенное сообщение «выстрелило» — придёт отдельным
-            // message_sent, здесь делать нечего.
             subscribe('messenger.scheduled_ready', () => undefined),
         ];
 
@@ -346,12 +407,36 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
         setMessages(prev => ({ ...prev, [chatId]: [...(prev[chatId] ?? []), optimistic] }));
         setContacts(prev => prev.map(c =>
             c.id === chatId
-                ? { ...c, preview: `Вы: ${text || (payload.images?.length ? '🖼 Фото' : '📎 Файл')}`, time: optimistic.time, read: true, unread: undefined }
+                ? {
+                    ...c,
+                    preview: `Вы: ${text || (payload.images?.length ? '🖼 Фото' : payload.files?.length ? '📎 Файл' : '')}`,
+                    time: optimistic.time,
+                    read: true,
+                    unread: undefined,
+                }
                 : c
         ));
 
+        clearTimeout(typingTimersRef.current[chatId]);
+        messengerApi.setTyping(Number(chatId), false).catch(() => {});
+
         try {
-            const res = await messengerApi.sendMessage(Number(chatId), text);
+            const rawFiles = [...(payload.imageFiles ?? []), ...(payload.attachmentFiles ?? [])];
+            let attachmentKeys: string[] | undefined;
+
+            if (rawFiles.length) {
+                const uploaded = await Promise.all(
+                    rawFiles.map(file => messengerApi.uploadAttachment(file))
+                );
+                attachmentKeys = uploaded.map(res => res.data.storage_key);
+            }
+
+            const res = await messengerApi.sendMessage(
+                Number(chatId),
+                text,
+                payload.replyToId ? Number(payload.replyToId) : undefined,
+                attachmentKeys,
+            );
             const confirmed = mapMessage(res.data, myID);
             setMessages(prev => ({
                 ...prev,
@@ -369,6 +454,63 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
     const sendMessage = useCallback<Ctx['sendMessage']>((chatId, text, replyTo) => {
         sendPayload(chatId, { text, replyTo });
     }, [sendPayload]);
+
+    const notifyTyping = useCallback((chatId: string) => {
+        if (!chatId) return;
+
+        if (!typingTimersRef.current[chatId]) {
+            messengerApi.setTyping(Number(chatId), true).catch(() => {});
+        }
+
+        clearTimeout(typingTimersRef.current[chatId]);
+        typingTimersRef.current[chatId] = setTimeout(() => {
+            delete typingTimersRef.current[chatId];
+            messengerApi.setTyping(Number(chatId), false).catch(() => {});
+        }, TYPING_IDLE_MS);
+    }, []);
+
+    const toggleReaction = useCallback(async (chatId: string, messageId: string, emoji: string) => {
+        const msg = (messages[chatId] ?? []).find(m => m.id === messageId);
+        if (!msg) return;
+
+        const existing = msg.reactions?.find(r => r.emoji === emoji);
+        const wasReacted = existing?.reactedByMe ?? false;
+
+        const applyOptimistic = (reactions: ReactionSummary[] = []): ReactionSummary[] => {
+            const idx = reactions.findIndex(r => r.emoji === emoji);
+            if (wasReacted) {
+                if (idx === -1) return reactions;
+                const count = reactions[idx].count - 1;
+                const next = [...reactions];
+                if (count <= 0) next.splice(idx, 1);
+                else next[idx] = { ...next[idx], count, reactedByMe: false };
+                return next;
+            }
+            if (idx === -1) return [...reactions, { emoji, count: 1, reactedByMe: true }];
+            const next = [...reactions];
+            next[idx] = { ...next[idx], count: next[idx].count + 1, reactedByMe: true };
+            return next;
+        };
+
+        setMessages(prev => ({
+            ...prev,
+            [chatId]: (prev[chatId] ?? []).map(m =>
+                m.id === messageId ? { ...m, reactions: applyOptimistic(m.reactions) } : m
+            ),
+        }));
+
+        try {
+            if (wasReacted) {
+                await messengerApi.removeReaction(Number(messageId), emoji);
+            } else {
+                await messengerApi.addReaction(Number(messageId), emoji);
+            }
+        } catch (err) {
+            console.error('[messenger] reaction failed', err);
+            loadedConvs.current.delete(chatId);
+            loadMessages(chatId);
+        }
+    }, [messages, loadMessages]);
 
     const pinMessage = useCallback<Ctx['pinMessage']>(async (chatId, messageId) => {
         const msg = (messages[chatId] ?? []).find(m => m.id === messageId);
@@ -489,8 +631,12 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
         messages,
         typing,
         availableMembers,
+        activeChatId,
+        toggleReaction,
+        setActiveChat,
         sendMessage,
         sendPayload,
+        notifyTyping,
         pinMessage,
         forwardMessage,
         deleteMessage,
@@ -501,9 +647,9 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
         getPinnedFromChat,
         ensureLoaded,
     }), [
-        contacts, messages, typing, availableMembers,
-        sendMessage, sendPayload, pinMessage, forwardMessage, deleteMessage,
-        createChat, getMembers, getMediaFromChat, getFilesFromChat, getPinnedFromChat,
+        contacts, messages, typing, availableMembers, activeChatId,
+        sendMessage, sendPayload, notifyTyping, pinMessage, forwardMessage, deleteMessage, setActiveChat,
+        createChat, getMembers, getMediaFromChat, getFilesFromChat, getPinnedFromChat, toggleReaction,
         ensureLoaded,
     ]);
 

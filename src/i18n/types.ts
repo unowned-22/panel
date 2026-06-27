@@ -58,6 +58,11 @@ export interface TranslationDictionary {
     'page.settings.setup.menu.items': string;
     'page.settings.section.account': string;
     'page.settings.section.notifications': string;
+    'page.settings.section.security': string;
+    'page.settings.section.privacy': string;
+    'page.settings.section.apps': string;
+    'page.settings.section.blacklist': string;
+    'page.settings.section.voices': string;
     'page.settings.modal.setup.items': string;
 
     // ── Account page ──────────────────────────────────────────────────────────

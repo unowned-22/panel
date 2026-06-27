@@ -15,6 +15,7 @@ const Messenger = () => {
     const { contacts, ensureLoaded, createChat } = useMessenger() as ReturnType<typeof useMessenger> & {
         ensureLoaded: (chatId: string) => void;
     };
+    const { setActiveChat } = useMessenger();
     const { username } = useParams<{ username: string }>();
     const navigate = useNavigate();
 
@@ -87,6 +88,7 @@ const Messenger = () => {
 
     const handleSelect = (id: string) => {
         setActiveId(id);
+        setActiveChat(id);
         setCreatingChat(false);
         setInfoOpen(false);
     };

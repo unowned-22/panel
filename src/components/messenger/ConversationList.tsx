@@ -46,6 +46,8 @@ export const ConversationList = ({ contacts, activeId, onSelect, onOpenCreate, o
         return matchesSearch;
     });
 
+    console.table(contacts)
+
     return (
         <>
             <div className="h-14 px-4 flex items-center justify-between border-b border-border/60">

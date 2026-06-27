@@ -79,6 +79,11 @@ export const ru: TranslationDictionary = {
     'page.settings.setup.menu.items': 'Настроить отображение пунктов меню',
     'page.settings.section.account': 'Аккаунт и внешний вид',
     'page.settings.section.notifications': 'Уведомления',
+    'page.settings.section.security': 'Безопасность',
+    'page.settings.section.privacy': 'Приватность',
+    'page.settings.section.blacklist': 'Чёрный список',
+    'page.settings.section.apps': 'Настройки приложений',
+    'page.settings.section.voices': 'Голоса',
     'page.settings.modal.setup.items': 'Настройка пунктов меню',
 
     // ── Shared auth ──────────────────────────────────────────────────────────
@@ -290,6 +295,7 @@ export const ru: TranslationDictionary = {
     'photos.setcover.error': 'Не удалось установить обложку',
     'photos.photos.loading': 'Загрузка фотографий…',
     'photos.comments.album': 'Комментарии к альбому',
+    'photos.comments.photo': 'Комментарии к фото',
     'photos.comments.loading': 'Загрузка комментариев…',
     'photos.comments.empty': 'Пока нет комментариев. Будьте первым!',
     'photos.comment.placeholder': 'Написать комментарий…  Используйте @ для упоминания',

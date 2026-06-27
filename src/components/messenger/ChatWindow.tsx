@@ -9,13 +9,13 @@ import { useMessenger } from "@/hooks/use-messenger";
 import AudioMessage from "@/components/messenger/AudioMessage";
 import VideoMessage from "@/components/messenger/VideoMessage";
 import LinkPreview, { extractUrls } from "@/components/messenger/LinkPreview";
-import TypingIndicator from "@/components/messenger/TypingIndicator";
 import MessageContextMenu from "@/components/messenger/MessageContextMenu";
 import EmojiPicker from "@/components/messenger/EmojiPicker";
 import FileAttachment from "@/components/messenger/FileAttachment";
 import {
     DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import TypingDots from "./typing-dots";
 import { Avatar } from "./ConversationList";
 
 const readAsDataURL = (file: File) =>
@@ -47,28 +47,28 @@ interface Props {
 }
 
 export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCall, onForward }: Props) => {
-    const { messages, typing, sendPayload, pinMessage, deleteMessage } = useMessenger();
+    const { messages, typing, sendPayload, notifyTyping, pinMessage, deleteMessage, toggleReaction } = useMessenger();
 
     const chatMessages = messages[active.id] ?? [];
     const isTyping = typing.has(active.id);
     const pinnedMessages = chatMessages.filter(m => m.pinned);
 
     const [text, setText] = useState("");
-    const [replyTo, setReplyTo] = useState<{ senderName: string; text: string } | null>(null);
+    const [replyTo, setReplyTo] = useState<{ id: string; senderName: string; text: string } | null>(null);
     const [pendingImages, setPendingImages] = useState<string[]>([]);
+    const [pendingImageFiles, setPendingImageFiles] = useState<File[]>([]);
     const [pendingFiles, setPendingFiles] = useState<MessageFile[]>([]);
+    const [pendingAttachmentFiles, setPendingAttachmentFiles] = useState<File[]>([]);
 
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const endRef = useRef<HTMLDivElement>(null);
     const imageInputRef = useRef<HTMLInputElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Scroll to bottom on new messages / typing / chat switch
     useEffect(() => {
         endRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [chatMessages.length, isTyping, active.id]);
 
-    // Auto-resize textarea
     useEffect(() => {
         const ta = inputRef.current;
         if (!ta) return;
@@ -83,12 +83,17 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
             text: t,
             images: pendingImages.length ? pendingImages : undefined,
             files: pendingFiles.length ? pendingFiles : undefined,
+            imageFiles: pendingImageFiles.length ? pendingImageFiles : undefined,
+            attachmentFiles: pendingAttachmentFiles.length ? pendingAttachmentFiles : undefined,
             replyTo: replyTo ?? undefined,
+            replyToId: replyTo?.id,
         });
         setText("");
         setReplyTo(null);
         setPendingImages([]);
+        setPendingImageFiles([]);
         setPendingFiles([]);
+        setPendingAttachmentFiles([]);
     };
 
     const handlePickImages = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,6 +101,7 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
         if (!files.length) return;
         const urls = await Promise.all(files.map(readAsDataURL));
         setPendingImages(p => [...p, ...urls]);
+        setPendingImageFiles(p => [...p, ...files]);
         e.target.value = "";
     };
 
@@ -111,7 +117,25 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
             }))
         );
         setPendingFiles(p => [...p, ...items]);
+        setPendingAttachmentFiles(p => [...p, ...files]);
         e.target.value = "";
+    };
+
+    const removePendingImage = (index: number) => {
+        setPendingImages(p => p.filter((_, j) => j !== index));
+        setPendingImageFiles(p => p.filter((_, j) => j !== index));
+    };
+
+    const removePendingFile = (index: number) => {
+        setPendingFiles(p => p.filter((_, j) => j !== index));
+        setPendingAttachmentFiles(p => p.filter((_, j) => j !== index));
+    };
+
+    const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setText(e.target.value);
+        if (e.target.value.trim()) {
+            notifyTyping(active.id);
+        }
     };
 
     let lastDate = "";
@@ -135,7 +159,11 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
                             {active.verified && <BadgeCheck className="w-4 h-4 text-primary fill-primary/20" />}
                         </div>
                         <p className="text-[12px] text-muted-foreground truncate">
-                            {active.isVK ? "Сервисные уведомления" : active.online ? "в сети" : "был(а) недавно"}
+                            {isTyping ? (
+                                <span className="flex items-center gap-0.5">
+                                    Печатает<TypingDots />
+                                </span>
+                            ) : active.isVK ? "Сервисные уведомления" : active.online ? "в сети" : "был(а) недавно"}
                         </p>
                     </div>
                 </button>
@@ -187,7 +215,7 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1.5">
-                {chatMessages.length === 0 && !isTyping && (
+                {chatMessages.length === 0 && (
                     <div className="flex items-center justify-center h-full">
                         <p className="text-sm text-muted-foreground">Нет сообщений. Напишите первым 👋</p>
                     </div>
@@ -224,11 +252,15 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
                                         <span className="text-[11px] text-primary font-semibold mb-0.5 ml-1">{msg.senderName}</span>
                                     )}
                                     <MessageContextMenu
-                                        onReply={() => setReplyTo({ senderName: msg.senderName, text: msg.text })}
+                                        messageText={msg.text}
+                                        senderName={msg.senderName}
+                                        isPinned={msg.pinned}
+                                        reactions={msg.reactions}
+                                        onReply={() => setReplyTo({ id: msg.id, senderName: msg.senderName, text: msg.text })}
                                         onPin={() => pinMessage(active.id, msg.id)}
                                         onDelete={() => deleteMessage(active.id, msg.id)}
                                         onForward={() => onForward(msg.id)}
-                                        isPinned={msg.pinned}
+                                        onReact={(emoji) => toggleReaction(active.id, msg.id, emoji)}
                                     >
                                         <div
                                             className={`px-3 py-2 text-[13.5px] ${
@@ -265,7 +297,7 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
                                             {msg.audio && <AudioMessage url={msg.audio.url} duration={msg.audio.duration} isOwn={msg.isOwn} />}
                                             {msg.video && <VideoMessage url={msg.video.url} thumbnail={msg.video.thumbnail} duration={msg.video.duration} />}
                                             {msg.text && (
-                                                <p className="text-[13.5px] leading-relaxed whitespace-pre-wrap break-words">{msg.text}</p>
+                                                <p className="text-[13.5px] leading-relaxed whitespace-pre-wrap wrap-break-word">{msg.text}</p>
                                             )}
                                             {urls.map((u, i) => <LinkPreview key={i} url={u} isOwn={msg.isOwn} />)}
                                             {msg.images && (
@@ -278,7 +310,20 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
                                             {msg.files?.map((f, i) => (
                                                 <FileAttachment key={i} file={f} isOwn={msg.isOwn} />
                                             ))}
-                                            <div className={`flex items-center gap-1 justify-end mt-1 ${msg.isOwn ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                                            <div className={`flex items-center gap-1 justify-end mt-1 flex-wrap ${msg.isOwn ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                                                {msg.reactions?.map(r => (
+                                                    <button
+                                                        key={r.emoji}
+                                                        onClick={() => toggleReaction(active.id, msg.id, r.emoji)}
+                                                        className={`flex items-center gap-0.5 text-[10.5px] px-1.5 py-0.5 rounded-full transition-colors ${
+                                                            r.reactedByMe
+                                                                ? "bg-primary/20 text-primary"
+                                                                : msg.isOwn ? "bg-primary-foreground/10 text-primary-foreground/80" : "bg-background/60 text-muted-foreground"
+                                                        }`}
+                                                    >
+                                                        {r.emoji} {r.count}
+                                                    </button>
+                                                ))}
                                                 <span className="text-[10.5px]">{msg.time}</span>
                                                 {msg.isOwn && <CheckCheck size={14} />}
                                             </div>
@@ -289,7 +334,6 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
                         </div>
                     );
                 })}
-                {isTyping && <TypingIndicator name="Печатает…" />}
                 <div ref={endRef} />
             </div>
 
@@ -302,7 +346,7 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
                             <div key={`img-${i}`} className="relative w-16 h-16 rounded-lg overflow-hidden bg-secondary">
                                 <img src={src} alt="" className="w-full h-full object-cover" />
                                 <button
-                                    onClick={() => setPendingImages(p => p.filter((_, j) => j !== i))}
+                                    onClick={() => removePendingImage(i)}
                                     className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-background/80 flex items-center justify-center text-foreground hover:bg-background"
                                     aria-label="Удалить"
                                 >
@@ -315,7 +359,7 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
                                 <FileText size={16} className="text-primary shrink-0" />
                                 <span className="text-xs truncate">{f.name}</span>
                                 <button
-                                    onClick={() => setPendingFiles(p => p.filter((_, j) => j !== i))}
+                                    onClick={() => removePendingFile(i)}
                                     className="shrink-0 text-muted-foreground hover:text-foreground"
                                     aria-label="Удалить"
                                 >
@@ -382,7 +426,7 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
                         ref={inputRef}
                         rows={1}
                         value={text}
-                        onChange={e => setText(e.target.value)}
+                        onChange={handleTextChange}
                         onKeyDown={e => {
                             if (e.key === "Enter" && !e.shiftKey) {
                                 e.preventDefault();

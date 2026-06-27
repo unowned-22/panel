@@ -17,7 +17,14 @@ export interface ApiAttachment {
 export interface ApiMessagePreview {
     id: number;
     sender_id: number;
+    sender_name?: string;
     body: string;
+}
+
+export interface ApiReactionSummary {
+    emoji: string;
+    count: number;
+    reacted_by_me: boolean;
 }
 
 export interface ApiMessage {
@@ -35,8 +42,7 @@ export interface ApiMessage {
     is_edited: boolean;
     edited_at?: string | null;
     pinned: boolean;
-    likes_count: number;
-    liked_by_me: boolean;
+    reactions: ApiReactionSummary[];
     disappears_at?: string | null;
     scheduled_at?: string | null;
     is_scheduled: boolean;
@@ -291,10 +297,10 @@ export const messengerApi = {
     },
 
     /** Send a text message */
-    sendMessage(convID: number, body: string, replyToID?: number | null) {
+    sendMessage(convID: number, body: string, replyToID?: number | null, attachmentKeys?: string[]) {
         return apiClient.post<{ data: ApiMessage }>(
             `${BASE}/conversations/${convID}/messages`,
-            { body, reply_to_id: replyToID ?? undefined }
+            { body, reply_to_id: replyToID ?? undefined, attachment_keys: attachmentKeys }
         );
     },
 
@@ -328,18 +334,16 @@ export const messengerApi = {
         );
     },
 
-    /** Like a message */
-    likeMessage(msgID: number) {
+    addReaction(msgID: number, emoji: string) {
         return apiClient.post<{ data: MessageResult }>(
-            `${BASE}/messages/${msgID}/like`,
-            {}
+            `${BASE}/messages/${msgID}/reactions`,
+            { emoji }
         );
     },
 
-    /** Remove my like from a message */
-    unlikeMessage(msgID: number) {
+    removeReaction(msgID: number, emoji: string) {
         return apiClient.delete<{ data: MessageResult }>(
-            `${BASE}/messages/${msgID}/like`
+            `${BASE}/messages/${msgID}/reactions/${encodeURIComponent(emoji)}`
         );
     },
 
@@ -433,5 +437,9 @@ export const messengerApi = {
             `${BASE}/attachments/upload`,
             file
         );
+    },
+
+    setTyping(convID: number, isTyping: boolean) {
+        return apiClient.post(`${BASE}/conversations/${convID}/typing`, { is_typing: isTyping });
     },
 };
