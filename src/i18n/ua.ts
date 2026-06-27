@@ -79,6 +79,11 @@ export const ua: TranslationDictionary = {
     'page.settings.setup.menu.items': 'Налаштувати пункти меню',
     'page.settings.section.account': 'Акаунт і зовнішній вигляд',
     'page.settings.section.notifications': 'Сповіщення',
+    'page.settings.section.security': 'Безпека',
+    'page.settings.section.privacy': 'Приватність',
+    'page.settings.section.blacklist': 'Чорний список',
+    'page.settings.section.apps': 'Налаштування застосунків',
+    'page.settings.section.voices': 'Голоси',
     'page.settings.modal.setup.items': 'Налаштування пунктів меню',
 
     // ── Shared auth ──────────────────────────────────────────────────────────
@@ -255,7 +260,6 @@ export const ua: TranslationDictionary = {
     'page.photos.cancel': 'Скасувати',
     'page.photos.empty.photo': 'У вас ще немає фотографій',
     'photos.page.all.users': 'Усі користувачі',
-    'photos.album.create': 'Створити альбом',
     'photos.album.edit.title': 'Редагування альбому',
     'photos.album.title': 'Назва',
     'photos.album.title.placeholder': 'Назва альбому',
@@ -291,6 +295,7 @@ export const ua: TranslationDictionary = {
     'photos.setcover.error': 'Не вдалося встановити обкладинку',
     'photos.comments.loading': 'Завантаження коментарів…',
     'photos.comments.album': 'Коментарі до альбому',
+    'photos.comments.photo': 'Коментарі до фото',
     'photos.photos.loading': 'Завантаження фотографій…',
     'photos.comments.empty': 'Коментарів поки немає. Будьте першим!',
     'photos.comment.placeholder': 'Напишіть коментар… Використовуйте @ для згадки користувача',

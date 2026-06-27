@@ -79,6 +79,11 @@ export const es: TranslationDictionary = {
     'page.settings.setup.menu.items': 'Configurar elementos del menú',
     'page.settings.section.account': 'Cuenta y apariencia',
     'page.settings.section.notifications': 'Notificaciones',
+    'page.settings.section.security': 'Seguridad',
+    'page.settings.section.privacy': 'Privacidad',
+    'page.settings.section.blacklist': 'Lista de bloqueados',
+    'page.settings.section.apps': 'Configuración de aplicaciones',
+    'page.settings.section.voices': 'Créditos',
     'page.settings.modal.setup.items': 'Configuración de los elementos del menú',
 
     // ── Shared auth ──────────────────────────────────────────────────────────
@@ -290,6 +295,7 @@ export const es: TranslationDictionary = {
     'photos.setcover.error': 'No se pudo establecer la portada',
     'photos.comments.loading': 'Cargando comentarios…',
     'photos.comments.album': 'Comentarios del álbum',
+    'photos.comments.photo': 'Comentarios de la foto',
     'photos.photos.loading': 'Cargando fotos…',
     'photos.comments.empty': 'Aún no hay comentarios. ¡Sé el primero!',
     'photos.comment.placeholder': 'Escribe un comentario… Usa @ para mencionar a alguien',

@@ -79,6 +79,11 @@ export const fr: TranslationDictionary = {
     'page.settings.setup.menu.items': 'Configurer les éléments du menu',
     'page.settings.section.account': 'Compte et apparence',
     'page.settings.section.notifications': 'Notifications',
+    'page.settings.section.security': 'Sécurité',
+    'page.settings.section.privacy': 'Confidentialité',
+    'page.settings.section.blacklist': 'Utilisateurs bloqués',
+    'page.settings.section.apps': 'Paramètres des applications',
+    'page.settings.section.voices': 'Crédits',
     'page.settings.modal.setup.items': 'Configuration des éléments du menu',
 
     // ── Shared auth ──────────────────────────────────────────────────────────

@@ -17,6 +17,7 @@ export interface ApiAttachment {
 export interface ApiMessagePreview {
     id: number;
     sender_id: number;
+    sender_name?: string;
     body: string;
 }
 
@@ -291,10 +292,10 @@ export const messengerApi = {
     },
 
     /** Send a text message */
-    sendMessage(convID: number, body: string, replyToID?: number | null) {
+    sendMessage(convID: number, body: string, replyToID?: number | null, attachmentKeys?: string[]) {
         return apiClient.post<{ data: ApiMessage }>(
             `${BASE}/conversations/${convID}/messages`,
-            { body, reply_to_id: replyToID ?? undefined }
+            { body, reply_to_id: replyToID ?? undefined, attachment_keys: attachmentKeys }
         );
     },
 
@@ -433,5 +434,9 @@ export const messengerApi = {
             `${BASE}/attachments/upload`,
             file
         );
+    },
+
+    setTyping(convID: number, isTyping: boolean) {
+        return apiClient.post(`${BASE}/conversations/${convID}/typing`, { is_typing: isTyping });
     },
 };

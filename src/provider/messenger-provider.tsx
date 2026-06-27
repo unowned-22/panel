@@ -112,7 +112,12 @@ const mapMessage = (m: ApiMessage, myID: number): Message => {
         likesCount: m.likes_count,
         likedByMe: m.liked_by_me,
         deliveryStatus: m.delivery_status,
-        replyTo: m.reply_to ? { senderName: m.sender_name, text: m.reply_to.body } : undefined,
+        replyTo: m.reply_to
+            ? {
+                senderName: m.reply_to.sender_name ?? `Пользователь ${m.reply_to.sender_id}`,
+                text: m.reply_to.body,
+            }
+            : undefined,
         forwardedFrom: m.forwarded_from_id ? String(m.forwarded_from_id) : undefined,
     };
 };
@@ -154,6 +159,17 @@ interface WsPresencePayload {
     last_seen_at?: string | null;
 }
 
+interface WsTypingPayload {
+    conversation_id: number;
+    user_id: number;
+    is_typing: boolean;
+}
+
+// Сколько ждать тишины после последнего keystroke, прежде чем сами погасим
+// у себя индикатор «печатает» (сервер тоже гасит по таймауту, но дублируем
+// здесь, чтобы не зависеть от сетевых задержек WS).
+const TYPING_IDLE_MS = 3000;
+
 export const MessengerProvider = ({ children }: { children: ReactNode }) => {
     const user = useAuthStore(s => s.user);
     const activeAccountId = useAuthStore(s => s.activeAccountId);
@@ -163,11 +179,14 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
     const [activeChatId, setActiveChatId] = useState<string | null>(null);
     const [contacts, setContacts] = useState<ChatContact[]>([]);
     const [messages, setMessages] = useState<Record<string, Message[]>>({});
-    const [typing] = useState<Set<string>>(new Set());
+    const [typing, setTyping] = useState<Set<string>>(new Set());
     const [availableMembers] = useState<AvailableMember[]>([]);
 
     const loadedConvs = useRef<Set<string>>(new Set());
     const mountedRef = useRef(true);
+    // Таймеры авто-сброса "is_typing: true" -> "false" для чатов, в которые
+    // печатает текущий пользователь (per chatId).
+    const typingTimersRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
     const setActiveChat = useCallback((chatId: string | null) => {
         setActiveChatId(chatId);
@@ -229,6 +248,14 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [myID, activeAccountId]);
 
+    // ── Cleanup typing timers on unmount ──────────────────────────────────────
+
+    useEffect(() => {
+        return () => {
+            Object.values(typingTimersRef.current).forEach(clearTimeout);
+        };
+    }, []);
+
     useEffect(() => {
         const unsubs = [
             subscribe<WsMsgPayload>('messenger.message_sent', (p) => {
@@ -264,6 +291,31 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
                         read: isMine,
                     };
                 }));
+
+                // Если только что пришло сообщение от собеседника — его
+                // "печатает" точно закончился, гасим индикатор сразу,
+                // не дожидаясь отдельного typing:false от сервера.
+                if (p.message.sender_id !== myID) {
+                    setTyping(prev => {
+                        if (!prev.has(chatId)) return prev;
+                        const next = new Set(prev);
+                        next.delete(chatId);
+                        return next;
+                    });
+                }
+            }),
+
+            subscribe<WsTypingPayload>('messenger.typing', (p) => {
+                if (p.user_id === myID) return; // не показываем себе свой же индикатор
+                const chatId = String(p.conversation_id);
+                setTyping(prev => {
+                    const has = prev.has(chatId);
+                    if (p.is_typing === has) return prev;
+                    const next = new Set(prev);
+                    if (p.is_typing) next.add(chatId);
+                    else next.delete(chatId);
+                    return next;
+                });
             }),
 
             subscribe<WsPinPayload>('messenger.message_pinned', (p) => {
@@ -372,12 +424,36 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
         setMessages(prev => ({ ...prev, [chatId]: [...(prev[chatId] ?? []), optimistic] }));
         setContacts(prev => prev.map(c =>
             c.id === chatId
-                ? { ...c, preview: `Вы: ${text || (payload.images?.length ? '🖼 Фото' : '📎 Файл')}`, time: optimistic.time, read: true, unread: undefined }
+                ? {
+                    ...c,
+                    preview: `Вы: ${text || (payload.images?.length ? '🖼 Фото' : payload.files?.length ? '📎 Файл' : '')}`,
+                    time: optimistic.time,
+                    read: true,
+                    unread: undefined,
+                }
                 : c
         ));
 
+        clearTimeout(typingTimersRef.current[chatId]);
+        messengerApi.setTyping(Number(chatId), false).catch(() => {});
+
         try {
-            const res = await messengerApi.sendMessage(Number(chatId), text);
+            const rawFiles = [...(payload.imageFiles ?? []), ...(payload.attachmentFiles ?? [])];
+            let attachmentKeys: string[] | undefined;
+
+            if (rawFiles.length) {
+                const uploaded = await Promise.all(
+                    rawFiles.map(file => messengerApi.uploadAttachment(file))
+                );
+                attachmentKeys = uploaded.map(res => res.data.storage_key);
+            }
+
+            const res = await messengerApi.sendMessage(
+                Number(chatId),
+                text,
+                payload.replyToId ? Number(payload.replyToId) : undefined,
+                attachmentKeys,
+            );
             const confirmed = mapMessage(res.data, myID);
             setMessages(prev => ({
                 ...prev,
@@ -395,6 +471,53 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
     const sendMessage = useCallback<Ctx['sendMessage']>((chatId, text, replyTo) => {
         sendPayload(chatId, { text, replyTo });
     }, [sendPayload]);
+
+    const notifyTyping = useCallback((chatId: string) => {
+        if (!chatId) return;
+
+        if (!typingTimersRef.current[chatId]) {
+            messengerApi.setTyping(Number(chatId), true).catch(() => {});
+        }
+
+        clearTimeout(typingTimersRef.current[chatId]);
+        typingTimersRef.current[chatId] = setTimeout(() => {
+            delete typingTimersRef.current[chatId];
+            messengerApi.setTyping(Number(chatId), false).catch(() => {});
+        }, TYPING_IDLE_MS);
+    }, []);
+
+    const likeMessage = useCallback(async (chatId: string, messageId: string) => {
+        const msg = (messages[chatId] ?? []).find(m => m.id === messageId);
+        if (!msg) return;
+
+        const wasLiked = msg.likedByMe ?? false;
+        setMessages(prev => ({
+            ...prev,
+            [chatId]: (prev[chatId] ?? []).map(m =>
+                m.id === messageId
+                    ? { ...m, likedByMe: !wasLiked, likesCount: (m.likesCount ?? 0) + (wasLiked ? -1 : 1) }
+                    : m
+            ),
+        }));
+
+        try {
+            if (wasLiked) {
+                await messengerApi.unlikeMessage(Number(messageId));
+            } else {
+                await messengerApi.likeMessage(Number(messageId));
+            }
+        } catch (err) {
+            console.error('[messenger] like failed', err);
+            setMessages(prev => ({
+                ...prev,
+                [chatId]: (prev[chatId] ?? []).map(m =>
+                    m.id === messageId
+                        ? { ...m, likedByMe: wasLiked, likesCount: (m.likesCount ?? 0) + (wasLiked ? 1 : -1) }
+                        : m
+                ),
+            }));
+        }
+    }, [messages]);
 
     const pinMessage = useCallback<Ctx['pinMessage']>(async (chatId, messageId) => {
         const msg = (messages[chatId] ?? []).find(m => m.id === messageId);
@@ -516,9 +639,11 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
         typing,
         availableMembers,
         activeChatId,
+        likeMessage,
         setActiveChat,
         sendMessage,
         sendPayload,
+        notifyTyping,
         pinMessage,
         forwardMessage,
         deleteMessage,
@@ -530,8 +655,8 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
         ensureLoaded,
     }), [
         contacts, messages, typing, availableMembers, activeChatId,
-        sendMessage, sendPayload, pinMessage, forwardMessage, deleteMessage, setActiveChat,
-        createChat, getMembers, getMediaFromChat, getFilesFromChat, getPinnedFromChat,
+        sendMessage, sendPayload, notifyTyping, pinMessage, forwardMessage, deleteMessage, setActiveChat,
+        createChat, getMembers, getMediaFromChat, getFilesFromChat, getPinnedFromChat, likeMessage,
         ensureLoaded,
     ]);
 

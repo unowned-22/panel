@@ -26,7 +26,7 @@ import Market from "@/me/pages/market";
 import Music from "@/me/pages/music";
 import Search from "@/me/pages/search";
 import Feed from "@/me/pages/me/feed";
-import SettingsPage from "@/me/pages/me/settings";
+
 import Profile from "@/me/pages/me/profile";
 import UserProfile from "@/me/pages/user-profile";
 
@@ -61,7 +61,6 @@ export function AppRoutingSetup() {
                     <Route path="/user-profile/:id" element={<UserProfile />} />
                     <Route path="/user/feed" element={<Feed />} />
                     <Route path="/user/profile" element={<Profile />} />
-                    <Route path="/user/settings" element={<SettingsPage />} />
                 </Route>
             </Route>
             <Route path="error/*" element={<ErrorRouting />} />

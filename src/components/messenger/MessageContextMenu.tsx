@@ -13,15 +13,18 @@ interface Props {
   senderName?: string;
   isOwn?: boolean;
   isPinned?: boolean;
+  isLiked?: boolean;
+  likesCount?: number;
   onReply?: (p: { senderName: string; text: string }) => void;
   onPin?: () => void;
   onForward?: () => void;
   onDelete?: () => void;
+  onLike?: () => void;
 }
 
 const MessageContextMenu = ({
-  children, messageText, senderName, isOwn, isPinned,
-  onReply, onPin, onForward, onDelete,
+  children, messageText, senderName, isOwn, isPinned, isLiked, likesCount,
+  onReply, onPin, onForward, onDelete, onLike,
 }: Props) => {
   const [reaction, setReaction] = useState<string | null>(null);
 
@@ -51,8 +54,9 @@ const MessageContextMenu = ({
             <Reply size={18} className="text-muted-foreground" />Ответить
           </ContextMenuItem>
           <ContextMenuItem className="gap-3 px-3 py-2 text-sm cursor-pointer"
-            onClick={() => toast({ title: "❤️ Нравится" })}>
-            <Heart size={18} className="text-muted-foreground" />Нравится
+                           onClick={() => { onLike?.(); toast({ title: isLiked ? "Убрал лайк" : "❤️ Нравится" }); }}>
+            <Heart size={18} className={isLiked ? "text-red-500 fill-red-500" : "text-muted-foreground"} />
+            {isLiked ? `Нравится · ${likesCount}` : "Нравится"}
           </ContextMenuItem>
           <ContextMenuItem className="gap-3 px-3 py-2 text-sm cursor-pointer"
             onClick={() => { onPin?.(); toast({ title: isPinned ? "Откреплено" : "Закреплено" }); }}>
