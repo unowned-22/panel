@@ -9,13 +9,13 @@ import { useMessenger } from "@/hooks/use-messenger";
 import AudioMessage from "@/components/messenger/AudioMessage";
 import VideoMessage from "@/components/messenger/VideoMessage";
 import LinkPreview, { extractUrls } from "@/components/messenger/LinkPreview";
-import TypingIndicator from "@/components/messenger/TypingIndicator";
 import MessageContextMenu from "@/components/messenger/MessageContextMenu";
 import EmojiPicker from "@/components/messenger/EmojiPicker";
 import FileAttachment from "@/components/messenger/FileAttachment";
 import {
     DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import TypingDots from "./typing-dots";
 import { Avatar } from "./ConversationList";
 
 const readAsDataURL = (file: File) =>
@@ -47,7 +47,7 @@ interface Props {
 }
 
 export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCall, onForward }: Props) => {
-    const { messages, typing, sendPayload, notifyTyping, pinMessage, deleteMessage, likeMessage } = useMessenger();
+    const { messages, typing, sendPayload, notifyTyping, pinMessage, deleteMessage, toggleReaction } = useMessenger();
 
     const chatMessages = messages[active.id] ?? [];
     const isTyping = typing.has(active.id);
@@ -159,9 +159,11 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
                             {active.verified && <BadgeCheck className="w-4 h-4 text-primary fill-primary/20" />}
                         </div>
                         <p className="text-[12px] text-muted-foreground truncate">
-                            {isTyping
-                                ? "печатает…"
-                                : active.isVK ? "Сервисные уведомления" : active.online ? "в сети" : "был(а) недавно"}
+                            {isTyping ? (
+                                <span className="flex items-center gap-0.5">
+                                    Печатает<TypingDots />
+                                </span>
+                            ) : active.isVK ? "Сервисные уведомления" : active.online ? "в сети" : "был(а) недавно"}
                         </p>
                     </div>
                 </button>
@@ -213,7 +215,7 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1.5">
-                {chatMessages.length === 0 && !isTyping && (
+                {chatMessages.length === 0 && (
                     <div className="flex items-center justify-center h-full">
                         <p className="text-sm text-muted-foreground">Нет сообщений. Напишите первым 👋</p>
                     </div>
@@ -252,15 +254,13 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
                                     <MessageContextMenu
                                         messageText={msg.text}
                                         senderName={msg.senderName}
-                                        isOwn={msg.isOwn}
                                         isPinned={msg.pinned}
-                                        isLiked={msg.likedByMe}
-                                        likesCount={msg.likesCount}
+                                        reactions={msg.reactions}
                                         onReply={() => setReplyTo({ id: msg.id, senderName: msg.senderName, text: msg.text })}
                                         onPin={() => pinMessage(active.id, msg.id)}
                                         onDelete={() => deleteMessage(active.id, msg.id)}
                                         onForward={() => onForward(msg.id)}
-                                        onLike={() => likeMessage(active.id, msg.id)}
+                                        onReact={(emoji) => toggleReaction(active.id, msg.id, emoji)}
                                     >
                                         <div
                                             className={`px-3 py-2 text-[13.5px] ${
@@ -310,19 +310,20 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
                                             {msg.files?.map((f, i) => (
                                                 <FileAttachment key={i} file={f} isOwn={msg.isOwn} />
                                             ))}
-                                            <div className={`flex items-center gap-1 justify-end mt-1 ${msg.isOwn ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
-                                                {(msg.likesCount ?? 0) > 0 && (
+                                            <div className={`flex items-center gap-1 justify-end mt-1 flex-wrap ${msg.isOwn ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                                                {msg.reactions?.map(r => (
                                                     <button
-                                                        onClick={() => likeMessage(active.id, msg.id)}
-                                                        className={`flex items-center gap-0.5 text-[10.5px] transition-colors ${
-                                                            msg.likedByMe
-                                                                ? "text-red-500"
-                                                                : msg.isOwn ? "text-primary-foreground/70" : "text-muted-foreground"
+                                                        key={r.emoji}
+                                                        onClick={() => toggleReaction(active.id, msg.id, r.emoji)}
+                                                        className={`flex items-center gap-0.5 text-[10.5px] px-1.5 py-0.5 rounded-full transition-colors ${
+                                                            r.reactedByMe
+                                                                ? "bg-primary/20 text-primary"
+                                                                : msg.isOwn ? "bg-primary-foreground/10 text-primary-foreground/80" : "bg-background/60 text-muted-foreground"
                                                         }`}
                                                     >
-                                                        ❤️ {msg.likesCount}
+                                                        {r.emoji} {r.count}
                                                     </button>
-                                                )}
+                                                ))}
                                                 <span className="text-[10.5px]">{msg.time}</span>
                                                 {msg.isOwn && <CheckCheck size={14} />}
                                             </div>
@@ -333,7 +334,6 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
                         </div>
                     );
                 })}
-                {isTyping && <TypingIndicator name={active.name} />}
                 <div ref={endRef} />
             </div>
 

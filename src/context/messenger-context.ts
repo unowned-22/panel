@@ -7,6 +7,12 @@ export interface MessageFile {
     mime?: string;
 }
 
+export interface ReactionSummary {
+    emoji: string;
+    count: number;
+    reactedByMe: boolean;
+}
+
 export interface Message {
     id: string;
     senderId: string;
@@ -22,8 +28,7 @@ export interface Message {
     replyTo?: { senderName: string; text: string };
     pinned?: boolean;
     forwardedFrom?: string;
-    likesCount?: number;
-    likedByMe?: boolean;
+    reactions?: ReactionSummary[];
     deliveryStatus?: string;
 }
 
@@ -78,7 +83,7 @@ export interface Ctx {
     availableMembers: AvailableMember[];
     activeChatId: string | null;
     setActiveChat: (chatId: string | null) => void;
-    likeMessage: (chatId: string, messageId: string) => void;
+    toggleReaction: (chatId: string, messageId: string, emoji: string) => void;
     sendMessage: (chatId: string, text: string, replyTo?: { senderName: string; text: string }) => void;
     sendPayload: (chatId: string, payload: SendPayload) => void;
     pinMessage: (chatId: string, messageId: string) => void;

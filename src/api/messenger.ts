@@ -21,6 +21,12 @@ export interface ApiMessagePreview {
     body: string;
 }
 
+export interface ApiReactionSummary {
+    emoji: string;
+    count: number;
+    reacted_by_me: boolean;
+}
+
 export interface ApiMessage {
     id: number;
     conversation_id: number;
@@ -36,8 +42,7 @@ export interface ApiMessage {
     is_edited: boolean;
     edited_at?: string | null;
     pinned: boolean;
-    likes_count: number;
-    liked_by_me: boolean;
+    reactions: ApiReactionSummary[];
     disappears_at?: string | null;
     scheduled_at?: string | null;
     is_scheduled: boolean;
@@ -329,18 +334,16 @@ export const messengerApi = {
         );
     },
 
-    /** Like a message */
-    likeMessage(msgID: number) {
+    addReaction(msgID: number, emoji: string) {
         return apiClient.post<{ data: MessageResult }>(
-            `${BASE}/messages/${msgID}/like`,
-            {}
+            `${BASE}/messages/${msgID}/reactions`,
+            { emoji }
         );
     },
 
-    /** Remove my like from a message */
-    unlikeMessage(msgID: number) {
+    removeReaction(msgID: number, emoji: string) {
         return apiClient.delete<{ data: MessageResult }>(
-            `${BASE}/messages/${msgID}/like`
+            `${BASE}/messages/${msgID}/reactions/${encodeURIComponent(emoji)}`
         );
     },
 

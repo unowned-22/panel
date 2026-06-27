@@ -14,12 +14,11 @@ import type {
     Ctx,
     Message,
     MessageFile,
+    ReactionSummary
 } from '@/context/messenger-context';
-import { messengerApi, type ApiConversation, type ApiMessage } from '@/api/messenger';
+import { messengerApi, type ApiConversation, type ApiMessage, type ApiReactionSummary } from '@/api/messenger';
 import { useAuthStore } from '@/auth/auth.store';
 import { useSocket } from '@/hooks/use-socket';
-
-// ─── Formatters ───────────────────────────────────────────────────────────────
 
 const fmtTime = (iso?: string | null): string => {
     if (!iso) return '';
@@ -41,9 +40,9 @@ const fmtDate = (iso?: string | null): string => {
 };
 
 const convName = (c: ApiConversation, myID: number): string => {
-    if (c.type !== 'direct') return c.title || 'Без названия';
+    if (c.type !== 'direct') return c.title || 'Группа без названия';
     const other = c.members?.find(m => m.user_id !== myID);
-    return other?.user_name || c.title || 'Диалог';
+    return other?.user_name || c.title || `Диалог #${c.id}`;
 };
 
 const convAvatar = (c: ApiConversation, myID: number): string | undefined => {
@@ -109,8 +108,11 @@ const mapMessage = (m: ApiMessage, myID: number): Message => {
         audio,
         video,
         pinned: m.pinned,
-        likesCount: m.likes_count,
-        likedByMe: m.liked_by_me,
+        reactions: (m.reactions ?? []).map(r => ({
+            emoji: r.emoji,
+            count: r.count,
+            reactedByMe: r.reacted_by_me,
+        })),
         deliveryStatus: m.delivery_status,
         replyTo: m.reply_to
             ? {
@@ -142,8 +144,8 @@ interface WsReactionPayload {
     conversation_id: number;
     message_id: number;
     user_id: number;
-    likes_count: number;
-    action: string;
+    emoji: string;
+    reactions: ApiReactionSummary[];
 }
 
 interface WsDeliveryPayload {
@@ -165,9 +167,6 @@ interface WsTypingPayload {
     is_typing: boolean;
 }
 
-// Сколько ждать тишины после последнего keystroke, прежде чем сами погасим
-// у себя индикатор «печатает» (сервер тоже гасит по таймауту, но дублируем
-// здесь, чтобы не зависеть от сетевых задержек WS).
 const TYPING_IDLE_MS = 3000;
 
 export const MessengerProvider = ({ children }: { children: ReactNode }) => {
@@ -184,8 +183,6 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
 
     const loadedConvs = useRef<Set<string>>(new Set());
     const mountedRef = useRef(true);
-    // Таймеры авто-сброса "is_typing: true" -> "false" для чатов, в которые
-    // печатает текущий пользователь (per chatId).
     const typingTimersRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
     const setActiveChat = useCallback((chatId: string | null) => {
@@ -233,8 +230,6 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [myID]);
 
-    // ── Bootstrap on auth change ──────────────────────────────────────────────
-
     useEffect(() => {
         mountedRef.current = true;
 
@@ -248,7 +243,25 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [myID, activeAccountId]);
 
-    // ── Cleanup typing timers on unmount ──────────────────────────────────────
+    const applyReactionSnapshot = (p: WsReactionPayload) => {
+        const chatId = String(p.conversation_id);
+        const msgId = String(p.message_id);
+        setMessages(prev => ({
+            ...prev,
+            [chatId]: (prev[chatId] ?? []).map(m =>
+                m.id === msgId
+                    ? {
+                        ...m,
+                        reactions: p.reactions.map(r => ({
+                            emoji: r.emoji,
+                            count: r.count,
+                            reactedByMe: r.reacted_by_me,
+                        })),
+                    }
+                    : m
+            ),
+        }));
+    };
 
     useEffect(() => {
         return () => {
@@ -340,37 +353,9 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
                 }));
             }),
 
-            subscribe<WsReactionPayload>('messenger.reaction_added', (p) => {
-                const chatId = String(p.conversation_id);
-                const msgId = String(p.message_id);
-                setMessages(prev => ({
-                    ...prev,
-                    [chatId]: (prev[chatId] ?? []).map(m => {
-                        if (m.id !== msgId) return m;
-                        return {
-                            ...m,
-                            likesCount: p.likes_count,
-                            likedByMe: p.user_id === myID ? true : m.likedByMe,
-                        };
-                    }),
-                }));
-            }),
+            subscribe<WsReactionPayload>('messenger.reaction_added', applyReactionSnapshot),
 
-            subscribe<WsReactionPayload>('messenger.reaction_removed', (p) => {
-                const chatId = String(p.conversation_id);
-                const msgId = String(p.message_id);
-                setMessages(prev => ({
-                    ...prev,
-                    [chatId]: (prev[chatId] ?? []).map(m => {
-                        if (m.id !== msgId) return m;
-                        return {
-                            ...m,
-                            likesCount: p.likes_count,
-                            likedByMe: p.user_id === myID ? false : m.likedByMe,
-                        };
-                    }),
-                }));
-            }),
+            subscribe<WsReactionPayload>('messenger.reaction_removed', applyReactionSnapshot),
 
             subscribe<WsDeliveryPayload>('messenger.delivery_updated', (p) => {
                 const chatId = String(p.conversation_id);
@@ -383,19 +368,17 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
                 }));
             }),
 
-            // Присутствие друзей онлайн/офлайн — раньше эта тема приходила в
-            // оба провайдера и игнорировалась обоими.
             subscribe<WsPresencePayload>('messenger.presence', (p) => {
                 const uid = String(p.user_id);
+                console.log(uid)
                 setContacts(prev => prev.map(c => {
+                    console.log(c)
                     if (c.isGroup) return c;
                     if (!c.memberIds?.includes(uid)) return c;
                     return { ...c, online: p.is_online };
                 }));
             }),
 
-            // Отложенное сообщение «выстрелило» — придёт отдельным
-            // message_sent, здесь делать нечего.
             subscribe('messenger.scheduled_ready', () => undefined),
         ];
 
@@ -486,38 +469,48 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
         }, TYPING_IDLE_MS);
     }, []);
 
-    const likeMessage = useCallback(async (chatId: string, messageId: string) => {
+    const toggleReaction = useCallback(async (chatId: string, messageId: string, emoji: string) => {
         const msg = (messages[chatId] ?? []).find(m => m.id === messageId);
         if (!msg) return;
 
-        const wasLiked = msg.likedByMe ?? false;
+        const existing = msg.reactions?.find(r => r.emoji === emoji);
+        const wasReacted = existing?.reactedByMe ?? false;
+
+        const applyOptimistic = (reactions: ReactionSummary[] = []): ReactionSummary[] => {
+            const idx = reactions.findIndex(r => r.emoji === emoji);
+            if (wasReacted) {
+                if (idx === -1) return reactions;
+                const count = reactions[idx].count - 1;
+                const next = [...reactions];
+                if (count <= 0) next.splice(idx, 1);
+                else next[idx] = { ...next[idx], count, reactedByMe: false };
+                return next;
+            }
+            if (idx === -1) return [...reactions, { emoji, count: 1, reactedByMe: true }];
+            const next = [...reactions];
+            next[idx] = { ...next[idx], count: next[idx].count + 1, reactedByMe: true };
+            return next;
+        };
+
         setMessages(prev => ({
             ...prev,
             [chatId]: (prev[chatId] ?? []).map(m =>
-                m.id === messageId
-                    ? { ...m, likedByMe: !wasLiked, likesCount: (m.likesCount ?? 0) + (wasLiked ? -1 : 1) }
-                    : m
+                m.id === messageId ? { ...m, reactions: applyOptimistic(m.reactions) } : m
             ),
         }));
 
         try {
-            if (wasLiked) {
-                await messengerApi.unlikeMessage(Number(messageId));
+            if (wasReacted) {
+                await messengerApi.removeReaction(Number(messageId), emoji);
             } else {
-                await messengerApi.likeMessage(Number(messageId));
+                await messengerApi.addReaction(Number(messageId), emoji);
             }
         } catch (err) {
-            console.error('[messenger] like failed', err);
-            setMessages(prev => ({
-                ...prev,
-                [chatId]: (prev[chatId] ?? []).map(m =>
-                    m.id === messageId
-                        ? { ...m, likedByMe: wasLiked, likesCount: (m.likesCount ?? 0) + (wasLiked ? 1 : -1) }
-                        : m
-                ),
-            }));
+            console.error('[messenger] reaction failed', err);
+            loadedConvs.current.delete(chatId);
+            loadMessages(chatId);
         }
-    }, [messages]);
+    }, [messages, loadMessages]);
 
     const pinMessage = useCallback<Ctx['pinMessage']>(async (chatId, messageId) => {
         const msg = (messages[chatId] ?? []).find(m => m.id === messageId);
@@ -639,7 +632,7 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
         typing,
         availableMembers,
         activeChatId,
-        likeMessage,
+        toggleReaction,
         setActiveChat,
         sendMessage,
         sendPayload,
@@ -656,7 +649,7 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
     }), [
         contacts, messages, typing, availableMembers, activeChatId,
         sendMessage, sendPayload, notifyTyping, pinMessage, forwardMessage, deleteMessage, setActiveChat,
-        createChat, getMembers, getMediaFromChat, getFilesFromChat, getPinnedFromChat, likeMessage,
+        createChat, getMembers, getMediaFromChat, getFilesFromChat, getPinnedFromChat, toggleReaction,
         ensureLoaded,
     ]);
 
