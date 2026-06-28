@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Rnd } from "react-rnd";
 import type { CropRect } from "./types";
 import { DESKTOP_RATIO, MIN_MOBILE_WIDTH, MOBILE_RATIO } from "./types";
+import { useTranslation } from "@/hooks/use-translation";
 
 interface Props {
   imageUrl: string;
@@ -19,6 +20,7 @@ const MAX_VIEWPORT_W = 911;
 const MAX_VIEWPORT_H = 607;
 
 export function CoverCropStep({ imageUrl, mobile, desktop, onChange, onLoadError }: Props) {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const [natural, setNatural] = useState<{ w: number; h: number } | null>(null);
   const [view, setView] = useState<{ w: number; h: number } | null>(null);
@@ -116,24 +118,24 @@ export function CoverCropStep({ imageUrl, mobile, desktop, onChange, onLoadError
 
   if (loading || !view || !natural) {
     return (
-      <div
-        ref={containerRef}
-        className="flex h-100 w-full items-center justify-center rounded-lg bg-black/40"
-      >
-        <div className="text-sm text-neutral-400">Loading image…</div>
-      </div>
+        <div
+            ref={containerRef}
+            className="flex h-100 w-full items-center justify-center rounded-lg bg-black/40"
+        >
+          <div className="text-sm text-neutral-400">{t('cover.crop.loading')}</div>
+        </div>
     );
   }
 
   // Mobile in screen coords
   const mScreen = mobile
-    ? {
+      ? {
         x: mobile.x / scaleX,
         y: mobile.y / scaleY,
         w: mobile.width / scaleX,
         h: mobile.height / scaleY,
       }
-    : null;
+      : null;
 
   // Desktop screen dims — width always equals mobile width
   // DESKTOP_RATIO > MOBILE_RATIO so desktop is always shorter → always fits inside mobile
@@ -142,11 +144,11 @@ export function CoverCropStep({ imageUrl, mobile, desktop, onChange, onLoadError
 
   // Desktop Y offset relative to mobile top edge (for positioning inside mobile Rnd)
   const dOffsetY =
-    mScreen && desktop
-      ? Math.max(0, Math.min(desktop.y / scaleY - mScreen.y, mScreen.h - dScreenH))
-      : mScreen
-        ? (mScreen.h - dScreenH) / 2
-        : 0;
+      mScreen && desktop
+          ? Math.max(0, Math.min(desktop.y / scaleY - mScreen.y, mScreen.h - dScreenH))
+          : mScreen
+              ? (mScreen.h - dScreenH) / 2
+              : 0;
 
   // Called when mobile is dragged or resized
   // Syncs desktop width to new mobile width, preserves relative Y offset
@@ -201,91 +203,91 @@ export function CoverCropStep({ imageUrl, mobile, desktop, onChange, onLoadError
   };
 
   return (
-    <div ref={containerRef} className="flex w-full justify-center">
-      <div
-        className="relative select-none overflow-hidden rounded-lg bg-black"
-        style={{ width: view.w, height: view.h }}
-      >
-        <img
-          src={imageUrl}
-          alt="cover"
-          draggable={false}
-          className="pointer-events-none absolute inset-0 h-full w-full object-fill"
-        />
+      <div ref={containerRef} className="flex w-full justify-center">
+        <div
+            className="relative select-none overflow-hidden rounded-lg bg-black"
+            style={{ width: view.w, height: view.h }}
+        >
+          <img
+              src={imageUrl}
+              alt="cover"
+              draggable={false}
+              className="pointer-events-none absolute inset-0 h-full w-full object-fill"
+          />
 
-        {/* Dim overlay outside mobile crop */}
-        {mScreen && (
-          <>
-            <div
-              className="pointer-events-none absolute inset-x-0 top-0 bg-black/55"
-              style={{ height: mScreen.y }}
-            />
-            <div
-              className="pointer-events-none absolute inset-x-0 bg-black/55"
-              style={{ top: mScreen.y + mScreen.h, bottom: 0 }}
-            />
-            <div
-              className="pointer-events-none absolute bg-black/55"
-              style={{ top: mScreen.y, left: 0, width: mScreen.x, height: mScreen.h }}
-            />
-            <div
-              className="pointer-events-none absolute bg-black/55"
-              style={{ top: mScreen.y, left: mScreen.x + mScreen.w, right: 0, height: mScreen.h }}
-            />
-          </>
-        )}
+          {/* Dim overlay outside mobile crop */}
+          {mScreen && (
+              <>
+                <div
+                    className="pointer-events-none absolute inset-x-0 top-0 bg-black/55"
+                    style={{ height: mScreen.y }}
+                />
+                <div
+                    className="pointer-events-none absolute inset-x-0 bg-black/55"
+                    style={{ top: mScreen.y + mScreen.h, bottom: 0 }}
+                />
+                <div
+                    className="pointer-events-none absolute bg-black/55"
+                    style={{ top: mScreen.y, left: 0, width: mScreen.x, height: mScreen.h }}
+                />
+                <div
+                    className="pointer-events-none absolute bg-black/55"
+                    style={{ top: mScreen.y, left: mScreen.x + mScreen.w, right: 0, height: mScreen.h }}
+                />
+              </>
+          )}
 
-        {/* Mobile crop — draggable & resizable freely */}
-        {mScreen && (
-          <Rnd
-            size={{ width: mScreen.w, height: mScreen.h }}
-            position={{ x: mScreen.x, y: mScreen.y }}
-            bounds="parent"
-            lockAspectRatio={MOBILE_RATIO}
-            minWidth={Math.min(MIN_MOBILE_WIDTH, view.w)}
-            cancel=".desktop-crop"
-            onDragStop={(_, d) => updateMobile(d.x, d.y, mScreen.w, mScreen.h)}
-            onResizeStop={(_, __, ref, ___, pos) =>
-              updateMobile(pos.x, pos.y, ref.offsetWidth, ref.offsetHeight)
-            }
-            className="border-2! border-dashed! border-white/90!"
-            style={{ zIndex: 10 }}
-          >
-            {/* Mobile label */}
-            <div className="absolute left-2 top-2 z-10 rounded bg-black/70 px-2 py-0.5 text-[11px] text-white/80 select-none pointer-events-none">
-              Mobile
-            </div>
+          {/* Mobile crop — draggable & resizable freely */}
+          {mScreen && (
+              <Rnd
+                  size={{ width: mScreen.w, height: mScreen.h }}
+                  position={{ x: mScreen.x, y: mScreen.y }}
+                  bounds="parent"
+                  lockAspectRatio={MOBILE_RATIO}
+                  minWidth={Math.min(MIN_MOBILE_WIDTH, view.w)}
+                  cancel=".desktop-crop"
+                  onDragStop={(_, d) => updateMobile(d.x, d.y, mScreen.w, mScreen.h)}
+                  onResizeStop={(_, __, ref, ___, pos) =>
+                      updateMobile(pos.x, pos.y, ref.offsetWidth, ref.offsetHeight)
+                  }
+                  className="border-2! border-dashed! border-white/90!"
+                  style={{ zIndex: 10 }}
+              >
+                {/* Mobile label */}
+                <div className="absolute left-2 top-2 z-10 rounded bg-black/70 px-2 py-0.5 text-[11px] text-white/80 select-none pointer-events-none">
+                  {t('cover.crop.label.mobile')}
+                </div>
 
-            {/* Desktop crop — lives inside mobile, same width, only vertical drag */}
-            <Rnd
-              size={{ width: dScreenW, height: dScreenH }}
-              position={{ x: 0, y: dOffsetY }}
-              bounds="parent"
-              dragAxis="y"
-              enableResizing={false}
-              onDragStop={(_, d) => updateDesktopOffsetY(d.y)}
-              className="desktop-crop border-2! border-dashed! border-sky-400!"
-              style={{ zIndex: 20 }}
-            >
-              <div className="absolute left-2 top-2 rounded bg-black/70 px-2 py-0.5 text-[11px] text-sky-300 select-none pointer-events-none">
-                Desktop ↕
-              </div>
-            </Rnd>
-          </Rnd>
-        )}
-      </div>
-
-      {/* Legend */}
-      <div className="absolute bottom-2 right-2 flex flex-col gap-1 text-[10px]">
-        <div className="flex items-center gap-1.5">
-          <div className="h-3 w-5 rounded-sm border border-dashed border-white/70" />
-          <span className="text-white/60">Mobile area</span>
+                {/* Desktop crop — lives inside mobile, same width, only vertical drag */}
+                <Rnd
+                    size={{ width: dScreenW, height: dScreenH }}
+                    position={{ x: 0, y: dOffsetY }}
+                    bounds="parent"
+                    dragAxis="y"
+                    enableResizing={false}
+                    onDragStop={(_, d) => updateDesktopOffsetY(d.y)}
+                    className="desktop-crop border-2! border-dashed! border-sky-400!"
+                    style={{ zIndex: 20 }}
+                >
+                  <div className="absolute left-2 top-2 rounded bg-black/70 px-2 py-0.5 text-[11px] text-sky-300 select-none pointer-events-none">
+                    {t('cover.crop.label.desktop')}
+                  </div>
+                </Rnd>
+              </Rnd>
+          )}
         </div>
-        <div className="flex items-center gap-1.5">
-          <div className="h-3 w-5 rounded-sm border border-dashed border-sky-400" />
-          <span className="text-white/60">Desktop area (drag ↕)</span>
+
+        {/* Legend */}
+        <div className="absolute bottom-2 right-2 flex flex-col gap-1 text-[10px]">
+          <div className="flex items-center gap-1.5">
+            <div className="h-3 w-5 rounded-sm border border-dashed border-white/70" />
+            <span className="text-white/60">{t('cover.crop.legend.mobile')}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="h-3 w-5 rounded-sm border border-dashed border-sky-400" />
+            <span className="text-white/60">{t('cover.crop.legend.desktop')}</span>
+          </div>
         </div>
       </div>
-    </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
-import { Image as ImageIcon, MoreHorizontal, Settings, Archive, CheckCircle2, MessageSquare } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Image as ImageIcon, MoreHorizontal, Settings, Archive, CheckCircle2, MessageSquare, X, Trash2, FolderInput } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -14,6 +14,12 @@ import type { Photo, Album as ApiAlbum } from '@/api/photos';
 
 type Tab = "photos" | "albums";
 
+const bulkDeletePhotos = (ids: number[]) =>
+    Promise.all(ids.map((id) => photosApi.deletePhoto(id)));
+
+const bulkMovePhotos = (ids: number[], albumId: number | null) =>
+    Promise.all(ids.map((id) => photosApi.movePhoto(id, albumId)));
+
 const Photos = () => {
     const [tab, setTab] = useState<Tab>("photos");
     const [openAlbumId, setOpenAlbumId] = useState<number | null>(null);
@@ -26,17 +32,35 @@ const Photos = () => {
     const [viewerPhoto, setViewerPhoto] = useState<Photo | null>(null);
     const [movePhotoId, setMovePhotoId] = useState<number | null>(null);
 
+    const [selectionMode, setSelectionMode] = useState(false);
+    const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+    const [bulkMoveOpen, setBulkMoveOpen] = useState(false);
+    const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+
+    const enterSelectionMode = () => { setSelectionMode(true); setSelectedIds(new Set()); };
+    const exitSelectionMode = () => { setSelectionMode(false); setSelectedIds(new Set()); };
+    const toggleSelect = (id: number) => setSelectedIds((prev) => {
+        const next = new Set(prev);
+        if (next.has(id)) next.delete(id); else next.add(id);
+        return next;
+    });
+    // ─────────────────────────────────────────────────────────────────────────
+
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const photosQuery = usePhotos(1, 100);
     const albumsQuery = useAlbums(1, 100);
-    const albumPhotosQuery = useAlbumPhotos(openAlbumId, 1, 100);
+    const albumPhotosQuery = useAlbumPhotos(openAlbumId ?? editAlbumId, 1, 100);
 
     const allPhotos = photosQuery.data?.items ?? [];
     const openAlbumResolved = openAlbumId
         ? (albumsQuery.data?.items ?? []).find((a) => a.id === openAlbumId) ?? null
         : null;
-    const editingAlbum = editAlbumId ? (albumsQuery.data?.items ?? []).find((a) => a.id === editAlbumId) ?? null : null;
+    const editingAlbum = editAlbumId
+        ? (albumsQuery.data?.items ?? []).find((a) => a.id === editAlbumId) ?? null
+        : null;
+
+    const editAlbumPhotos = albumPhotosQuery.data?.items ?? [];
 
     const upload = usePhotoUpload();
     const toast = useToast();
@@ -47,7 +71,7 @@ const Photos = () => {
             await photosApi.createAlbum({ title, description });
             toast.toast({ title: t('photos.album.create.success'), description: title });
             await albumsQuery.refetch();
-        } catch (err) {
+        } catch {
             toast.toast({ title: t('errors.error'), description: t('photos.album.create.error') });
         } finally {
             setCreateOpen(false);
@@ -60,7 +84,7 @@ const Photos = () => {
             await photosApi.updateAlbum(editingAlbum.id, { title, description });
             toast.toast({ title: t('photos.album.updated') });
             await albumsQuery.refetch();
-        } catch (err) {
+        } catch {
             toast.toast({ title: t('errors.error'), description: t('photos.album.create.error') });
         } finally {
             setEditAlbumId(null);
@@ -73,13 +97,35 @@ const Photos = () => {
             await photosApi.deleteAlbum(id);
             toast.toast({ title: t('photos.album.delete.success') });
             await albumsQuery.refetch();
-        } catch (err) {
+        } catch {
             toast.toast({ title: t('errors.error'), description: t('photos.album.delete.error') });
         } finally {
             if (openAlbumId === id) setOpenAlbumId(null);
             if (editAlbumId === id) setEditAlbumId(null);
         }
     };
+
+    const handleSetAlbumCover = async (photoId: number) => {
+        if (!editAlbumId) return;
+        try {
+            await photosApi.setAlbumCover(editAlbumId, photoId);
+            await albumsQuery.refetch();
+        } catch {
+            toast.toast({ title: t('errors.error'), description: t('photos.setcover.error') });
+        }
+    };
+
+    const handleUploadAlbumCover = async (file: File) => {
+        if (!editAlbumId) return;
+        try {
+            const photo = await photosApi.uploadPhoto(file, () => {}, editAlbumId);
+            await photosApi.setAlbumCover(editAlbumId, photo.id);
+            await Promise.all([albumsQuery.refetch(), albumPhotosQuery.refetch()]);
+        } catch {
+            toast.toast({ title: t('errors.error'), description: t('photos.setcover.error') });
+        }
+    };
+    // ─────────────────────────────────────────────────────────────────────────
 
     const triggerFileSelect = (target: number | null) => {
         setUploadAlbumId(target);
@@ -104,17 +150,38 @@ const Photos = () => {
         setUploadOpen(false);
     };
 
+    // ── Bulk handlers ─────────────────────────────────────────────────────────
+    const handleBulkDelete = async () => {
+        try {
+            await bulkDeletePhotos(Array.from(selectedIds));
+            toast.toast({ title: t('photos.bulk.delete.success') });
+            await photosQuery.refetch();
+            exitSelectionMode();
+        } catch {
+            toast.toast({ title: t('errors.error'), description: t('photos.delete.error') });
+        } finally {
+            setBulkDeleteOpen(false);
+        }
+    };
+
+    const handleBulkMove = async (albumId: number | null) => {
+        try {
+            await bulkMovePhotos(Array.from(selectedIds), albumId);
+            toast.toast({ title: t('photos.move.success') });
+            await Promise.all([photosQuery.refetch(), albumsQuery.refetch()]);
+            exitSelectionMode();
+        } catch {
+            toast.toast({ title: t('errors.error'), description: t('photos.move.error') });
+        }
+    };
+    // ─────────────────────────────────────────────────────────────────────────
+
+    const selectedCount = selectedIds.size;
+
     return (
         <div className="flex gap-4">
             <div className="flex-1 min-w-0 w-full flex flex-col gap-3">
-                <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    className="hidden"
-                    onChange={onFilesPicked}
-                />
+                <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={onFilesPicked} />
 
                 <div className="panel-card p-5">
                     {openAlbumId && !openAlbumResolved ? (
@@ -136,60 +203,64 @@ const Photos = () => {
                             <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
                                 <div className="flex gap-1">
                                     <button
-                                        onClick={() => setTab("photos")}
-                                        className={cn(
-                                            "button-pill flex items-center gap-2",
-                                            tab === "photos" ? "bg-secondary" : "bg-transparent text-muted-foreground",
-                                        )}
+                                        onClick={() => { exitSelectionMode(); setTab("photos"); }}
+                                        className={cn("button-pill flex items-center gap-2", tab === "photos" ? "bg-secondary" : "bg-transparent text-muted-foreground")}
                                     >
                                         {t('page.photos.photos')}
                                     </button>
                                     <button
-                                        onClick={() => setTab("albums")}
-                                        className={cn(
-                                            "button-pill",
-                                            tab === "albums" ? "bg-secondary" : "bg-transparent text-muted-foreground",
-                                        )}
+                                        onClick={() => { exitSelectionMode(); setTab("albums"); }}
+                                        className={cn("button-pill", tab === "albums" ? "bg-secondary" : "bg-transparent text-muted-foreground")}
                                     >
                                         {t('page.photos.albums')}
                                     </button>
                                 </div>
+
                                 <div className="flex items-center gap-2">
                                     {tab === "photos" ? (
-                                        <>
-                                            <button
-                                                onClick={() => triggerFileSelect(null)}
-                                                className="button-pill flex items-center gap-2"
-                                            >
-                                                <ImageIcon className="w-4 h-4 text-primary" /> {t('page.photos.upload.photo')}
-                                            </button>
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <button className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center hover:bg-accent transition-colors">
-                                                        <MoreHorizontal className="w-4 h-4" />
-                                                    </button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end" className="w-56">
-                                                    <DropdownMenuItem>
-                                                        <Archive className="w-4 h-4 mr-2" /> {t('page.photos.archive')}
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem>
-                                                        <MessageSquare className="w-4 h-4 mr-2" /> {t('photos.comments.photo')}
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem>
-                                                        <CheckCircle2 className="w-4 h-4 mr-2" /> {t('page.photos.chose.some')}
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                            <button className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center hover:bg-accent transition-colors">
-                                                <Settings className="w-4 h-4" />
-                                            </button>
-                                        </>
+                                        selectionMode ? (
+                                            <>
+                                                <span className="text-sm text-muted-foreground">
+                                                    {selectedCount > 0
+                                                        ? t('photos.selected.count').replace('{count}', String(selectedCount))
+                                                        : t('photos.selected.none')}
+                                                </span>
+                                                <Button variant="secondary" size="sm" onClick={exitSelectionMode} className="flex items-center gap-1.5">
+                                                    <X className="w-4 h-4" /> {t('page.photos.cancel')}
+                                                </Button>
+                                                <Button variant="secondary" size="sm" disabled={selectedCount === 0} onClick={() => setBulkMoveOpen(true)} className="flex items-center gap-1.5">
+                                                    <FolderInput className="w-4 h-4" /> {t('page.photos.move')}
+                                                </Button>
+                                                <Button variant="destructive" size="sm" disabled={selectedCount === 0} onClick={() => setBulkDeleteOpen(true)} className="flex items-center gap-1.5">
+                                                    <Trash2 className="w-4 h-4" /> {t('page.photos.delete')}
+                                                </Button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <button onClick={() => triggerFileSelect(null)} className="button-pill flex items-center gap-2">
+                                                    <ImageIcon className="w-4 h-4 text-primary" /> {t('page.photos.upload.photo')}
+                                                </button>
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <button className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center hover:bg-accent transition-colors">
+                                                            <MoreHorizontal className="w-4 h-4" />
+                                                        </button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end" className="w-56">
+                                                        <DropdownMenuItem><Archive className="w-4 h-4 mr-2" /> {t('page.photos.archive')}</DropdownMenuItem>
+                                                        <DropdownMenuItem><MessageSquare className="w-4 h-4 mr-2" /> {t('photos.comments.photo')}</DropdownMenuItem>
+                                                        <DropdownMenuItem onSelect={() => enterSelectionMode()}>
+                                                            <CheckCircle2 className="w-4 h-4 mr-2" /> {t('page.photos.chose.some')}
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                                <button className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center hover:bg-accent transition-colors">
+                                                    <Settings className="w-4 h-4" />
+                                                </button>
+                                            </>
+                                        )
                                     ) : (
-                                        <button
-                                            onClick={() => setCreateOpen(true)}
-                                            className="button-pill flex items-center gap-2"
-                                        >
+                                        <button onClick={() => setCreateOpen(true)} className="button-pill flex items-center gap-2">
                                             <ImageIcon className="w-4 h-4 text-primary" /> {t('photos.album.create')}
                                         </button>
                                     )}
@@ -202,6 +273,10 @@ const Photos = () => {
                                     onOpen={(p: Photo) => setViewerPhoto(p)}
                                     onDelete={(id) => photosQuery.deletePhoto(id)}
                                     onMove={(id) => setMovePhotoId(id)}
+                                    onEnterSelectMode={enterSelectionMode}
+                                    selectionMode={selectionMode}
+                                    selectedIds={selectedIds}
+                                    onToggleSelect={toggleSelect}
                                 />
                             ) : (
                                 <AlbumsGrid
@@ -232,17 +307,19 @@ const Photos = () => {
                     submitLabel={t('page.settings.save')}
                     initialTitle={editingAlbum?.title ?? ''}
                     initialDescription={editingAlbum?.description ?? ''}
+                    initialCoverUrl={editingAlbum?.cover_url ?? undefined}
+                    albumPhotos={editAlbumPhotos}
                     onSubmit={handleSaveAlbum}
                     onDelete={editingAlbum ? () => handleDeleteAlbum(editingAlbum.id) : undefined}
+                    onSetCover={handleSetAlbumCover}
+                    onUploadCover={handleUploadAlbumCover}
                     showCover
                 />
 
                 {/* Upload */}
                 <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
                     <DialogContent className="max-w-2xl">
-                        <DialogHeader>
-                            <DialogTitle>{t('photos.upload.title')}</DialogTitle>
-                        </DialogHeader>
+                        <DialogHeader><DialogTitle>{t('photos.upload.title')}</DialogTitle></DialogHeader>
                         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                             {t('photos.photos.photo.count').replace('{count}', String(upload.items.length))}
                         </div>
@@ -256,27 +333,20 @@ const Photos = () => {
                                 </div>
                             ))}
                             {upload.items.length === 0 && (
-                                <div className="col-span-4 text-center text-sm text-muted-foreground py-8">
-                                    {t('photos.upload.none')}
-                                </div>
+                                <div className="col-span-4 text-center text-sm text-muted-foreground py-8">{t('photos.upload.none')}</div>
                             )}
                         </div>
                         <DialogFooter className="justify-between! sm:justify-between! items-center">
-                            <button
-                                onClick={() => fileInputRef.current?.click()}
-                                className="text-sm text-primary hover:underline"
-                            >
+                            <button onClick={() => fileInputRef.current?.click()} className="text-sm text-primary hover:underline">
                                 {t('photos.upload.add')}
                             </button>
                             <div className="flex gap-2">
-                                <Button variant="secondary" onClick={() => setUploadOpen(false)}>
-                                    {t('page.photos.cancel')}
-                                </Button>
+                                <Button variant="secondary" onClick={() => setUploadOpen(false)}>{t('page.photos.cancel')}</Button>
                                 <Button onClick={confirmUpload} className="gap-2">
                                     {t('page.settings.save')}
                                     {upload.items.length > 0 && (
                                         <span className="w-5 h-5 rounded-full bg-background/20 text-xs flex items-center justify-center">
-                                          {upload.items.length}
+                                            {upload.items.length}
                                         </span>
                                     )}
                                 </Button>
@@ -284,6 +354,7 @@ const Photos = () => {
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
+
                 <PhotoViewer
                     open={!!viewerPhoto}
                     onOpenChange={(o) => !o && setViewerPhoto(null)}
@@ -294,6 +365,8 @@ const Photos = () => {
                     }
                     albums={albumsQuery.data?.items ?? []}
                 />
+
+                {/* Move single photo */}
                 <MoveToAlbumDialog
                     open={movePhotoId !== null}
                     onOpenChange={(o) => { if (!o) setMovePhotoId(null); }}
@@ -307,6 +380,31 @@ const Photos = () => {
                         setMovePhotoId(null);
                     }}
                 />
+
+                {/* Bulk move */}
+                <MoveToAlbumDialog
+                    open={bulkMoveOpen}
+                    onOpenChange={setBulkMoveOpen}
+                    albums={albumsQuery.data?.items ?? []}
+                    currentAlbumId={null}
+                    onConfirm={handleBulkMove}
+                />
+
+                {/* Bulk delete confirm */}
+                <Dialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
+                    <DialogContent className="max-w-sm" hideClose>
+                        <DialogHeader>
+                            <DialogTitle>{t('photos.delete.confirm.title')}</DialogTitle>
+                            <DialogDescription>
+                                {t('photos.bulk.delete.confirm').replace('{count}', String(selectedCount))}
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                            <Button variant="secondary" onClick={() => setBulkDeleteOpen(false)}>{t('page.photos.cancel')}</Button>
+                            <Button variant="destructive" onClick={handleBulkDelete}>{t('page.photos.delete')}</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
         </div>
     );

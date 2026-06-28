@@ -106,86 +106,86 @@ const AccountSection = () => {
                 </button>
             </Row>
 
-            <Row label="Тема">
-                <button className="text-primary hover:underline">Системная</button>
+            <Row label={t('page.settings.account.theme')}>
+                <button className="text-primary hover:underline">{t('page.settings.account.theme.system')}</button>
             </Row>
 
-            <Row label="Аккаунты">
-                <Link to="/me/account" className="text-primary hover:underline">Управление аккаунтами</Link>
+            <Row label={t('page.settings.account.accounts')}>
+                <Link to="/me/account" className="text-primary hover:underline">{t('page.settings.account.manage')}</Link>
             </Row>
 
-            <Row label="Настройки профиля">
+            <Row label={t('page.settings.account.profile')}>
                 <div className="flex flex-col gap-3">
                     <CheckboxItem
                         checked={profileFlags.showPosts}
                         onChange={() => toggleProfile("showPosts")}
-                        label="При открытии профиля показывать мои посты"
+                        label={t('page.settings.account.profile.show.posts')}
                         hint
                     />
                     <CheckboxItem
                         checked={profileFlags.disableComments}
                         onChange={() => toggleProfile("disableComments")}
-                        label="Отключить комментирование постов"
+                        label={t('page.settings.account.profile.disable.comments')}
                         hint
                     />
                     <CheckboxItem
                         checked={profileFlags.accessibility}
                         onChange={() => toggleProfile("accessibility")}
-                        label="Специальные возможности"
+                        label={t('page.settings.account.profile.accessibility')}
                         hint
                     />
                 </div>
             </Row>
 
-            <Row label="Настройки контента">
+            <Row label={t('page.settings.account.content')}>
                 <div className="flex flex-col gap-3">
                     <CheckboxItem
                         checked={contentFlags.autoplay}
                         onChange={() => toggleContent("autoplay")}
-                        label="Автоматически включать видео и музыку в ленте"
+                        label={t('page.settings.account.content.autoplay')}
                         hint
                     />
                     <CheckboxItem
                         checked={contentFlags.autoGif}
                         onChange={() => toggleContent("autoGif")}
-                        label="Автоматически воспроизводить GIF-анимации"
+                        label={t('page.settings.account.content.auto.gif')}
                     />
                     <CheckboxItem
                         checked={contentFlags.suggestStickers}
                         onChange={() => toggleContent("suggestStickers")}
-                        label="Подсказывать стикеры в полях ввода"
+                        label={t('page.settings.account.content.suggest.stickers')}
                     />
                     <CheckboxItem
                         checked={contentFlags.showInteresting}
                         onChange={() => toggleContent("showInteresting")}
-                        label="Показывать «Интересное» в историях"
+                        label={t('page.settings.account.content.show.interesting')}
                     />
                     <CheckboxItem
                         checked={contentFlags.translatePosts}
                         onChange={() => toggleContent("translatePosts")}
-                        label="Переводить посты"
+                        label={t('page.settings.account.content.translate.posts')}
                         hint
                     />
 
                     <div className="mt-2">
-                        <div className="text-xs text-muted-foreground">Порядок постов в ленте новостей:</div>
+                        <div className="text-xs text-muted-foreground">{t('page.settings.account.content.feed.order')}</div>
                         <button className="mt-1 text-sm font-medium text-primary hover:underline">
-                            По времени публикации
+                            {t('page.settings.account.content.feed.order.value')}
                         </button>
                     </div>
                     <div>
-                        <div className="text-xs text-muted-foreground">Сортировка комментариев:</div>
+                        <div className="text-xs text-muted-foreground">{t('page.settings.account.content.comments.sort')}</div>
                         <button className="mt-1 text-sm font-medium text-primary hover:underline">
-                            Сначала интересные
+                            {t('page.settings.account.content.comments.sort.value')}
                         </button>
                     </div>
                 </div>
             </Row>
 
-            <Row label="Фильтр нецензурных выражений" divider={false}>
+            <Row label={t('page.settings.account.profanity.filter')} divider={false}>
                 <div className="flex items-center justify-between gap-4">
-                    <span className="text-foreground/90">Отключён</span>
-                    <button className="text-sm font-medium text-primary hover:underline">Изменить</button>
+                    <span className="text-foreground/90">{t('page.settings.account.profanity.disabled')}</span>
+                    <button className="text-sm font-medium text-primary hover:underline">{t('page.settings.account.profanity.change')}</button>
                 </div>
             </Row>
         </Card>
@@ -194,13 +194,6 @@ const AccountSection = () => {
 
 
 type Frequency = "instant" | "daily" | "weekly" | "off";
-
-const FREQ_LABEL: Record<Frequency, string> = {
-    instant: "Мгновенно",
-    daily: "Ежедневная сводка",
-    weekly: "Еженедельная сводка",
-    off: "Отключено",
-};
 
 type NotifKey =
     | "messages"
@@ -225,63 +218,22 @@ const DEFAULT_PREFS: Record<NotifKey, NotifPref> = {
 
 const NOTIF_TYPES: {
     key: NotifKey;
-    title: string;
-    description: string;
+    titleKey: keyof TranslationDictionary;
+    descKey: keyof TranslationDictionary;
     icon: ReactNode;
     color: string;
 }[] = [
-    {
-        key: "messages",
-        title: "Личные сообщения",
-        description: "Новые сообщения в ваших личных чатах",
-        icon: <MessageSquare className="h-4 w-4" />,
-        color: "hsl(140 60% 45%)",
-    },
-    {
-        key: "mentions",
-        title: "Упоминания",
-        description: "Когда вас упоминают в постах, комментариях или чатах",
-        icon: <AtSign className="h-4 w-4" />,
-        color: "hsl(200 80% 55%)",
-    },
-    {
-        key: "likes",
-        title: "Реакции и лайки",
-        description: "Реакции на ваши посты, комментарии, фото и видео",
-        icon: <Heart className="h-4 w-4" />,
-        color: "hsl(345 80% 60%)",
-    },
-    {
-        key: "shares",
-        title: "Поделились",
-        description: "Когда вашими записями делятся друзья и сообщества",
-        icon: <Share2 className="h-4 w-4" />,
-        color: "hsl(210 90% 55%)",
-    },
-    {
-        key: "comments",
-        title: "Комментарии",
-        description: "Новые комментарии к вашим постам и фото",
-        icon: <MessageSquare className="h-4 w-4" />,
-        color: "hsl(0 75% 60%)",
-    },
-    {
-        key: "friends",
-        title: "Друзья",
-        description: "Заявки в друзья и новые подписчики",
-        icon: <UserPlus className="h-4 w-4" />,
-        color: "hsl(265 70% 55%)",
-    },
-    {
-        key: "groups",
-        title: "Сообщества",
-        description: "Новости и публикации в ваших сообществах",
-        icon: <UsersIcon className="h-4 w-4" />,
-        color: "hsl(28 90% 55%)",
-    },
+    { key: "messages", titleKey: "page.settings.notif.type.messages", descKey: "page.settings.notif.type.messages.desc", icon: <MessageSquare className="h-4 w-4" />, color: "hsl(140 60% 45%)" },
+    { key: "mentions", titleKey: "page.settings.notif.type.mentions", descKey: "page.settings.notif.type.mentions.desc", icon: <AtSign className="h-4 w-4" />, color: "hsl(200 80% 55%)" },
+    { key: "likes",    titleKey: "page.settings.notif.type.likes",    descKey: "page.settings.notif.type.likes.desc",    icon: <Heart className="h-4 w-4" />,        color: "hsl(345 80% 60%)" },
+    { key: "shares",   titleKey: "page.settings.notif.type.shares",   descKey: "page.settings.notif.type.shares.desc",   icon: <Share2 className="h-4 w-4" />,       color: "hsl(210 90% 55%)" },
+    { key: "comments", titleKey: "page.settings.notif.type.comments", descKey: "page.settings.notif.type.comments.desc", icon: <MessageSquare className="h-4 w-4" />, color: "hsl(0 75% 60%)" },
+    { key: "friends",  titleKey: "page.settings.notif.type.friends",  descKey: "page.settings.notif.type.friends.desc",  icon: <UserPlus className="h-4 w-4" />,     color: "hsl(265 70% 55%)" },
+    { key: "groups",   titleKey: "page.settings.notif.type.groups",   descKey: "page.settings.notif.type.groups.desc",   icon: <UsersIcon className="h-4 w-4" />,    color: "hsl(28 90% 55%)" },
 ];
 
 const NotificationsSection = () => {
+    const { t } = useTranslation();
     const [flags, setFlags] = useState({
         instant: true,
         sound: true,
@@ -302,24 +254,31 @@ const NotificationsSection = () => {
             return next;
         });
 
+    const freqLabel: Record<Frequency, string> = {
+        instant: t('page.settings.notif.freq.instant'),
+        daily:   t('page.settings.notif.freq.daily'),
+        weekly:  t('page.settings.notif.freq.weekly'),
+        off:     t('page.settings.notif.freq.off'),
+    };
+
     return (
         <div className="flex flex-col gap-3">
-            <Card title="Уведомления на сайте">
+            <Card title={t('page.settings.notif.site.title')}>
                 <SwitchRow
                     icon={<Zap className="h-4 w-4" />}
-                    title="Показывать мгновенные уведомления"
+                    title={t('page.settings.notif.instant')}
                     checked={flags.instant}
                     onCheckedChange={() => toggle("instant")}
                 />
                 <SwitchRow
                     icon={<Volume2 className="h-4 w-4" />}
-                    title="Получать уведомления со звуком"
+                    title={t('page.settings.notif.sound')}
                     checked={flags.sound}
                     onCheckedChange={() => toggle("sound")}
                 />
                 <SwitchRow
                     icon={<MessageSquare className="h-4 w-4" />}
-                    title="Показывать текст сообщений"
+                    title={t('page.settings.notif.show.text')}
                     checked={flags.showText}
                     onCheckedChange={() => toggle("showText")}
                 />
@@ -328,46 +287,46 @@ const NotificationsSection = () => {
                         <Bell className="h-4 w-4" />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium">Браузерные уведомления</div>
+                        <div className="text-sm font-medium">{t('page.settings.notif.browser')}</div>
                         <div className="text-xs text-muted-foreground leading-snug mt-0.5">
-                            Уведомления, которые вы будете получать, можно настроить ниже
+                            {t('page.settings.notif.browser.desc')}
                         </div>
                     </div>
-                    <button className="text-sm font-medium text-primary hover:underline">Отключены</button>
+                    <button className="text-sm font-medium text-primary hover:underline">{t('page.settings.notif.browser.disabled')}</button>
                 </div>
             </Card>
 
-            <Card title="Типы уведомлений и частота">
+            <Card title={t('page.settings.notif.types.title')}>
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-border/60">
                     <p className="text-xs text-muted-foreground max-w-md">
-                        Выберите, о чём уведомлять и как часто получать сводки. Изменения применяются ко всем
-                        устройствам.
+                        {t('page.settings.notif.types.desc')}
                     </p>
                     <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">Для всех:</span>
+                        <span className="text-xs text-muted-foreground">{t('page.settings.notif.for.all')}</span>
                         <Select onValueChange={(v) => setAllFrequency(v as Frequency)}>
                             <SelectTrigger className="h-8 w-42.5 text-xs">
-                                <SelectValue placeholder="Применить ко всем" />
+                                <SelectValue placeholder={t('page.settings.notif.apply.all')} />
                             </SelectTrigger>
                             <SelectContent>
-                                {(Object.keys(FREQ_LABEL) as Frequency[]).map((f) => (
+                                {(Object.keys(freqLabel) as Frequency[]).map((f) => (
                                     <SelectItem key={f} value={f}>
-                                        {FREQ_LABEL[f]}
+                                        {freqLabel[f]}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
                     </div>
                 </div>
-                {NOTIF_TYPES.map((t) => (
+                {NOTIF_TYPES.map((n) => (
                     <NotifPrefRow
-                        key={t.key}
-                        icon={t.icon}
-                        color={t.color}
-                        title={t.title}
-                        description={t.description}
-                        pref={prefs[t.key]}
-                        onChange={(next) => updatePref(t.key, next)}
+                        key={n.key}
+                        icon={n.icon}
+                        color={n.color}
+                        title={t(n.titleKey)}
+                        description={t(n.descKey)}
+                        pref={prefs[n.key]}
+                        freqLabel={freqLabel}
+                        onChange={(next) => updatePref(n.key, next)}
                     />
                 ))}
             </Card>
@@ -382,6 +341,7 @@ const NotifPrefRow = ({
                           title,
                           description,
                           pref,
+                          freqLabel,
                           onChange,
                       }: {
     icon: ReactNode;
@@ -389,6 +349,7 @@ const NotifPrefRow = ({
     title: string;
     description: string;
     pref: NotifPref;
+    freqLabel: Record<Frequency, string>;
     onChange: (next: NotifPref) => void;
 }) => (
     <div className="flex items-center gap-3 border-b border-border/60 py-4 last:border-b-0">
@@ -411,9 +372,9 @@ const NotifPrefRow = ({
                 <SelectValue />
             </SelectTrigger>
             <SelectContent>
-                {(Object.keys(FREQ_LABEL) as Frequency[]).map((f) => (
+                {(Object.keys(freqLabel) as Frequency[]).map((f) => (
                     <SelectItem key={f} value={f}>
-                        {FREQ_LABEL[f]}
+                        {freqLabel[f]}
                     </SelectItem>
                 ))}
             </SelectContent>
@@ -428,69 +389,74 @@ const NotifPrefRow = ({
 
 
 
-const SecuritySection = () => (
-    <Card title="Безопасность">
-        <Row label="Пароль">
-            <div className="flex items-center justify-between">
-                <span className="text-foreground/90">Был изменён 4 месяца назад</span>
-                <button className="text-sm font-medium text-primary hover:underline">Изменить</button>
-            </div>
-        </Row>
-        <Row label="Двухфакторная аутентификация">
-            <div className="flex items-center justify-between">
-                <span className="text-foreground/90">Не подключена</span>
-                <button className="text-sm font-medium text-primary hover:underline">Подключить</button>
-            </div>
-        </Row>
-        <Row label="Активные сеансы">
-            <button className="text-sm font-medium text-primary hover:underline">
-                Завершить на других устройствах
-            </button>
-        </Row>
-        <Row label="История входов" divider={false}>
-            <button className="text-sm font-medium text-primary hover:underline">Показать</button>
-        </Row>
-    </Card>
-);
+const SecuritySection = () => {
+    const { t } = useTranslation();
+    return (
+        <Card title={t('page.settings.security.title')}>
+            <Row label={t('page.settings.security.password')}>
+                <div className="flex items-center justify-between">
+                    <span className="text-foreground/90">{t('page.settings.security.password.changed')}</span>
+                    <button className="text-sm font-medium text-primary hover:underline">{t('page.settings.security.password.change')}</button>
+                </div>
+            </Row>
+            <Row label={t('page.settings.security.2fa')}>
+                <div className="flex items-center justify-between">
+                    <span className="text-foreground/90">{t('page.settings.security.2fa.status')}</span>
+                    <button className="text-sm font-medium text-primary hover:underline">{t('page.settings.security.2fa.connect')}</button>
+                </div>
+            </Row>
+            <Row label={t('page.settings.security.sessions')}>
+                <button className="text-sm font-medium text-primary hover:underline">
+                    {t('page.settings.security.sessions.terminate')}
+                </button>
+            </Row>
+            <Row label={t('page.settings.security.login.history')} divider={false}>
+                <button className="text-sm font-medium text-primary hover:underline">{t('page.settings.security.login.history.show')}</button>
+            </Row>
+        </Card>
+    );
+};
 
 const PrivacySection = () => {
-    const items: { label: string; value: string; locked?: boolean }[] = [
-        { label: "Кто видит основную информацию моей страницы", value: "Все пользователи" },
-        { label: "Кто видит мою дату рождения", value: "Все пользователи" },
-        { label: "Кто видит мои сохранённые фотографии", value: "Только я", locked: true },
-        { label: "Кто видит список моих сообществ", value: "Все пользователи" },
-        { label: "Кто видит список моих аудиозаписей", value: "Все пользователи" },
-        { label: "Кто видит список моих видеозаписей", value: "Все пользователи" },
-        { label: "Кто видит список моих подарков", value: "Все пользователи" },
-        { label: "Кого видно в списке моих друзей и подписок", value: "Всех друзей" },
+    const { t } = useTranslation();
+
+    const items: { labelKey: keyof TranslationDictionary; valueKey: keyof TranslationDictionary; locked?: boolean }[] = [
+        { labelKey: "page.settings.privacy.item.main.info",    valueKey: "page.settings.privacy.value.all" },
+        { labelKey: "page.settings.privacy.item.birthday",     valueKey: "page.settings.privacy.value.all" },
+        { labelKey: "page.settings.privacy.item.saved.photos", valueKey: "page.settings.privacy.value.only.me", locked: true },
+        { labelKey: "page.settings.privacy.item.groups",       valueKey: "page.settings.privacy.value.all" },
+        { labelKey: "page.settings.privacy.item.audio",        valueKey: "page.settings.privacy.value.all" },
+        { labelKey: "page.settings.privacy.item.video",        valueKey: "page.settings.privacy.value.all" },
+        { labelKey: "page.settings.privacy.item.gifts",        valueKey: "page.settings.privacy.value.all" },
+        { labelKey: "page.settings.privacy.item.friends",      valueKey: "page.settings.privacy.value.all.friends" },
     ];
 
     return (
-        <Card title="Моя страница">
+        <Card title={t('page.settings.privacy.title')}>
             <div className="mb-2 flex items-start gap-3 rounded-xl bg-secondary/60 p-4">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
                     <Heart className="h-5 w-5" />
                 </div>
                 <div className="flex-1 text-sm">
-                    <div className="font-semibold">Неделя без непрошеного внимания</div>
+                    <div className="font-semibold">{t('page.settings.privacy.banner.title')}</div>
                     <p className="mt-1 text-muted-foreground leading-snug">
-                        Если нужна пауза в общении с незнакомцами, попробуйте режим «Личное пространство»
+                        {t('page.settings.privacy.banner.desc')}
                     </p>
                     <button className="mt-3 text-sm font-medium text-primary hover:underline">
-                        Подробнее
+                        {t('page.settings.privacy.banner.more')}
                     </button>
                 </div>
             </div>
 
             {items.map((i) => (
                 <div
-                    key={i.label}
+                    key={i.labelKey}
                     className="grid grid-cols-[1fr_auto] items-center gap-4 border-b border-border/60 py-4 last:border-b-0"
                 >
-                    <div className="text-sm text-muted-foreground">{i.label}</div>
+                    <div className="text-sm text-muted-foreground">{t(i.labelKey)}</div>
                     <button className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
                         {i.locked && <Lock className="h-3.5 w-3.5" />}
-                        {i.value}
+                        {t(i.valueKey)}
                     </button>
                 </div>
             ))}
@@ -498,101 +464,108 @@ const PrivacySection = () => {
     );
 };
 
-const BlacklistSection = () => (
-    <Card>
-        <div className="mb-4 flex items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold">Чёрный список</h2>
-            <button className="button-pill rounded-lg px-4">Добавить в чёрный список</button>
-        </div>
-        <div className="relative mb-6">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-                type="text"
-                placeholder="Поиск"
-                className="h-10 w-full rounded-lg bg-secondary pl-9 pr-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-            />
-        </div>
-        <div className="flex flex-col items-center px-4 py-10 text-center">
-            <div className="text-base font-semibold">Ваш чёрный список пуст</div>
-            <p className="mt-2 max-w-md text-sm text-muted-foreground leading-relaxed">
-                Люди из чёрного списка не могут просматривать вашу страницу, оставлять комментарии и
-                отправлять вам личные сообщения
-            </p>
-        </div>
-    </Card>
-);
-
-const AppsSection = () => (
-    <Card title="Настройки приложений">
-        <Row label="Подключённые приложения">
-            <span className="text-foreground/90">Нет подключённых приложений</span>
-        </Row>
-        <Row label="Игровые приложения" divider={false}>
-            <button className="text-sm font-medium text-primary hover:underline">Управлять</button>
-        </Row>
-    </Card>
-);
-
-const VoicesSection = () => (
-    <div className="flex flex-col gap-3">
-        <Card title="Состояние личного счёта">
-            <p className="text-sm text-foreground/90 leading-relaxed">
-                Голоса — универсальная условная единица для приобретения платных возможностей приложений
-                ВКонтакте, а также подарков и стикеров. Голосами нельзя оплатить рекламу.
-            </p>
-            <p className="mt-3 text-sm text-foreground/90 leading-relaxed">
-                Обратите внимание, что право использования голосов предоставляется на условиях{" "}
-                <a href="#!" className="text-primary hover:underline">
-                    Лицензионного соглашения
-                </a>
-                . Возврат средств невозможен.
-            </p>
-
-            <div className="mt-5">
-                <Row label="На вашем счёте">
-                    <span className="text-foreground/90">0 голосов</span>
-                </Row>
-                <Row label="Способы оплаты">
-                    <button className="text-sm font-medium text-primary hover:underline">Показать</button>
-                </Row>
-                <Row label="Баланс" divider={false}>
-                    <button className="button-pill gap-2 rounded-lg px-4">
-                        <Plus className="h-4 w-4" />
-                        Пополнить баланс
-                    </button>
-                </Row>
+const BlacklistSection = () => {
+    const { t } = useTranslation();
+    return (
+        <Card>
+            <div className="mb-4 flex items-center justify-between gap-3">
+                <h2 className="text-lg font-semibold">{t('page.settings.blacklist.title')}</h2>
+                <button className="button-pill rounded-lg px-4">{t('page.settings.blacklist.add')}</button>
             </div>
+            <div className="relative mb-6">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                    type="text"
+                    placeholder={t('page.settings.blacklist.search')}
+                    className="h-10 w-full rounded-lg bg-secondary pl-9 pr-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                />
+            </div>
+            <div className="flex flex-col items-center px-4 py-10 text-center">
+                <div className="text-base font-semibold">{t('page.settings.blacklist.empty.title')}</div>
+                <p className="mt-2 max-w-md text-sm text-muted-foreground leading-relaxed">
+                    {t('page.settings.blacklist.empty.desc')}
+                </p>
+            </div>
+        </Card>
+    );
+};
 
-            <div className="mt-4 flex flex-col items-start gap-3 border-t border-border/60 pt-4">
-                <button className="text-sm font-medium text-primary hover:underline">
-                    Получить голоса у партнёров
-                </button>
-                <button className="text-sm font-medium text-primary hover:underline">
-                    Активировать промокод
-                </button>
-                <div className="pt-2 text-xs text-muted-foreground">
-                    Если у вас возникли проблемы, обратитесь в{" "}
+const AppsSection = () => {
+    const { t } = useTranslation();
+    return (
+        <Card title={t('page.settings.apps.title')}>
+            <Row label={t('page.settings.apps.connected')}>
+                <span className="text-foreground/90">{t('page.settings.apps.connected.none')}</span>
+            </Row>
+            <Row label={t('page.settings.apps.games')} divider={false}>
+                <button className="text-sm font-medium text-primary hover:underline">{t('page.settings.apps.games.manage')}</button>
+            </Row>
+        </Card>
+    );
+};
+
+const VoicesSection = () => {
+    const { t } = useTranslation();
+    return (
+        <div className="flex flex-col gap-3">
+            <Card title={t('page.settings.voices.balance.title')}>
+                <p className="text-sm text-foreground/90 leading-relaxed">
+                    {t('page.settings.voices.desc.1')}
+                </p>
+                <p className="mt-3 text-sm text-foreground/90 leading-relaxed">
+                    {t('page.settings.voices.desc.2')}{" "}
                     <a href="#!" className="text-primary hover:underline">
-                        платёжную Поддержку
+                        {t('page.settings.voices.desc.2.link')}
                     </a>
                     .
-                </div>
-            </div>
-        </Card>
+                </p>
 
-        <Card>
-            <div className="mb-3 inline-flex w-fit rounded-md bg-secondary px-2.5 py-1 text-xs font-semibold">
-                Подписки
-            </div>
-            <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-primary">
-                    <Volume2 className="h-5 w-5" />
+                <div className="mt-5">
+                    <Row label={t('page.settings.voices.account')}>
+                        <span className="text-foreground/90">{t('page.settings.voices.balance.value')}</span>
+                    </Row>
+                    <Row label={t('page.settings.voices.payment')}>
+                        <button className="text-sm font-medium text-primary hover:underline">{t('page.settings.voices.payment.show')}</button>
+                    </Row>
+                    <Row label={t('page.settings.voices.topup')} divider={false}>
+                        <button className="button-pill gap-2 rounded-lg px-4">
+                            <Plus className="h-4 w-4" />
+                            {t('page.settings.voices.topup.btn')}
+                        </button>
+                    </Row>
                 </div>
-                <div className="flex-1 text-sm font-medium">Подписка на музыку</div>
-                <button className="button-pill rounded-lg px-4">Оформить</button>
-            </div>
-        </Card>
-    </div>
-);
+
+                <div className="mt-4 flex flex-col items-start gap-3 border-t border-border/60 pt-4">
+                    <button className="text-sm font-medium text-primary hover:underline">
+                        {t('page.settings.voices.partners')}
+                    </button>
+                    <button className="text-sm font-medium text-primary hover:underline">
+                        {t('page.settings.voices.promo')}
+                    </button>
+                    <div className="pt-2 text-xs text-muted-foreground">
+                        {t('page.settings.voices.support')}{" "}
+                        <a href="#!" className="text-primary hover:underline">
+                            {t('page.settings.voices.support.link')}
+                        </a>
+                        .
+                    </div>
+                </div>
+            </Card>
+
+            <Card>
+                <div className="mb-3 inline-flex w-fit rounded-md bg-secondary px-2.5 py-1 text-xs font-semibold">
+                    {t('page.settings.voices.subscriptions')}
+                </div>
+                <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-primary">
+                        <Volume2 className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 text-sm font-medium">{t('page.settings.voices.music.sub')}</div>
+                    <button className="button-pill rounded-lg px-4">{t('page.settings.voices.music.sub.btn')}</button>
+                </div>
+            </Card>
+        </div>
+    );
+};
 
 export default Settings;

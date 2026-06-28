@@ -4,15 +4,17 @@ import { CoverUploadStep } from "./CoverUploadStep";
 import { CoverCropStep } from "./CoverCropStep";
 import { CoverPreviewModal } from "./CoverPreviewModal";
 import type { CoverEditorProps, CropRect } from "./types";
+import { useTranslation } from "@/hooks/use-translation";
 
 export function CoverEditorModal({
-  open,
-  image,
-  avatar,
-  userName,
-  onClose,
-  onSave,
-}: CoverEditorProps) {
+                                   open,
+                                   image,
+                                   avatar,
+                                   userName,
+                                   onClose,
+                                   onSave,
+                                 }: CoverEditorProps) {
+  const { t } = useTranslation();
   const [file, setFile] = useState<File | null>(null);
   const [url, setUrl] = useState<string | null>(image ?? null);
   const [mobile, setMobile] = useState<CropRect | null>(null);
@@ -63,77 +65,77 @@ export function CoverEditorModal({
   const inCropStep = !!url;
 
   return (
-    <>
-      <Modal
-        open={open && !previewOpen}
-        onClose={onClose}
-        title={inCropStep ? "Edit cover" : "Add cover"}
-        widthClass={inCropStep ? "max-w-4xl" : "max-w-md"}
-        footer={
-          inCropStep ? (
-            <>
-              <button
-                onClick={() => setPreviewOpen(true)}
-                disabled={!mobile || !desktop}
-                className="rounded-md bg-white/10 px-4 py-2 text-sm font-medium hover:bg-white/20 disabled:opacity-50"
-              >
-                Preview
-              </button>
-              <div className="flex gap-2">
-                <button
-                  onClick={onClose}
-                  className="rounded-md bg-white/10 px-4 py-2 text-sm font-medium hover:bg-white/20"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={!mobile || !desktop}
-                  className="rounded-md bg-white px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-neutral-200 disabled:opacity-50"
-                >
-                  Set cover
-                </button>
+      <>
+        <Modal
+            open={open && !previewOpen}
+            onClose={onClose}
+            title={inCropStep ? t('cover.modal.title.edit') : t('cover.modal.title.add')}
+            widthClass={inCropStep ? "max-w-4xl" : "max-w-md"}
+            footer={
+              inCropStep ? (
+                  <>
+                    <button
+                        onClick={() => setPreviewOpen(true)}
+                        disabled={!mobile || !desktop}
+                        className="rounded-md bg-white/10 px-4 py-2 text-sm font-medium hover:bg-white/20 disabled:opacity-50"
+                    >
+                      {t('cover.modal.preview')}
+                    </button>
+                    <div className="flex gap-2">
+                      <button
+                          onClick={onClose}
+                          className="rounded-md bg-white/10 px-4 py-2 text-sm font-medium hover:bg-white/20"
+                      >
+                        {t('cover.modal.cancel')}
+                      </button>
+                      <button
+                          onClick={handleSave}
+                          disabled={!mobile || !desktop}
+                          className="rounded-md bg-white px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-neutral-200 disabled:opacity-50"
+                      >
+                        {t('cover.modal.set')}
+                      </button>
+                    </div>
+                  </>
+              ) : undefined
+            }
+        >
+          {inCropStep && url ? (
+              <div className="space-y-4">
+                <p className="text-center text-sm text-neutral-400">
+                  {t('cover.modal.hint')}
+                </p>
+                <CoverCropStep
+                    imageUrl={url}
+                    mobile={mobile}
+                    desktop={desktop}
+                    onChange={({ mobile: m, desktop: d, natural: n }) => {
+                      setMobile(m);
+                      setDesktop(d);
+                      setNatural(n);
+                    }}
+                    onLoadError={() => setError(t('cover.load.error'))}
+                />
+                {error && <div className="text-center text-sm text-red-400">{error}</div>}
               </div>
-            </>
-          ) : undefined
-        }
-      >
-        {inCropStep && url ? (
-          <div className="space-y-4">
-            <p className="text-center text-sm text-neutral-400">
-              The selected area will be seen on your profile
-            </p>
-            <CoverCropStep
-              imageUrl={url}
-              mobile={mobile}
-              desktop={desktop}
-              onChange={({ mobile: m, desktop: d, natural: n }) => {
-                setMobile(m);
-                setDesktop(d);
-                setNatural(n);
-              }}
-              onLoadError={() => setError("Failed to load image")}
-            />
-            {error && <div className="text-center text-sm text-red-400">{error}</div>}
-          </div>
-        ) : (
-          <CoverUploadStep onFile={handleFile} error={error} />
-        )}
-      </Modal>
+          ) : (
+              <CoverUploadStep onFile={handleFile} error={error} />
+          )}
+        </Modal>
 
-      {url && mobile && desktop && natural && (
-        <CoverPreviewModal
-          open={previewOpen}
-          onClose={() => setPreviewOpen(false)}
-          onSetCover={handleSave}
-          imageUrl={url}
-          natural={natural}
-          mobile={mobile}
-          desktop={desktop}
-          avatar={avatar}
-          userName={userName}
-        />
-      )}
-    </>
+        {url && mobile && desktop && natural && (
+            <CoverPreviewModal
+                open={previewOpen}
+                onClose={() => setPreviewOpen(false)}
+                onSetCover={handleSave}
+                imageUrl={url}
+                natural={natural}
+                mobile={mobile}
+                desktop={desktop}
+                avatar={avatar}
+                userName={userName}
+            />
+        )}
+      </>
   );
 }

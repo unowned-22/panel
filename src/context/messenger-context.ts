@@ -76,6 +76,13 @@ export interface SendPayload {
     forwardedFrom?: string;
 }
 
+/** Минимальные данные о собеседнике, нужные для открытия черновика direct-чата. */
+export interface DraftChatTarget {
+    userId: number;
+    name: string;
+    avatar?: string;
+}
+
 export interface Ctx {
     contacts: ChatContact[];
     messages: Record<string, Message[]>;
@@ -85,12 +92,25 @@ export interface Ctx {
     setActiveChat: (chatId: string | null) => void;
     toggleReaction: (chatId: string, messageId: string, emoji: string) => void;
     sendMessage: (chatId: string, text: string, replyTo?: { senderName: string; text: string }) => void;
-    sendPayload: (chatId: string, payload: SendPayload) => void;
+    /**
+     * Отправляет сообщение. Если chatId — id черновика (draft:<userId>),
+     * перед отправкой создаёт реальный conversation на бэкенде и возвращает
+     * его настоящий id; иначе возвращает тот же chatId, что был передан.
+     */
+    sendPayload: (chatId: string, payload: SendPayload) => Promise<string>;
     pinMessage: (chatId: string, messageId: string) => void;
     notifyTyping: (chatId: string) => void;
     forwardMessage: (sourceChatId: string, messageId: string, targetChatIds: string[]) => void;
     deleteMessage: (chatId: string, messageId: string) => void;
     createChat: (input: CreateChatInput) => Promise<string>;
+    /**
+     * Открывает локальный черновик direct-чата с пользователем без обращения
+     * к бэкенду. Если direct-диалог (или черновик) с этим пользователем уже
+     * есть среди contacts — возвращает его id вместо создания нового.
+     * Реальный conversation создаётся позже, при первой отправке сообщения
+     * (см. sendPayload).
+     */
+    openDraftChat: (target: DraftChatTarget) => string;
     getMembers: (chatId: string) => AvailableMember[];
     getMediaFromChat: (chatId: string) => string[];
     getFilesFromChat: (chatId: string) => MessageFile[];

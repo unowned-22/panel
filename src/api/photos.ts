@@ -258,7 +258,7 @@ export const photosApi = {
     },
 
     async setAlbumCover(albumId: number, photoId: number): Promise<void> {
-        await apiClient.post(`/albums/${albumId}/cover`, { photo_id: photoId });
+        await apiClient.patch(`/albums/${albumId}/cover`, { photo_id: photoId });
     },
 
     async listAlbumPhotos(albumId: number, page = 1, limit = 24): Promise<PaginatedResponse<Photo>> {
