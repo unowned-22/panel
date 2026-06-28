@@ -1,1 +1,1 @@
-export type Tool = null | "text" | "photo" | "stickers" | "paint" | "background" | "filters" | "color";
+export type Tool = null | "text" | "photo" | "stickers" | "link" | "paint" | "background" | "filters" | "color";

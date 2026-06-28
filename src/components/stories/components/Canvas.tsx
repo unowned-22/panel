@@ -7,7 +7,7 @@ import { useTranslation } from "@/hooks/use-translation";
 
 export function Canvas({
                   slide, selectedId, paintMode, onSelect, onUpdate, onDelete,
-                  onSelectFile, onPickBackground, onTextEdit, onAddDrawingStroke, onAddTextAt,
+                  onSelectFile, onTextEdit, onAddDrawingStroke, onAddTextAt,
                 }: {
   slide: Slide;
   selectedId: string | null;
@@ -16,7 +16,6 @@ export function Canvas({
   onUpdate: (id: string, patch: Partial<CanvasElement>, opts?: { skipHistory?: boolean }) => void;
   onDelete: (id: string) => void;
   onSelectFile: (f: File) => void;
-  onPickBackground: () => void;
   onTextEdit: (id: string, text: string) => void;
   onAddDrawingStroke: (stroke: DrawingElement["paths"][number]) => void;
   onAddTextAt: (x: number, y: number) => void;
@@ -106,7 +105,6 @@ export function Canvas({
                     onClick={() => fileInputRef.current?.click()}
                     className="rounded-lg bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-white"
                 >{t('stories.editor.select.file')}</button>
-                <button onClick={onPickBackground} className="text-sm font-medium text-zinc-200 hover:text-white">{t('stories.editor.select.background')}</button>
               </div>
               <input
                   ref={fileInputRef} type="file" accept="image/*,video/*" className="hidden"

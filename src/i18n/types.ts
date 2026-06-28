@@ -179,6 +179,7 @@ export interface TranslationDictionary {
     'stories.editor.menu.background': string;
     'stories.editor.menu.filters': string;
     'stories.editor.menu.color': string;
+    'stories.editor.menu.link': string;
     'stories.editor.audience.everyone': string;
     'stories.editor.audience.friends': string;
     'stories.editor.audience.close': string;

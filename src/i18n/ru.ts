@@ -171,6 +171,7 @@ export const ru: TranslationDictionary = {
     'stories.editor.select.background': 'Выбрать фон',
     'stories.editor.hint.double.click': 'Дважды кликните по пустому месту, чтобы добавить текст — или используйте инструмент Текст',
     'stories.editor.menu.text': 'Текст',
+    'stories.editor.menu.link': 'Ссылка',
     'stories.editor.menu.photo': 'Фото',
     'stories.editor.menu.stickers': 'Стикеры',
     'stories.editor.menu.paintbrush': 'Кисть',

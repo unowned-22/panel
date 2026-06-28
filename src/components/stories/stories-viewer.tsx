@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { ChevronLeft, ChevronRight, Heart, Send, X } from "lucide-react";
-import { type StoryUser } from "@/context/stories-context";
+import { ChevronLeft, ChevronRight, Heart, Send, X, ExternalLink } from "lucide-react";
+import { type StoryUser, type LinkZone } from "@/context/stories-context";
 import { toast } from "sonner";
 import { useStories } from "@/hooks/use-stories";
 import { useTranslation } from "@/hooks/use-translation";
@@ -26,6 +26,7 @@ export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
     const [likedMap, setLikedMap] = useState<Record<number, boolean>>({});
     const [inputFocused, setInputFocused] = useState(false);
     const [holdPause, setHoldPause] = useState(false);
+    const [confirmUrl, setConfirmUrl] = useState<string | null>(null);
     const rafRef = useRef<number>(0);
     const startRef = useRef<number>(0);
     const pausedRef = useRef(false);
@@ -150,7 +151,6 @@ export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
                         ))}
                     </div>
 
-                    {/* Header */}
                     <div className="absolute top-5 left-2 right-2 z-20 flex items-center gap-2 mt-2">
                         <img src={currentUser.avatar} alt={currentUser.name} className="w-8 h-8 rounded-full object-cover" />
                         <span className="text-sm font-medium text-white">{currentUser.name}</span>
@@ -183,23 +183,66 @@ export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
                         )}
                     </div>
 
-                    {/* Content */}
-                    {currentItem.image ? (
-                        <img src={currentItem.image} alt="story" className="w-full h-full object-cover" />
-                    ) : (
+                    <img src={currentItem.image} alt="story" className="w-full h-full object-cover" />
+
+                    {currentItem.linkZones?.map((zone: LinkZone, i: number) => (
+                        <button
+                            key={i}
+                            onClick={(e) => { e.stopPropagation(); setConfirmUrl(zone.url); setHoldPause(true); }}
+                            className="absolute z-15"
+                            style={{
+                                left: `${zone.x - zone.width / 2}%`,
+                                top: `${zone.y - zone.height / 2}%`,
+                                width: `${zone.width}%`,
+                                height: `${zone.height}%`,
+                            }}
+                            aria-label={zone.title || zone.url}
+                        />
+                    ))}
+
+                    {/* Link confirm dialog */}
+                    {confirmUrl && (
                         <div
-                            className="w-full h-full flex items-center justify-center"
-                            style={{ background: currentItem.background || "hsl(var(--muted))" }}
+                            className="absolute inset-0 z-40 flex items-end"
+                            onPointerDown={(e) => e.stopPropagation()}
                         >
-                            <p className="px-6 text-center text-2xl font-semibold text-white wrap-break-word">
-                                {currentItem.text}
-                            </p>
+                            {/* backdrop */}
+                            <div
+                                className="absolute inset-0 bg-black/50"
+                                onClick={() => { setConfirmUrl(null); setHoldPause(false); }}
+                            />
+                            {/* sheet */}
+                            <div className="relative w-full rounded-t-2xl bg-zinc-900 p-5 space-y-4 shadow-2xl">
+                                <p className="text-xs text-zinc-400 text-center uppercase tracking-wider">
+                                    Переход по ссылке
+                                </p>
+                                <div className="flex items-center gap-2 rounded-xl bg-zinc-800 px-4 py-3">
+                                    <ExternalLink className="h-4 w-4 text-zinc-400 shrink-0" />
+                                    <span className="text-sm text-zinc-100 truncate">{confirmUrl}</span>
+                                </div>
+                                <p className="text-xs text-zinc-500 text-center">
+                                    Вы покинете приложение и перейдёте на внешний сайт.
+                                </p>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <button
+                                        onClick={() => { setConfirmUrl(null); setHoldPause(false); }}
+                                        className="rounded-xl bg-zinc-800 py-3 text-sm font-medium text-zinc-200 hover:bg-zinc-700"
+                                    >
+                                        Отмена
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            window.open(confirmUrl, "_blank", "noopener,noreferrer");
+                                            setConfirmUrl(null);
+                                            setHoldPause(false);
+                                        }}
+                                        className="rounded-xl bg-white py-3 text-sm font-semibold text-zinc-900 hover:bg-zinc-100"
+                                    >
+                                        Перейти
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                    )}
-                    {currentItem.image && currentItem.text && (
-                        <p className="absolute bottom-10 left-0 right-0 px-4 text-center text-lg font-semibold text-white drop-shadow z-10">
-                            {currentItem.text}
-                        </p>
                     )}
 
                     {/* Nav zones */}
@@ -220,20 +263,20 @@ export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
                     {!currentUser.isMe && (
                         <form
                             onSubmit={async (e) => {
-                                    e.preventDefault();
-                                    const text = reply.trim();
-                                    if (!text) return;
-                                    if (!currentItem?.storyId) return;
-                                    try {
-                                        if (currentItem.storyId == null) return;
-                                        await import('@/components/stories/api/stories').then(m => m.storiesActions.reply(currentItem.storyId!, text));
-                                        toast.success(t('stories.viewer.reply.sent').replace('{name}', currentUser.name), { description: text });
-                                        setReply("");
-                                        (document.activeElement as HTMLElement | null)?.blur?.();
-                                    } catch (err) {
-                                        toast.error(t('stories.viewer.reply.error' as any))
-                                    }
-                                }}
+                                e.preventDefault();
+                                const text = reply.trim();
+                                if (!text) return;
+                                if (!currentItem?.storyId) return;
+                                try {
+                                    if (currentItem.storyId == null) return;
+                                    await import('@/components/stories/api/stories').then(m => m.storiesActions.reply(currentItem.storyId!, text));
+                                    toast.success(t('stories.viewer.reply.sent').replace('{name}', currentUser.name), { description: text });
+                                    setReply("");
+                                    (document.activeElement as HTMLElement | null)?.blur?.();
+                                } catch (err) {
+                                    toast.error(t('stories.viewer.reply.error' as any))
+                                }
+                            }}
                             className="absolute bottom-0 left-0 right-0 z-30 p-3 flex items-center gap-2 bg-linear-to-t from-black/70 to-transparent"
                             onPointerDown={(e) => e.stopPropagation()}
                         >

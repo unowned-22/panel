@@ -1,13 +1,23 @@
 import { createContext } from "react";
 
+export type LinkZone = {
+    url: string;
+    display_style: "pill" | "card";
+    title?: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    rotation: number;
+};
+
 export type StoryItem = {
     id: string;
     image?: string;
-    background?: string;
-    text?: string;
     createdAt: number;
     storyId?: number;
     seen?: boolean;
+    linkZones?: LinkZone[];
 };
 
 export type StoryUser = {

@@ -171,6 +171,7 @@ export const it: TranslationDictionary = {
     'stories.editor.select.background': 'Seleziona sfondo',
     'stories.editor.hint.double.click': 'Fai doppio clic in un punto qualsiasi per aggiungere testo o usa lo strumento Testo',
     'stories.editor.menu.text': 'Testo',
+    'stories.editor.menu.link': 'Link',
     'stories.editor.menu.photo': 'Foto',
     'stories.editor.menu.stickers': 'Adesivi',
     'stories.editor.menu.paintbrush': 'Pennello',

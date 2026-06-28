@@ -64,11 +64,19 @@ export interface StickerElement {
     link?: string;
 }
 
-/**
- * A freely placed photo on top of the slide (as opposed to the slide's
- * full-bleed `background`). Unlike the background, an image element can be
- * dragged, resized (keeping its own aspect ratio) and rotated, and removed.
- */
+export interface LinkElement {
+    id: string;
+    type: "link";
+    x: number;
+    y: number;
+    width: number;
+    rotation: number;
+    zIndex: number;
+    url: string;
+    displayStyle: "pill" | "card";
+    title?: string;
+}
+
 export interface ImageElement {
     id: string;
     type: "image";
@@ -86,11 +94,10 @@ export interface DrawingElement {
     id: string;
     type: "drawing";
     zIndex: number;
-    // paths are normalized 0..1 within canvas
     paths: { color: string; size: number; points: { x: number; y: number }[] }[];
 }
 
-export type CanvasElement = TextElement | StickerElement | ImageElement | DrawingElement;
+export type CanvasElement = TextElement | StickerElement | ImageElement | DrawingElement | LinkElement;
 
 export interface Slide {
     id: string;
@@ -98,7 +105,7 @@ export interface Slide {
     filterId: string;
     adjustments: Adjustments;
     elements: CanvasElement[];
-    rendered_url?: string; // optional storage key for a pre-rendered composite image
+    rendered_url?: string;
 }
 
 export interface StoryState {

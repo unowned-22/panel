@@ -171,6 +171,7 @@ export const ua: TranslationDictionary = {
     'stories.editor.select.background': 'Вибрати фон',
     'stories.editor.hint.double.click': 'Двічі клацніть на порожньому місці, щоб додати текст — або використовуйте інструмент Текст',
     'stories.editor.menu.text': 'Текст',
+    'stories.editor.menu.link': 'Посилання',
     'stories.editor.menu.photo': 'Фото',
     'stories.editor.menu.stickers': 'Стікери',
     'stories.editor.menu.paintbrush': 'Пензель',
