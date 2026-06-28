@@ -52,8 +52,8 @@ export default class ApiClient {
         return this.request<T>('DELETE', path, undefined, opts);
     }
 
-    async upload<T>(path: string, file: File, opts?: { logoutOn401?: boolean }): Promise<T> {
-        return this.requestFormData<T>('POST', path, file, opts);
+    async upload<T>(path: string, payload: File | FormData, opts?: { logoutOn401?: boolean }): Promise<T> {
+        return this.requestFormData<T>('POST', path, payload, opts);
     }
 
     private async request<T>(method: string, path: string, body?: unknown, opts?: { logoutOn401?: boolean }): Promise<T> {
@@ -111,16 +111,22 @@ export default class ApiClient {
         return res.json();
     }
 
-    private async requestFormData<T>(method: string, path: string, file: File, opts?: { logoutOn401?: boolean }): Promise<T> {
+    private async requestFormData<T>(method: string, path: string, payload: File | FormData, opts?: { logoutOn401?: boolean }): Promise<T> {
         const url = `${this.baseUrl}${path}`;
         const headers: Record<string, string> = {};
         const token = this.getToken();
         if (token) headers['Authorization'] = `Bearer ${token}`;
 
-        const formData = new FormData();
-        formData.append('file', file);
+        // If the caller already built a FormData (e.g. cover upload with crop JSON),
+        // use it as-is. Otherwise wrap a bare File in a new FormData.
+        const buildBody = (p: File | FormData): FormData => {
+            if (p instanceof FormData) return p;
+            const fd = new FormData();
+            fd.append('file', p);
+            return fd;
+        };
 
-        const res = await fetch(url, { method, headers, body: formData });
+        const res = await fetch(url, { method, headers, body: buildBody(payload) });
 
         if (res.status === 401) {
             const logoutOn401 = opts?.logoutOn401 ?? true;
@@ -140,10 +146,7 @@ export default class ApiClient {
             const retryHeaders = { ...headers };
             if (newToken) retryHeaders['Authorization'] = `Bearer ${newToken}`;
 
-            const retryFormData = new FormData();
-            retryFormData.append('file', file);
-
-            const retryRes = await fetch(url, { method, headers: retryHeaders, body: retryFormData });
+            const retryRes = await fetch(url, { method, headers: retryHeaders, body: buildBody(payload) });
             if (!retryRes.ok) {
                 const text = await safeText(retryRes);
                 throw new ApiError(retryRes.status, text || retryRes.statusText);

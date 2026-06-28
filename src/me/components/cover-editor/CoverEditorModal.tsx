@@ -5,6 +5,7 @@ import { CoverCropStep } from "./CoverCropStep";
 import { CoverPreviewModal } from "./CoverPreviewModal";
 import type { CoverEditorProps, CropRect } from "./types";
 import { useTranslation } from "@/hooks/use-translation";
+import { normalizeImageFile } from "@/lib/normalizeImageFile";
 
 export function CoverEditorModal({
                                    open,
@@ -23,6 +24,7 @@ export function CoverEditorModal({
   const [previewOpen, setPreviewOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const objectUrlRef = useRef<string | null>(null);
+  const [loadingFile, setLoadingFile] = useState(false);
 
   // reset when reopening
   useEffect(() => {
@@ -41,16 +43,22 @@ export function CoverEditorModal({
     }
   }, [open, image]);
 
-  const handleFile = (f: File) => {
-    setError(null);
-    if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
-    const u = URL.createObjectURL(f);
-    objectUrlRef.current = u;
-    setFile(f);
-    setUrl(u);
-    setMobile(null);
-    setDesktop(null);
-  };
+    const handleFile = async (f: File) => {
+        setError(null);
+        setLoadingFile(true);
+        try {
+            const normalized = await normalizeImageFile(f);
+            if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+            const u = URL.createObjectURL(normalized);
+            objectUrlRef.current = u;
+            setFile(normalized);
+            setUrl(u);
+            setMobile(null);
+            setDesktop(null);
+        } finally {
+            setLoadingFile(false);
+        }
+    };
 
   const handleSave = () => {
     if (!mobile || !desktop) return;
@@ -119,7 +127,7 @@ export function CoverEditorModal({
                 {error && <div className="text-center text-sm text-red-400">{error}</div>}
               </div>
           ) : (
-              <CoverUploadStep onFile={handleFile} error={error} />
+              <CoverUploadStep onFile={handleFile} error={error} loading={loadingFile} />
           )}
         </Modal>
 

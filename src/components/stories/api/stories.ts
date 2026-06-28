@@ -75,6 +75,7 @@ async function resolveSlide(slide: Slide): Promise<Slide> {
     try {
         const { renderSlideToBlob } = await import('../utils/renderSlide');
         const blob = await renderSlideToBlob(resolved);
+        console.log(blob)
         const file = new File([blob], 'rendered-slide.png', { type: 'image/png' });
         const up = await apiClient.upload<{ data: StoryMediaResponse }>('/stories/media', file);
         if (up && up.data && up.data.key) {

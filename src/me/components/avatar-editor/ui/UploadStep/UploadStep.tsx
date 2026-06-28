@@ -3,6 +3,7 @@ import { useDropzone } from "react-dropzone";
 import styles from "./UploadStep.module.css";
 import { useAvatarUploaderStore } from "../../model/store";
 import { validateImage } from "../../services/imageValidation";
+import { normalizeImageFile } from "@/lib/normalizeImageFile";
 
 interface Props {
   maxFileSize: number;
@@ -22,7 +23,8 @@ export function UploadStep({ maxFileSize, allowedTypes, minimumImageSize }: Prop
         setError(res.error);
         return;
       }
-      const url = URL.createObjectURL(file);
+        const normalized = await normalizeImageFile(file);
+        const url = URL.createObjectURL(normalized);
       setFile(file, url);
       setStep("profileCrop");
     },

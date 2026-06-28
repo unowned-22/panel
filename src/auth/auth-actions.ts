@@ -2,6 +2,13 @@ import { apiClient } from '@/lib/api-client';
 import { useAuthStore } from '@/auth/auth.store';
 import { clearPreferencesCache } from '@/lib/user-preferences';
 import type { AuthModel, UserModel } from './auth-model';
+import type { CropRect } from '@/me/components/cover-editor';
+
+export interface CoverUploadResponse {
+    cover_url: string;
+    cover_mobile_url: string;
+    cover_desktop_url: string;
+}
 
 export const authActions = {
     async login(email: string, password: string): Promise<UserModel> {
@@ -113,14 +120,20 @@ export const authActions = {
         return avatarUrl;
     },
 
-    async uploadCover(file: File): Promise<string> {
-        const res = await apiClient.upload<{ data: { cover_url: string } }>('/users/me/cover', file);
-        const coverUrl = res.data.cover_url;
+    async uploadCover(file: File, crop: { mobile: CropRect; desktop: CropRect }): Promise<CoverUploadResponse> {
+        const form = new FormData();
+        form.append('file', file);
+        form.append('crop', JSON.stringify({ mobile: crop.mobile, desktop: crop.desktop }));
+
+        const res = await apiClient.upload<{ data: CoverUploadResponse }>('/users/me/cover', form);
+
         useAuthStore.getState().setUser({
             ...useAuthStore.getState().user!,
-            cover_url: coverUrl,
+            cover_url:          res.data.cover_url,
+            cover_mobile_url: res.data.cover_mobile_url,
+            cover_desktop_url:  res.data.cover_desktop_url,
         });
-        return coverUrl;
+        return res.data;
     },
 
     deleteAvatar(): void {

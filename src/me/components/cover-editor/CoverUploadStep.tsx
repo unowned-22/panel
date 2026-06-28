@@ -5,13 +5,15 @@ import { useTranslation } from "@/hooks/use-translation";
 interface Props {
   onFile: (file: File) => void;
   error?: string | null;
+    loading?: boolean;
 }
 
-export function CoverUploadStep({ onFile, error }: Props) {
+export function CoverUploadStep({ onFile, error, loading }: Props) {
   const { t } = useTranslation();
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: ACCEPTED_TYPES,
     multiple: false,
+      disabled: loading,
     onDrop: (files) => {
       if (files[0]) onFile(files[0]);
     },
