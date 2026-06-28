@@ -20,6 +20,9 @@ import { messengerApi, type ApiConversation, type ApiMessage, type ApiReactionSu
 import { useAuthStore } from '@/auth/auth.store';
 import { useSocket } from '@/hooks/use-socket';
 
+const DRAFT_PREFIX = 'draft:';
+const isDraftId = (id: string) => id.startsWith(DRAFT_PREFIX);
+
 const fmtTime = (iso?: string | null): string => {
     if (!iso) return '';
     const d = new Date(iso);
@@ -124,10 +127,6 @@ const mapMessage = (m: ApiMessage, myID: number): Message => {
     };
 };
 
-// ─── WebSocket payload types (точно по backend messenger_payloads.go) ─────────
-// Сами фреймы теперь читает SocketProvider; здесь только типы данных под
-// каждый конкретный `type` события.
-
 interface WsMsgPayload {
     conversation_id: number;
     message: ApiMessage;
@@ -190,7 +189,7 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
     useEffect(() => {
-        if (!activeChatId) return;
+        if (!activeChatId || isDraftId(activeChatId)) return;
 
         const messagesInChat = messages[activeChatId] ?? [];
         const lastMessage = messagesInChat[messagesInChat.length - 1];
@@ -217,6 +216,7 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
     }, [myID]);
 
     const loadMessages = useCallback(async (chatId: string) => {
+        if (isDraftId(chatId)) return;
         if (loadedConvs.current.has(chatId)) return;
         loadedConvs.current.add(chatId);
         try {
@@ -305,9 +305,6 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
                     };
                 }));
 
-                // Если только что пришло сообщение от собеседника — его
-                // "печатает" точно закончился, гасим индикатор сразу,
-                // не дожидаясь отдельного typing:false от сервера.
                 if (p.message.sender_id !== myID) {
                     setTyping(prev => {
                         if (!prev.has(chatId)) return prev;
@@ -370,9 +367,7 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
 
             subscribe<WsPresencePayload>('messenger.presence', (p) => {
                 const uid = String(p.user_id);
-                console.log(uid)
                 setContacts(prev => prev.map(c => {
-                    console.log(c)
                     if (c.isGroup) return c;
                     if (!c.memberIds?.includes(uid)) return c;
                     return { ...c, online: p.is_online };
@@ -385,9 +380,60 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
         return () => unsubs.forEach(unsub => unsub());
     }, [subscribe, myID]);
 
-    // ── Context methods ───────────────────────────────────────────────────────
+    const openDraftChat = useCallback<Ctx['openDraftChat']>((target) => {
+        const userIdStr = String(target.userId);
+        const existingReal = contacts.find(
+            c => !c.isGroup && !isDraftId(c.id) && c.memberIds?.length === 1 && c.memberIds[0] === userIdStr
+        );
+        if (existingReal) return existingReal.id;
+        const draftId = `${DRAFT_PREFIX}${userIdStr}`;
+        if (contacts.some(c => c.id === draftId)) return draftId;
+
+        setContacts(prev => [
+            {
+                id: draftId,
+                name: target.name,
+                preview: '',
+                time: '',
+                avatar: target.avatar,
+                isGroup: false,
+                memberIds: [userIdStr],
+                read: true,
+            },
+            ...prev,
+        ]);
+
+        return draftId;
+    }, [contacts]);
 
     const sendPayload = useCallback<Ctx['sendPayload']>(async (chatId, payload) => {
+        let realChatId = chatId;
+
+        // Черновик — диалога на бэке ещё нет, создаём его прямо сейчас
+        if (isDraftId(chatId)) {
+            const targetUserId = Number(chatId.slice(DRAFT_PREFIX.length));
+            try {
+                const res = await messengerApi.getOrCreateDirect(targetUserId);
+                const contact = mapConversation(res.data, myID);
+                realChatId = contact.id;
+
+                setContacts(prev => [
+                    contact,
+                    ...prev.filter(c => c.id !== chatId && c.id !== contact.id),
+                ]);
+                setMessages(prev => {
+                    const draftMsgs = prev[chatId] ?? [];
+                    const { [chatId]: _omit, ...rest } = prev;
+                    return { ...rest, [contact.id]: draftMsgs };
+                });
+                loadedConvs.current.delete(chatId);
+                loadedConvs.current.add(contact.id);
+            } catch (err) {
+                console.error('[messenger] failed to materialize draft chat', err);
+                return chatId; // не удалось создать диалог — остаёмся в черновике
+            }
+        }
+
         const text = (payload.text ?? '').trim();
 
         const tempId = `optimistic-${Date.now()}`;
@@ -404,9 +450,9 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
             forwardedFrom: payload.forwardedFrom,
         };
 
-        setMessages(prev => ({ ...prev, [chatId]: [...(prev[chatId] ?? []), optimistic] }));
+        setMessages(prev => ({ ...prev, [realChatId]: [...(prev[realChatId] ?? []), optimistic] }));
         setContacts(prev => prev.map(c =>
-            c.id === chatId
+            c.id === realChatId
                 ? {
                     ...c,
                     preview: `Вы: ${text || (payload.images?.length ? '🖼 Фото' : payload.files?.length ? '📎 Файл' : '')}`,
@@ -417,8 +463,8 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
                 : c
         ));
 
-        clearTimeout(typingTimersRef.current[chatId]);
-        messengerApi.setTyping(Number(chatId), false).catch(() => {});
+        clearTimeout(typingTimersRef.current[realChatId]);
+        messengerApi.setTyping(Number(realChatId), false).catch(() => {});
 
         try {
             const rawFiles = [...(payload.imageFiles ?? []), ...(payload.attachmentFiles ?? [])];
@@ -432,7 +478,7 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
             }
 
             const res = await messengerApi.sendMessage(
-                Number(chatId),
+                Number(realChatId),
                 text,
                 payload.replyToId ? Number(payload.replyToId) : undefined,
                 attachmentKeys,
@@ -440,15 +486,17 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
             const confirmed = mapMessage(res.data, myID);
             setMessages(prev => ({
                 ...prev,
-                [chatId]: (prev[chatId] ?? []).map(m => m.id === tempId ? confirmed : m),
+                [realChatId]: (prev[realChatId] ?? []).map(m => m.id === tempId ? confirmed : m),
             }));
         } catch (err) {
             console.error('[messenger] send failed', err);
             setMessages(prev => ({
                 ...prev,
-                [chatId]: (prev[chatId] ?? []).filter(m => m.id !== tempId),
+                [realChatId]: (prev[realChatId] ?? []).filter(m => m.id !== tempId),
             }));
         }
+
+        return realChatId;
     }, [myID, user]);
 
     const sendMessage = useCallback<Ctx['sendMessage']>((chatId, text, replyTo) => {
@@ -456,7 +504,7 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
     }, [sendPayload]);
 
     const notifyTyping = useCallback((chatId: string) => {
-        if (!chatId) return;
+        if (!chatId || isDraftId(chatId)) return;
 
         if (!typingTimersRef.current[chatId]) {
             messengerApi.setTyping(Number(chatId), true).catch(() => {});
@@ -641,6 +689,7 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
         forwardMessage,
         deleteMessage,
         createChat,
+        openDraftChat,
         getMembers,
         getMediaFromChat,
         getFilesFromChat,
@@ -649,7 +698,7 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
     }), [
         contacts, messages, typing, availableMembers, activeChatId,
         sendMessage, sendPayload, notifyTyping, pinMessage, forwardMessage, deleteMessage, setActiveChat,
-        createChat, getMembers, getMediaFromChat, getFilesFromChat, getPinnedFromChat, toggleReaction,
+        createChat, openDraftChat, getMembers, getMediaFromChat, getFilesFromChat, getPinnedFromChat, toggleReaction,
         ensureLoaded,
     ]);
 

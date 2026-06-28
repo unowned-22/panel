@@ -44,9 +44,10 @@ interface Props {
     infoOpen: boolean;
     onStartCall: (type: "voice" | "video") => void;
     onForward: (msgId: string) => void;
+    onChatIdChange?: (id: string) => void;
 }
 
-export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCall, onForward }: Props) => {
+export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCall, onForward, onChatIdChange }: Props) => {
     const { messages, typing, sendPayload, notifyTyping, pinMessage, deleteMessage, toggleReaction } = useMessenger();
 
     const chatMessages = messages[active.id] ?? [];
@@ -76,10 +77,13 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
         ta.style.height = `${Math.min(ta.scrollHeight, 160)}px`;
     }, [text]);
 
-    const handleSend = () => {
+    const handleSend = async () => {
         const t = text.trim();
         if (!t && pendingImages.length === 0 && pendingFiles.length === 0) return;
-        sendPayload(active.id, {
+
+        const sentForChatId = active.id;
+
+        const realId = await sendPayload(sentForChatId, {
             text: t,
             images: pendingImages.length ? pendingImages : undefined,
             files: pendingFiles.length ? pendingFiles : undefined,
@@ -88,6 +92,11 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
             replyTo: replyTo ?? undefined,
             replyToId: replyTo?.id,
         });
+
+        if (realId && realId !== sentForChatId) {
+            onChatIdChange?.(realId);
+        }
+
         setText("");
         setReplyTo(null);
         setPendingImages([]);

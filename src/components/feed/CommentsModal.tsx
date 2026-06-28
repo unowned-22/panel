@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { formatCount, type Comment, type Post } from "./types";
-import { MentionInput, renderWithMentions, type MentionInputHandle } from "@/me/components/mention-input";
+import { MentionInput, renderWithMentions, type MentionInputHandle } from "../mention-input";
 
 interface Props {
   open: boolean;

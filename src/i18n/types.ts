@@ -301,4 +301,153 @@ export interface TranslationDictionary {
     'photos.comments.empty': string;
     'photos.comment.placeholder': string;
     'photos.album.privacy.change': string;
+    'photos.cover.pick': string;
+
+    // ── Settings – Account section ────────────────────────────────────────────
+    'page.settings.account.theme': string;
+    'page.settings.account.theme.system': string;
+    'page.settings.account.accounts': string;
+    'page.settings.account.manage': string;
+    'page.settings.account.profile': string;
+    'page.settings.account.profile.show.posts': string;
+    'page.settings.account.profile.disable.comments': string;
+    'page.settings.account.profile.accessibility': string;
+    'page.settings.account.content': string;
+    'page.settings.account.content.autoplay': string;
+    'page.settings.account.content.auto.gif': string;
+    'page.settings.account.content.suggest.stickers': string;
+    'page.settings.account.content.show.interesting': string;
+    'page.settings.account.content.translate.posts': string;
+    'page.settings.account.content.feed.order': string;
+    'page.settings.account.content.feed.order.value': string;
+    'page.settings.account.content.comments.sort': string;
+    'page.settings.account.content.comments.sort.value': string;
+    'page.settings.account.profanity.filter': string;
+    'page.settings.account.profanity.disabled': string;
+    'page.settings.account.profanity.change': string;
+
+    // ── Settings – Security section ───────────────────────────────────────────
+    'page.settings.security.title': string;
+    'page.settings.security.password': string;
+    'page.settings.security.password.changed': string;
+    'page.settings.security.password.change': string;
+    'page.settings.security.2fa': string;
+    'page.settings.security.2fa.status': string;
+    'page.settings.security.2fa.connect': string;
+    'page.settings.security.sessions': string;
+    'page.settings.security.sessions.terminate': string;
+    'page.settings.security.login.history': string;
+    'page.settings.security.login.history.show': string;
+
+    // ── Settings – Privacy section ────────────────────────────────────────────
+    'page.settings.privacy.title': string;
+    'page.settings.privacy.banner.title': string;
+    'page.settings.privacy.banner.desc': string;
+    'page.settings.privacy.banner.more': string;
+    'page.settings.privacy.item.main.info': string;
+    'page.settings.privacy.item.birthday': string;
+    'page.settings.privacy.item.saved.photos': string;
+    'page.settings.privacy.item.groups': string;
+    'page.settings.privacy.item.audio': string;
+    'page.settings.privacy.item.video': string;
+    'page.settings.privacy.item.gifts': string;
+    'page.settings.privacy.item.friends': string;
+    'page.settings.privacy.value.all': string;
+    'page.settings.privacy.value.only.me': string;
+    'page.settings.privacy.value.all.friends': string;
+
+    // ── Settings – Notifications section ─────────────────────────────────────
+    'page.settings.notif.site.title': string;
+    'page.settings.notif.instant': string;
+    'page.settings.notif.sound': string;
+    'page.settings.notif.show.text': string;
+    'page.settings.notif.browser': string;
+    'page.settings.notif.browser.desc': string;
+    'page.settings.notif.browser.disabled': string;
+    'page.settings.notif.types.title': string;
+    'page.settings.notif.types.desc': string;
+    'page.settings.notif.for.all': string;
+    'page.settings.notif.apply.all': string;
+    'page.settings.notif.freq.instant': string;
+    'page.settings.notif.freq.daily': string;
+    'page.settings.notif.freq.weekly': string;
+    'page.settings.notif.freq.off': string;
+    'page.settings.notif.type.messages': string;
+    'page.settings.notif.type.messages.desc': string;
+    'page.settings.notif.type.mentions': string;
+    'page.settings.notif.type.mentions.desc': string;
+    'page.settings.notif.type.likes': string;
+    'page.settings.notif.type.likes.desc': string;
+    'page.settings.notif.type.shares': string;
+    'page.settings.notif.type.shares.desc': string;
+    'page.settings.notif.type.comments': string;
+    'page.settings.notif.type.comments.desc': string;
+    'page.settings.notif.type.friends': string;
+    'page.settings.notif.type.friends.desc': string;
+    'page.settings.notif.type.groups': string;
+    'page.settings.notif.type.groups.desc': string;
+
+    // ── Settings – Blacklist section ──────────────────────────────────────────
+    'page.settings.blacklist.title': string;
+    'page.settings.blacklist.add': string;
+    'page.settings.blacklist.search': string;
+    'page.settings.blacklist.empty.title': string;
+    'page.settings.blacklist.empty.desc': string;
+
+    // ── Settings – Apps section ───────────────────────────────────────────────
+    'page.settings.apps.title': string;
+    'page.settings.apps.connected': string;
+    'page.settings.apps.connected.none': string;
+    'page.settings.apps.games': string;
+    'page.settings.apps.games.manage': string;
+
+    // ── Settings – Voices section ─────────────────────────────────────────────
+    'page.settings.voices.balance.title': string;
+    'page.settings.voices.desc.1': string;
+    'page.settings.voices.desc.2': string;
+    'page.settings.voices.desc.2.link': string;
+    'page.settings.voices.account': string;
+    'page.settings.voices.balance': string;
+    'page.settings.voices.balance.value': string;
+    'page.settings.voices.payment': string;
+    'page.settings.voices.payment.show': string;
+    'page.settings.voices.topup': string;
+    'page.settings.voices.topup.btn': string;
+    'page.settings.voices.partners': string;
+    'page.settings.voices.promo': string;
+    'page.settings.voices.support': string;
+    'page.settings.voices.support.link': string;
+    'page.settings.voices.subscriptions': string;
+    'page.settings.voices.music.sub': string;
+    'page.settings.voices.music.sub.btn': string;
+    'photos.bulk.delete.success': string;
+    'photos.delete.confirm.title': string;
+    'photos.bulk.delete.confirm': string;
+    'photos.selected.count': string;
+    'photos.selected.none': string;
+
+    // ── Cover editor ──────────────────────────────────────────────────────────
+    'cover.modal.title.edit': string;
+    'cover.modal.title.add': string;
+    'cover.modal.preview': string;
+    'cover.modal.cancel': string;
+    'cover.modal.set': string;
+    'cover.modal.hint': string;
+    'cover.modal.close': string;
+    'cover.load.error': string;
+    'cover.crop.loading': string;
+    'cover.crop.label.mobile': string;
+    'cover.crop.label.desktop': string;
+    'cover.crop.legend.mobile': string;
+    'cover.crop.legend.desktop': string;
+    'cover.preview.title': string;
+    'cover.preview.hint': string;
+    'cover.preview.return': string;
+    'cover.preview.set': string;
+    'cover.preview.tab.desktop': string;
+    'cover.preview.tab.mobile': string;
+    'cover.upload.title': string;
+    'cover.upload.desc': string;
+    'cover.upload.btn': string;
+    'cover.upload.hint': string;
 }

@@ -4,20 +4,14 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from '@/hooks/use-translation';
 import { Move, Trash2, Pin } from 'lucide-react';
-import { Heart, Send, X, Camera } from 'lucide-react';
-import { MentionInput, renderWithMentions, type MentionInputHandle } from './mention-input';
+import { Heart, Send } from 'lucide-react';
+import { MentionInput, renderWithMentions, type MentionInputHandle } from '@/components/mention-input';
 import { toAbsoluteUrl } from '@/lib/helpers';
 import type { Photo, Album as ApiAlbum } from '@/api/photos';
-import { useAuthStore } from '@/auth/auth.store';
 import { usePhotoComments } from '@/hooks/use-photo-comments';
 import { photosApi } from '@/api/photos';
-import {
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { MoveToAlbumDialog } from "./move-to-album";
+import { getInitials, useAccount } from "@/hooks/use-account.ts";
 
 type Props = {
     open: boolean;
@@ -28,68 +22,10 @@ type Props = {
     albums?: ApiAlbum[];
 };
 
-const MoveToAlbumDialog = ({
-                               open, onOpenChange, albums, currentAlbumId, onConfirm,
-                           }: {
-    open: boolean;
-    onOpenChange: (v: boolean) => void;
-    albums: ApiAlbum[];
-    currentAlbumId?: number | null;
-    onConfirm: (albumId: number | null) => void;
-}) => {
-    const [selected, setSelected] = useState<number | null>(currentAlbumId ?? null);
-    // reset on open
-    useState(() => { if (open) setSelected(currentAlbumId ?? null); });
-
-    return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-md">
-                <DialogHeader><DialogTitle>Переместить в альбом</DialogTitle></DialogHeader>
-                <div className="max-h-80 overflow-y-auto -mx-1 px-1 space-y-1">
-                    <button
-                        onClick={() => setSelected(null)}
-                        className={cn(
-                            'w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-2',
-                            selected === null ? 'bg-secondary' : 'hover:bg-secondary/60',
-                        )}
-                    >
-                        <span className="text-sm">Без альбома</span>
-                    </button>
-                    {albums.map((a) => (
-                        <button
-                            key={a.id}
-                            onClick={() => setSelected(a.id)}
-                            className={cn(
-                                'w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-3',
-                                selected === a.id ? 'bg-secondary' : 'hover:bg-secondary/60',
-                            )}
-                        >
-                            <div className="w-9 h-9 rounded-md bg-secondary overflow-hidden shrink-0 flex items-center justify-center">
-                                {a.cover_url
-                                    ? <img src={a.cover_url} className="w-full h-full object-cover" />
-                                    : <Camera className="w-4 h-4 text-muted-foreground" />}
-                            </div>
-                            <div className="min-w-0">
-                                <div className="text-sm font-medium truncate">{a.title}</div>
-                                <div className="text-xs text-muted-foreground">{a.photo_count} фото</div>
-                            </div>
-                        </button>
-                    ))}
-                </div>
-                <DialogFooter>
-                    <Button variant="secondary" onClick={() => onOpenChange(false)}>Отмена</Button>
-                    <Button onClick={() => { onConfirm(selected); onOpenChange(false); }}>Переместить</Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    );
-};
-
 export const PhotoViewer = ({ open, onOpenChange, photo, onPhotoUpdate, onToggleLike, albums = [] }: Props) => {
     const [draft, setDraft] = useState('');
     const [moveOpen, setMoveOpen] = useState(false);
     const inputRef = useRef<MentionInputHandle>(null);
-    const auth = useAuthStore((s) => s.user);
 
     const photoId = photo?.id ?? null;
     const commentsQuery = usePhotoComments(photoId);
@@ -97,6 +33,7 @@ export const PhotoViewer = ({ open, onOpenChange, photo, onPhotoUpdate, onToggle
     const qc = useQueryClient();
     const toast = useToast();
     const { t } = useTranslation();
+    const { activeAccount } = useAccount();
 
     useEffect(() => {
         if (open) setDraft('');
@@ -170,18 +107,11 @@ export const PhotoViewer = ({ open, onOpenChange, photo, onPhotoUpdate, onToggle
     return (
         <>
             <Dialog open={open} onOpenChange={onOpenChange}>
-                <DialogContent className="max-w-5xl p-0 overflow-hidden border-none bg-card">
+                <DialogContent className="max-w-5xl p-0 overflow-hidden border-none bg-card" hideClose>
                     <div className="grid md:grid-cols-[1fr_360px] max-h-[85vh] md:h-[85vh]">
                         {/* Image */}
                         <div className="relative bg-black flex items-center justify-center min-h-80">
-                            <img src={toAbsoluteUrl(photo.preview_url ?? photo.url)} alt="Фото" className="max-h-[85vh] w-full object-contain" />
-                            <button
-                                onClick={() => onOpenChange(false)}
-                                className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 md:hidden"
-                                aria-label="Закрыть"
-                            >
-                                <X className="w-5 h-5" />
-                            </button>
+                            <img src={photo.preview_url ?? photo.url} alt="Фото" className="max-h-[85vh] w-full object-contain" />
                         </div>
 
                         {/* Comments side */}
@@ -241,7 +171,15 @@ export const PhotoViewer = ({ open, onOpenChange, photo, onPhotoUpdate, onToggle
                                 )}
                             </div>
                             <form onSubmit={submit} className="p-3 border-t border-border flex items-center gap-2">
-                                <img src={toAbsoluteUrl(auth?.avatar_url ?? '/avatar-me.jpg')} alt="" className="w-8 h-8 rounded-full object-cover" />
+                                <div
+                                    className="w-8 h-8 overflow-hidden rounded-full"
+                                    style={{ background: activeAccount.user?.avatar_url ? "hsl(var(--background))" : activeAccount.avatarColor }}
+                                >
+                                    {activeAccount.user?.avatar_url
+                                        ? <img src={activeAccount.user?.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover" />
+                                        : <div className="flex h-full w-full items-center justify-center text-white font-semibold">{getInitials(activeAccount.name)}</div>
+                                    }
+                                </div>
                                 <MentionInput
                                     ref={inputRef}
                                     value={draft}

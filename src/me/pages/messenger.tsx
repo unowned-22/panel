@@ -12,73 +12,64 @@ import CallScreen from "@/components/messenger/CallScreen";
 import ForwardDialog from "@/components/messenger/ForwardDialog";
 
 const Messenger = () => {
-    const { contacts, ensureLoaded, createChat } = useMessenger() as ReturnType<typeof useMessenger> & {
+    const { contacts, ensureLoaded, createChat, openDraftChat } = useMessenger() as ReturnType<typeof useMessenger> & {
         ensureLoaded: (chatId: string) => void;
     };
     const { setActiveChat } = useMessenger();
     const { username } = useParams<{ username: string }>();
     const navigate = useNavigate();
-
     const [activeId, setActiveId] = useState<string>(contacts[0]?.id ?? "");
+    const [closedByUser, setClosedByUser] = useState(false);
     const [creatingChat, setCreatingChat] = useState(false);
     const [infoOpen, setInfoOpen] = useState(false);
     const [createOpen, setCreateOpen] = useState(false);
     const [call, setCall] = useState<{ type: "voice" | "video" } | null>(null);
     const [forwardMsgId, setForwardMsgId] = useState<string | null>(null);
     const [resolvingUser, setResolvingUser] = useState(false);
-
     const active = contacts.find(c => c.id === activeId) ?? null;
 
-    // Load messages whenever active conversation changes
     useEffect(() => {
         if (activeId) ensureLoaded(activeId);
     }, [activeId, ensureLoaded]);
 
-    // Auto-select first conversation once contacts load
     useEffect(() => {
-        if (!activeId && contacts.length > 0 && !username) {
+        if (!closedByUser && !activeId && contacts.length > 0 && !username) {
             setActiveId(contacts[0].id);
         }
-    }, [contacts, activeId, username]);
+    }, [contacts, activeId, username, closedByUser]);
 
-    // ── Открытие диалога по /me/messenger/:username ───────────────────────
-    // Если уже есть direct-переписка с этим пользователем среди загруженных
-    // контактов — просто выбираем её. Если нет — получаем (или создаём) её
-    // через бэкенд по числовому id профиля и сразу открываем.
     useEffect(() => {
         if (!username) return;
 
         let cancelled = false;
 
-        const openDirectByUsername = async () => {
+        const openDraft = async () => {
             setResolvingUser(true);
             try {
                 const profile = await profileApi.get(username);
                 if (cancelled || !profile?.id) return;
 
-                const chatId = await createChat({
+                const chatId = openDraftChat({
+                    userId: profile.id,
                     name: profile.full_name ?? profile.username ?? "",
-                    isGroup: false,
-                    memberIds: [String(profile.id)],
+                    avatar: profile.avatar_url,
                 });
 
                 if (!cancelled && chatId) {
+                    setClosedByUser(false);
                     setActiveId(chatId);
                 }
             } catch (err) {
-                console.error("[messenger] failed to open chat by username", err);
+                console.error("[messenger] failed to resolve user by username", err);
             } finally {
                 if (!cancelled) {
                     setResolvingUser(false);
-                    // Возвращаемся на канонический /me/messenger, чтобы при
-                    // обновлении страницы или повторном клике на ту же ссылку
-                    // не пересоздавать диалог заново.
                     navigate("/me/messenger", { replace: true });
                 }
             }
         };
 
-        openDirectByUsername();
+        openDraft();
 
         return () => {
             cancelled = true;
@@ -89,8 +80,14 @@ const Messenger = () => {
     const handleSelect = (id: string) => {
         setActiveId(id);
         setActiveChat(id);
+        setClosedByUser(false);
         setCreatingChat(false);
         setInfoOpen(false);
+    };
+
+    const handleCloseChat = () => {
+        setClosedByUser(true);
+        setActiveId("");
     };
 
     const handleCreateGroup = async (name: string, memberIds: string[], avatar?: string) => {
@@ -126,11 +123,12 @@ const Messenger = () => {
                     {active ? (
                         <ChatWindow
                             active={active}
-                            onClose={() => setActiveId("")}
+                            onClose={handleCloseChat}
                             onToggleInfo={() => setInfoOpen(v => !v)}
                             infoOpen={infoOpen}
                             onStartCall={type => setCall({ type })}
                             onForward={msgId => setForwardMsgId(msgId)}
+                            onChatIdChange={setActiveId}
                         />
                     ) : resolvingUser ? (
                         <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">

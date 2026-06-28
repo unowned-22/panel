@@ -1,3 +1,4 @@
+import { useRef, useState } from "react";
 import { MoreHorizontal, Pencil, Trash2, Camera } from "lucide-react";
 import {
     DropdownMenu,
@@ -17,12 +18,22 @@ interface AlbumCardProps {
 
 export const AlbumCard = ({ album, onOpen, onEdit, onDelete }: AlbumCardProps) => {
     const { t } = useTranslation();
+    const blockOpenRef = useRef(false);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
     const cover = album.cover_url;
+
+    const handleWrapperClick = () => {
+        if (blockOpenRef.current) {
+            blockOpenRef.current = false;
+            return;
+        }
+        onOpen();
+    };
 
     return (
         <div>
             <div
-                onClick={onOpen}
+                onClick={handleWrapperClick}
                 className="relative aspect-square rounded-xl overflow-hidden bg-secondary cursor-pointer group"
             >
                 {cover ? (
@@ -32,7 +43,7 @@ export const AlbumCard = ({ album, onOpen, onEdit, onDelete }: AlbumCardProps) =
                         <Camera className="w-10 h-10" />
                     </div>
                 )}
-                <DropdownMenu>
+                <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
                     <DropdownMenuTrigger asChild>
                         <button
                             onClick={(e) => e.stopPropagation()}
@@ -42,11 +53,23 @@ export const AlbumCard = ({ album, onOpen, onEdit, onDelete }: AlbumCardProps) =
                         </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuItem onClick={onEdit}>
+                        <DropdownMenuItem
+                            onSelect={(e) => {
+                                e.preventDefault();
+                                blockOpenRef.current = true;
+                                setDropdownOpen(false);
+                                onEdit();
+                            }}
+                        >
                             <Pencil className="w-4 h-4 mr-2 text-primary" /> {t('photos.album.edit')}
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                            onClick={onDelete}
+                            onSelect={(e) => {
+                                e.preventDefault();
+                                blockOpenRef.current = true;
+                                setDropdownOpen(false);
+                                onDelete();
+                            }}
                             className="text-destructive focus:text-destructive"
                         >
                             <Trash2 className="w-4 h-4 mr-2" /> {t('photos.album.delete')}

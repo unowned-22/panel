@@ -18,7 +18,10 @@ export function usePhotoUpload() {
     const addFiles = useCallback((files: File[] | FileList) => {
         const arr = Array.from(files as File[]).filter((f: File) => f.type.startsWith('image/') && f.size <= 10 * 1024 * 1024);
         const next = arr.map((file: File) => ({ id: `${Date.now()}-${file.name}`, file, progress: 0, status: 'pending' as UploadStatus }));
-        setItems((s: UploadItem[]) => [...s, ...next]);
+        setItems((s: UploadItem[]) => {
+            const active = s.filter((x) => x.status === 'pending' || x.status === 'uploading');
+            return [...active, ...next];
+        });
     }, []);
 
     const start = useCallback(async (albumId?: number | null) => {
