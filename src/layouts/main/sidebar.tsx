@@ -2,7 +2,7 @@ import {
     User, Newspaper, MessageCircle, Phone, Users, UsersRound,
     Image as ImageIcon, Music, Video, Film, Gamepad2, Smile,
     ShoppingBag, LayoutGrid, Mic, Bookmark, HelpCircle,
-    type LucideIcon,
+    type LucideIcon, Plus
 } from "lucide-react";
 import { SidebarNavItem } from "./sidebar-nav-item";
 import type { NavItemKey } from "@/context/settings-context";
@@ -97,11 +97,11 @@ export const Sidebar = ({ visible }: SidebarProps) => {
     if (current.length > 0) groups.push(current);
 
     return (
-        <aside className="hidden lg:flex flex-col w-58 shrink-0 py-3 pr-2 sticky top-15 self-start max-h-[calc(100vh-60px)] overflow-y-auto">
+        <aside className="hidden lg:flex flex-col w-58 shrink-0 py-3 pr-2 sticky top-15 self-start max-h-[calc(100vh-60px)]">
             {groups.map((group, i) => (
                 <div key={i}>
                     {i > 0 && <div className="my-3 border-t border-sidebar-border" />}
-                    <nav className="flex flex-col gap-0.5">
+                    <nav className="flex flex-col gap-0.5 pl-7 pr-2">
                         {group.map((key) => (
                             <SidebarNavItem
                                 key={key}
@@ -110,6 +110,8 @@ export const Sidebar = ({ visible }: SidebarProps) => {
                                 icon={ICON_MAP[key]}
                                 dot={key === "games"}
                                 badge={key === "friends" ? pendingCount : undefined}
+                                extraTo={key === "video" ? "/me/video/create" : undefined}
+                                extraIcon={key === "video" ? Plus : undefined}
                             />
                         ))}
                     </nav>

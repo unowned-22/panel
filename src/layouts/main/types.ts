@@ -7,6 +7,8 @@ export interface NavItem {
     icon: LucideIcon;
     dot?: boolean;
     badge?: number;
+    extraTo?: string;
+    extraIcon?: LucideIcon;
 }
 
 export type NavConfig = NavItem[];

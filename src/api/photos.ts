@@ -303,7 +303,6 @@ export const photosApi = {
 
         if (Array.isArray(res)) return { items: res.map(mapComment), total: res.length, page, limit };
 
-        // apiClient may unwrap data envelope — check both res and res.data
         const candidates = [res, res?.data];
         for (const candidate of candidates) {
             if (!candidate) continue;

@@ -13,7 +13,7 @@ import ProfilePage from "@/profile/pages/profile";
 import Friends from "@/me/pages/friends";
 import Photos from "@/me/pages/photos";
 import Calls from "@/me/pages/calls";
-import Video from "@/me/pages/video";
+import Video from "@/me/pages/video/video";
 import Groups from "@/me/pages/groups";
 import Messenger from "@/me/pages/messenger";
 import Analytics from "@/me/pages/analytics";
@@ -48,6 +48,7 @@ export function AppRoutingSetup() {
                     <Route path="/me/photos" element={<Photos />} />
                     <Route path="/me/calls" element={<Calls />} />
                     <Route path="/me/video" element={<Video />} />
+                    <Route path="/me/video/create" element={<Video />} />
                     <Route path="/me/groups" element={<Groups />} />
                     <Route path="/me/analytics" element={<Analytics />} />
                     <Route path="/me/messenger" element={<Messenger />} />

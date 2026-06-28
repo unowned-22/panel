@@ -11,12 +11,14 @@ export interface ApiClientConfig {
     baseUrl: string;
     getToken: () => string | undefined;
     getRefreshToken: () => string | undefined;
+    getLanguage?: () => string | undefined;
     onTokenRefreshed: (auth: { access_token: string; refresh_token?: string }) => void;
     onAuthFailure: () => void;
 }
 
 export default class ApiClient {
     private baseUrl: string;
+    private getLanguage?: () => string | undefined;
     private getToken: () => string | undefined;
     private getRefreshToken: () => string | undefined;
     private onTokenRefreshed: (auth: { access_token: string; refresh_token?: string }) => void;
@@ -26,6 +28,7 @@ export default class ApiClient {
 
     constructor(cfg: ApiClientConfig) {
         this.baseUrl = cfg.baseUrl.replace(/\/$/, '');
+        this.getLanguage = cfg.getLanguage;
         this.getToken = cfg.getToken;
         this.getRefreshToken = cfg.getRefreshToken;
         this.onTokenRefreshed = cfg.onTokenRefreshed;
@@ -61,6 +64,8 @@ export default class ApiClient {
         const headers: Record<string,string> = { 'Content-Type': 'application/json' };
         const token = this.getToken();
         if (token) headers['Authorization'] = `Bearer ${token}`;
+        const lang = this.getLanguage?.();
+        if (lang) headers['Accept-Language'] = lang;
 
         const res = await fetch(url, {
             method,
@@ -116,9 +121,9 @@ export default class ApiClient {
         const headers: Record<string, string> = {};
         const token = this.getToken();
         if (token) headers['Authorization'] = `Bearer ${token}`;
+        const lang = this.getLanguage?.();
+        if (lang) headers['Accept-Language'] = lang;
 
-        // If the caller already built a FormData (e.g. cover upload with crop JSON),
-        // use it as-is. Otherwise wrap a bare File in a new FormData.
         const buildBody = (p: File | FormData): FormData => {
             if (p instanceof FormData) return p;
             const fd = new FormData();
@@ -228,6 +233,8 @@ export const apiClient = new ApiClient({
         if (!activeAccountId) return undefined;
         return tokens[activeAccountId]?.refresh_token;
     },
+
+    getLanguage: () => (document.documentElement.lang || navigator.language).split('-')[0],
 
     onTokenRefreshed: (newAuth) => {
         const { activeAccountId } = useAuthStore.getState();
