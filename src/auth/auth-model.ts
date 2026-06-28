@@ -1,16 +1,10 @@
-// Define UUID types for consistent usage
-export type UUID = string;
-
-// Language code types for user preferences
 export type LanguageCode = 'en' | 'de' | 'es' | 'fr' | 'ja' | 'zh';
 
-// Auth model representing the authentication session
 export interface AuthModel {
     access_token: string;
     refresh_token?: string;
 }
 
-// User model representing the user profile
 export interface UserModel {
     id: number;
     username: string;
@@ -18,6 +12,8 @@ export interface UserModel {
     full_name: string;
     avatar_url: string;
     cover_url: string;
+    cover_mobile_url: string;
+    cover_desktop_url: string;
     role: string;
     phone?: string;
     language?: LanguageCode;

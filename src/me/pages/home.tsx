@@ -26,11 +26,13 @@ import { Link } from "react-router-dom";
 import { type StoryState, StoriesEditor, StoriesViewer } from "@/components/stories";
 import { toast } from "@/hooks/use-toast.ts";
 import { ApiError } from "@/lib/api-client.ts";
+import { useIsMobile } from "@/hooks/use-mobile.tsx";
 
 const Home = () => {
     const { t } = useTranslation();
     const { activeAccount } = useAccount();
     const { addMyStory } = useStories();
+    const isMobile = useIsMobile();
 
     const [avatar, setAvatar] = useState<string|null>(() => {
         return activeAccount.user?.avatar_url ?? null;
@@ -227,10 +229,12 @@ const Home = () => {
                 userName={activeAccount.name}
                 onClose={() => setCoverEditorOpen(false)}
                 onSave={async (result: CoverCropResult) => {
-                    await authActions.uploadCover(result.originalFile);
-                    // await authActions.uploadCover(result.originalFile, { mobile: result.mobile, desktop: result.desktop });
-                    console.log(result.mobile, result.desktop)
-                    setCover(URL.createObjectURL(result.originalFile));
+                    const res = await authActions.uploadCover(result.originalFile, {
+                        mobile: result.mobile,
+                        desktop: result.desktop,
+                    });
+
+                    setCover(isMobile ? res.cover_mobile_url : res.cover_desktop_url);
                 }}
             />
             <AvatarUploader

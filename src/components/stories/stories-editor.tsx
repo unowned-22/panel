@@ -18,6 +18,7 @@ import { FiltersPanel } from "./components/panels/FiltersPanel";
 import { ColorCorrectionPanel } from "./components/panels/ColorCorrectionPanel";
 import { LinkPanel, type LinkPayload } from "./components/panels/link-panel";
 import { uid, nextZ, widthPercentToHeightPercent, loadImageNaturalRatio } from "./utils";
+import { normalizeImageFile } from "./utils/normalizeImageFile";
 import type { Tool } from "./types/editor";
 import {
     defaultAdjustments,
@@ -130,17 +131,18 @@ export function StoriesEditor({ onClose, onPublish }: { onClose: () => void; onP
         set((prev) => ({ ...prev, selectedElementId: id }), { skipHistory: true });
     }, [set]);
 
-    // Background upload: always fills the whole slide and can't be moved/resized.
-    const handleBackgroundFile = useCallback((file: File) => {
-        const url = URL.createObjectURL(file);
+    const handleBackgroundFile = useCallback(async (file: File) => {
         const mediaType: "image" | "video" = file.type.startsWith("video") ? "video" : "image";
+        const normalized = mediaType === "image" ? await normalizeImageFile(file) : file;
+        const url = URL.createObjectURL(normalized);
         updateSlide((s) => ({ ...s, background: { kind: "media", url, mediaType } }));
     }, [updateSlide]);
 
     // Photo upload: added as a free-floating element on top of the slide —
     // draggable, resizable (aspect-locked) and rotatable, with its own delete button.
     const addImageElement = useCallback(async (file: File) => {
-        const url = URL.createObjectURL(file);
+        const normalized = await normalizeImageFile(file);
+        const url = URL.createObjectURL(normalized);
         const naturalRatio = await loadImageNaturalRatio(url);
         const width = 55;
         const height = Math.min(95, widthPercentToHeightPercent(width, naturalRatio));
