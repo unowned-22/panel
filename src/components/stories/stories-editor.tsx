@@ -16,12 +16,13 @@ import { PaintbrushPanel } from "./components/panels/PaintbrushPanel";
 import { BackgroundPanel } from "./components/panels/BackgroundPanel";
 import { FiltersPanel } from "./components/panels/FiltersPanel";
 import { ColorCorrectionPanel } from "./components/panels/ColorCorrectionPanel";
+import { LinkPanel, type LinkPayload } from "./components/panels/link-panel";
 import { uid, nextZ, widthPercentToHeightPercent, loadImageNaturalRatio } from "./utils";
 import type { Tool } from "./types/editor";
 import {
     defaultAdjustments,
     type Background, type CanvasElement,
-    type DrawingElement, type ImageElement, type Slide, type StickerElement,
+    type DrawingElement, type ImageElement, type LinkElement, type Slide, type StickerElement,
     type StoryState, type TextElement,
 } from "./types/stories";
 import { useTranslation } from "@/hooks/use-translation";
@@ -151,7 +152,6 @@ export function StoriesEditor({ onClose, onPublish }: { onClose: () => void; onP
         setSelected(el.id);
     }, [updateSlide, activeSlide, setSelected]);
 
-    // element ops
     const addText = useCallback(() => {
         const el: TextElement = {
             id: uid(), type: "text", x: 50, y: 50, width: 70, rotation: 0,
@@ -170,6 +170,16 @@ export function StoriesEditor({ onClose, onPublish }: { onClose: () => void; onP
         };
         updateSlide((s) => ({ ...s, elements: [...s.elements, el] }));
         setSelected(el.id);
+    }, [updateSlide, activeSlide, setSelected]);
+
+    const addLink = useCallback(({ url, displayStyle, title }: LinkPayload) => {
+        const el: LinkElement = {
+            id: uid(), type: "link", x: 50, y: 50, width: 55, rotation: 0,
+            zIndex: nextZ(activeSlide), url, displayStyle, title,
+        };
+        updateSlide((s) => ({ ...s, elements: [...s.elements, el] }));
+        setSelected(el.id);
+        setTool(null);
     }, [updateSlide, activeSlide, setSelected]);
 
     const updateElement = useCallback((id: string, patch: Partial<CanvasElement>, opts?: { skipHistory?: boolean }) => {
@@ -244,7 +254,6 @@ export function StoriesEditor({ onClose, onPublish }: { onClose: () => void; onP
 
             <div className="relative w-full max-w-3xl rounded-2xl bg-zinc-900 text-zinc-100 shadow-2xl ring-1 ring-white/5 overflow-hidden">
                 <div className="grid grid-cols-1 md:grid-cols-[1fr_300px]">
-                    {/* LEFT: canvas area */}
                     <div className="p-4 sm:p-5 flex flex-col gap-3">
                         <div className="flex items-center justify-center gap-3 text-zinc-400">
                             <button onClick={undo} disabled={!canUndo} className="p-2 rounded-md hover:bg-white/5 disabled:opacity-30">
@@ -263,7 +272,6 @@ export function StoriesEditor({ onClose, onPublish }: { onClose: () => void; onP
                             onUpdate={updateElement}
                             onDelete={deleteElement}
                             onSelectFile={handleBackgroundFile}
-                            onPickBackground={() => setTool("background")}
                             onTextEdit={(id, text) => updateElement(id, { text } as Partial<TextElement>, { skipHistory: true })}
                             onAddDrawingStroke={(stroke) => {
                                 updateSlide((s) => {
@@ -309,6 +317,7 @@ export function StoriesEditor({ onClose, onPublish }: { onClose: () => void; onP
                                 {tool === null && <DefaultMenu onPick={handlePickTool} />}
                                 {tool === "text" && <TextPanel selected={selected} onClose={() => setTool(null)} onUpdate={updateElement} />}
                                 {tool === "stickers" && <StickersPanel onAdd={addSticker} onClose={() => setTool(null)} />}
+                                {tool === "link" && <LinkPanel onAdd={addLink} onClose={() => setTool(null)} />}
                                 {tool === "paint" && <PaintbrushPanel onClose={() => setTool(null)} onClear={() => updateSlide((s) => ({ ...s, elements: s.elements.filter((e) => e.type !== "drawing") }))} />}
                                 {tool === "background" && (
                                     <BackgroundPanel

@@ -1,12 +1,21 @@
 import { useRef, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { RotateCw, Trash2 } from "lucide-react";
-import { TextRender, StickerRender, ImageRender } from "./ElementRenders";
+import { TextRender, StickerRender, ImageRender, LinkRender } from "./ElementRenders";
 import type { CanvasElement, TextElement } from "../types/stories";
+import type { LinkElement } from "../types/stories";
 
 export function ElementView({
-                       element, selected, editing, onSelect, onStartEdit, onStopEdit,
-                       onUpdate, onDelete, onTextEdit, containerRef,
-                     }: {
+                              element,
+                              selected,
+                              editing,
+                              onSelect,
+                              onStartEdit,
+                              onStopEdit,
+                              onUpdate,
+                              onDelete,
+                              onTextEdit,
+                              containerRef,
+                            }: {
   element: CanvasElement;
   selected: boolean;
   editing: boolean;
@@ -22,16 +31,22 @@ export function ElementView({
   const resizeRef = useRef<{ startX: number; startY: number; w: number; h: number } | null>(null);
   const rotateRef = useRef<{ startAngle: number; startRotation: number } | null>(null);
 
-  // drawing element renders as svg, not draggable (hooks above to keep Rules of Hooks happy)
+  // drawing renders as svg overlay — not draggable
   if (element.type === "drawing") {
     return (
-        <svg className="absolute inset-0 pointer-events-none w-full h-full" style={{ zIndex: element.zIndex }}>
+        <svg
+            className="absolute inset-0 pointer-events-none w-full h-full"
+            style={{ zIndex: element.zIndex }}
+        >
           {element.paths.map((p, i) => (
               <polyline
                   key={i}
                   points={p.points.map((pt) => `${pt.x * 100}%,${pt.y * 100}%`).join(" ")}
-                  stroke={p.color} strokeWidth={p.size} fill="none"
-                  strokeLinecap="round" strokeLinejoin="round"
+                  stroke={p.color}
+                  strokeWidth={p.size}
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
               />
           ))}
         </svg>
@@ -40,6 +55,7 @@ export function ElementView({
 
   const isImage = element.type === "image";
 
+  // ── drag ──────────────────────────────────────────────────────────────────────
   const onDragStart = (e: ReactPointerEvent) => {
     if (editing) return;
     e.stopPropagation();
@@ -52,18 +68,29 @@ export function ElementView({
     const rect = containerRef.current.getBoundingClientRect();
     const dx = ((e.clientX - dragRef.current.startX) / rect.width) * 100;
     const dy = ((e.clientY - dragRef.current.startY) / rect.height) * 100;
-    onUpdate(element.id, { x: Math.max(0, Math.min(100, dragRef.current.ox + dx)),
-      y: Math.max(0, Math.min(100, dragRef.current.oy + dy)) } as Partial<CanvasElement>, { skipHistory: true });
+    onUpdate(
+        element.id,
+        {
+          x: Math.max(0, Math.min(100, dragRef.current.ox + dx)),
+          y: Math.max(0, Math.min(100, dragRef.current.oy + dy)),
+        } as Partial<CanvasElement>,
+        { skipHistory: true },
+    );
   };
-  const onDragEnd = () => { if (dragRef.current) { dragRef.current = null; onUpdate(element.id, {}, {}); } };
+  const onDragEnd = () => {
+    if (dragRef.current) {
+      dragRef.current = null;
+      onUpdate(element.id, {}, {});
+    }
+  };
 
-  // Resize: text/stickers only carry a width (height follows content), images
-  // carry both width and height and must keep their aspect ratio.
+  // ── resize ────────────────────────────────────────────────────────────────────
   const startResize = (e: ReactPointerEvent) => {
     e.stopPropagation();
     if (!containerRef.current) return;
     resizeRef.current = {
-      startX: e.clientX, startY: e.clientY,
+      startX: e.clientX,
+      startY: e.clientY,
       w: element.width,
       h: isImage ? (element as { height: number }).height : 0,
     };
@@ -82,10 +109,14 @@ export function ElementView({
       onUpdate(element.id, { width: w } as Partial<CanvasElement>, { skipHistory: true });
     }
   };
-  const endResize = () => { if (resizeRef.current) { resizeRef.current = null; onUpdate(element.id, {}, {}); } };
+  const endResize = () => {
+    if (resizeRef.current) {
+      resizeRef.current = null;
+      onUpdate(element.id, {}, {});
+    }
+  };
 
-  // Rotate: drag a handle around the element's center to spin it freely,
-  // same gesture as the corner-drag rotate in most story editors.
+  // ── rotate ────────────────────────────────────────────────────────────────────
   const startRotate = (e: ReactPointerEvent) => {
     e.stopPropagation();
     if (!containerRef.current) return;
@@ -103,10 +134,20 @@ export function ElementView({
     const cy = rect.top + (element.y / 100) * rect.height;
     const angle = (Math.atan2(e.clientY - cy, e.clientX - cx) * 180) / Math.PI;
     const delta = angle - rotateRef.current.startAngle;
-    onUpdate(element.id, { rotation: rotateRef.current.startRotation + delta } as Partial<CanvasElement>, { skipHistory: true });
+    onUpdate(
+        element.id,
+        { rotation: rotateRef.current.startRotation + delta } as Partial<CanvasElement>,
+        { skipHistory: true },
+    );
   };
-  const endRotate = () => { if (rotateRef.current) { rotateRef.current = null; onUpdate(element.id, {}, {}); } };
+  const endRotate = () => {
+    if (rotateRef.current) {
+      rotateRef.current = null;
+      onUpdate(element.id, {}, {});
+    }
+  };
 
+  // ── base layout ───────────────────────────────────────────────────────────────
   const baseStyle: CSSProperties = {
     position: "absolute",
     left: `${element.x}%`,
@@ -124,12 +165,22 @@ export function ElementView({
           onPointerMove={onDragMove}
           onPointerUp={onDragEnd}
           onClick={(e) => { e.stopPropagation(); onSelect(); }}
-          onDoubleClick={(e) => { e.stopPropagation(); if (element.type === "text") onStartEdit(); }}
+          onDoubleClick={(e) => {
+            e.stopPropagation();
+            if (element.type === "text") onStartEdit();
+          }}
           className="group cursor-move"
       >
-        {element.type === "text" && <TextRender element={element as TextElement} editing={editing} onCommit={(t) => { onTextEdit(element.id, t); onStopEdit(); }} />}
+        {element.type === "text" && (
+            <TextRender
+                element={element as TextElement}
+                editing={editing}
+                onCommit={(t) => { onTextEdit(element.id, t); onStopEdit(); }}
+            />
+        )}
         {element.type === "sticker" && <StickerRender element={element} />}
         {element.type === "image" && <ImageRender element={element} />}
+        {element.type === "link" && <LinkRender element={element as LinkElement} />}
 
         {selected && (
             <>

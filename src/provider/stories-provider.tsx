@@ -38,7 +38,14 @@ export const StoriesProvider = ({ children }: { children: ReactNode }) => {
         return (slides || []).map((s: any, idx: number) => {
             const id = s.id ?? `${storyId ?? 'feed'}-${idx}`;
             const createdAt = rowCreatedAt ? Date.parse(rowCreatedAt) : Date.now();
-            return { id: String(id), image: s.rendered_url, background: undefined, text: undefined, createdAt, storyId, seen: !!s.seen } as StoryItem;
+            return {
+                id: String(id),
+                image: s.rendered_url,
+                createdAt,
+                storyId,
+                seen: !!s.seen,
+                linkZones: Array.isArray(s.link_zones) ? s.link_zones : undefined,
+            } as StoryItem;
         });
     };
 
@@ -103,7 +110,7 @@ export const StoriesProvider = ({ children }: { children: ReactNode }) => {
         // publish via API then refresh my stories
         await storiesActions.publish(state);
         try {
-                const resp: any[] = await storiesActions.listMine();
+            const resp: any[] = await storiesActions.listMine();
             const allSlides: any[] = [];
             for (const row of resp) if (row && Array.isArray(row.slides)) for (const sl of row.slides) allSlides.push({ ...(sl as any), created_at: (sl as any).created_at });
             const items = mapSlidesToItems(allSlides).sort((a,b)=>b.createdAt - a.createdAt);
