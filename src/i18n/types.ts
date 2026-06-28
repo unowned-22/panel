@@ -166,6 +166,10 @@ export interface TranslationDictionary {
     'stories.viewer.reply.placeholder': string;
     'stories.viewer.reply.sent': string;
     'stories.viewer.like.sent': string;
+    'stories.viewer.redirect.link': string;
+    'stories.viewer.redirect.output': string;
+    'stories.viewer.redirect.cancel': string;
+    'stories.viewer.redirect.follow': string;
     'stories.editor.tap.to.edit': string;
     'stories.editor.enter.text': string;
     'stories.editor.drag.drop.photo': string;

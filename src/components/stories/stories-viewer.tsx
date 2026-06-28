@@ -241,7 +241,7 @@ export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
                         >
                             <span className="inline-flex items-center gap-1 bg-white/90 backdrop-blur-xs text-black text-xs font-medium px-3 py-1.5 rounded-full shadow-lg max-w-full truncate hover:bg-white transition-colors">
                                 <ExternalLink className="w-3 h-3 shrink-0" />
-                                <span className="truncate">{zone.title || 'Ссылка'}</span>
+                                <span className="truncate">{zone.title || t('stories.editor.menu.link')}</span>
                             </span>
                         </button>
                     ))}
@@ -250,15 +250,29 @@ export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
                         <div className="absolute inset-0 z-40 flex items-end" onPointerDown={(e) => e.stopPropagation()}>
                             <div className="absolute inset-0 bg-black/50" onClick={() => { setConfirmUrl(null); setHoldPause(false); }} />
                             <div className="relative w-full rounded-t-2xl bg-zinc-900 p-5 space-y-4 shadow-2xl">
-                                <p className="text-xs text-zinc-400 text-center uppercase tracking-wider">Переход по ссылке</p>
+                                <p className="text-xs text-zinc-400 text-center uppercase tracking-wider">
+                                    {t('stories.viewer.redirect.link')}
+                                </p>
                                 <div className="flex items-center gap-2 rounded-xl bg-zinc-800 px-4 py-3">
                                     <ExternalLink className="h-4 w-4 text-zinc-400 shrink-0" />
                                     <span className="text-sm text-zinc-100 truncate">{confirmUrl}</span>
                                 </div>
-                                <p className="text-xs text-zinc-500 text-center">Вы покинете приложение и перейдёте на внешний сайт.</p>
+                                <p className="text-xs text-zinc-500 text-center">
+                                    {t('stories.viewer.redirect.output')}
+                                </p>
                                 <div className="grid grid-cols-2 gap-2">
-                                    <button onClick={() => { setConfirmUrl(null); setHoldPause(false); }} className="rounded-xl bg-zinc-800 py-3 text-sm font-medium text-zinc-200 hover:bg-zinc-700">Отмена</button>
-                                    <button onClick={() => { window.open(confirmUrl, "_blank", "noopener,noreferrer"); setConfirmUrl(null); setHoldPause(false); }} className="rounded-xl bg-white py-3 text-sm font-semibold text-zinc-900 hover:bg-zinc-100">Перейти</button>
+                                    <button
+                                        onClick={() => { setConfirmUrl(null); setHoldPause(false); }}
+                                        className="rounded-xl bg-zinc-800 py-3 text-sm font-medium text-zinc-200 hover:bg-zinc-700"
+                                    >
+                                        {t('stories.viewer.redirect.cancel')}
+                                    </button>
+                                    <button
+                                        onClick={() => { window.open(confirmUrl, "_blank", "noopener,noreferrer"); setConfirmUrl(null); setHoldPause(false); }}
+                                        className="rounded-xl bg-white py-3 text-sm font-semibold text-zinc-900 hover:bg-zinc-100"
+                                    >
+                                        {t('stories.viewer.redirect.follow')}
+                                    </button>
                                 </div>
                             </div>
                         </div>
