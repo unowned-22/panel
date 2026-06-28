@@ -72,8 +72,6 @@ async function resolveSlide(slide: Slide): Promise<Slide> {
     const elements = await Promise.all(slide.elements.map(resolveElement));
     const resolved = { ...slide, background, elements };
 
-    // Try to render and upload a composite image for quick viewing. Failure
-    // should not block publication.
     try {
         const { renderSlideToBlob } = await import('../utils/renderSlide');
         const blob = await renderSlideToBlob(resolved);
@@ -83,8 +81,6 @@ async function resolveSlide(slide: Slide): Promise<Slide> {
             return { ...resolved, rendered_url: up.data.key } as Slide;
         }
     } catch (err) {
-        // non-fatal: continue without rendered_url
-        // eslint-disable-next-line no-console
         console.warn('[stories] renderAndUploadSlide failed, skipping rendered_url:', err);
     }
 
