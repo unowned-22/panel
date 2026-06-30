@@ -33,5 +33,6 @@ export interface ValidationOptions {
 
 export interface ValidationResult {
   valid: boolean;
-  error?: string;
+  errorCode?: 'tooLarge' | 'unsupportedFormat' | 'minSize' | 'readFailed';
+  errorParams?: { max?: string; size?: string };
 }

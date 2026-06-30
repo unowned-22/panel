@@ -89,6 +89,33 @@ export interface TranslationDictionary {
     // ── Shared auth ──────────────────────────────────────────────────────────
     'page.auth.back-to-login': string;
 
+    // ── Avatar uploader ───────────────────────────────────────────────────────
+    'avatar.uploader.title.upload': string;
+    'avatar.uploader.title.profileCrop': string;
+    'avatar.uploader.title.thumbnailCrop': string;
+    'avatar.uploader.title.complete': string;
+    'avatar.uploader.close': string;
+    'avatar.uploader.dropzone.help': string;
+    'avatar.uploader.dropzone.formats': string;
+    'avatar.uploader.dropzone.select': string;
+    'avatar.uploader.dropzone.footer': string;
+    'avatar.uploader.validation.tooLarge': string;
+    'avatar.uploader.validation.unsupportedFormat': string;
+    'avatar.uploader.validation.minSize': string;
+    'avatar.uploader.validation.readFailed': string;
+    'avatar.uploader.profileCrop.description': string;
+    'avatar.uploader.profileCrop.rotateLeft': string;
+    'avatar.uploader.profileCrop.rotateRight': string;
+    'avatar.uploader.profileCrop.saveAndContinue': string;
+    'avatar.uploader.saving': string;
+    'avatar.uploader.back': string;
+    'avatar.uploader.thumbnailCrop.description': string;
+    'avatar.uploader.save': string;
+    'avatar.uploader.complete.avatarAlt': string;
+    'avatar.uploader.complete.thumbnailAlt': string;
+    'avatar.uploader.complete.publishPost': string;
+    'avatar.uploader.complete.continue': string;
+
     // ── Login page ───────────────────────────────────────────────────────────
     'page.auth.login': string;
     'page.auth.registration': string;

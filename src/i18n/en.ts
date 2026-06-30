@@ -89,6 +89,33 @@ export const en: TranslationDictionary = {
     // ── Shared auth ──────────────────────────────────────────────────────────
     'page.auth.back-to-login': '← Back to login',
 
+    // ── Avatar uploader ───────────────────────────────────────────────────────
+    'avatar.uploader.title.upload': 'Upload new photo',
+    'avatar.uploader.title.profileCrop': 'Your profile photo',
+    'avatar.uploader.title.thumbnailCrop': 'Create thumbnail',
+    'avatar.uploader.title.complete': 'Your profile photo',
+    'avatar.uploader.close': 'Close',
+    'avatar.uploader.dropzone.help': 'Upload a real photo of yourself so that friends can easily recognize you.',
+    'avatar.uploader.dropzone.formats': 'You can upload an image in JPG, GIF, PNG, WEBP or HEIC/HEIF format.',
+    'avatar.uploader.dropzone.select': 'Select a file',
+    'avatar.uploader.dropzone.footer': 'If you have any problems with your upload, try using a smaller photo.',
+    'avatar.uploader.validation.tooLarge': 'File is too large. Max {max}MB.',
+    'avatar.uploader.validation.unsupportedFormat': 'Unsupported file format.',
+    'avatar.uploader.validation.minSize': 'Image must be at least {size}x{size}px.',
+    'avatar.uploader.validation.readFailed': 'Could not read image.',
+    'avatar.uploader.profileCrop.description': 'Please select an area for your profile picture. You can rotate the image to position it properly.',
+    'avatar.uploader.profileCrop.rotateLeft': 'Rotate left',
+    'avatar.uploader.profileCrop.rotateRight': 'Rotate right',
+    'avatar.uploader.profileCrop.saveAndContinue': 'Save and continue',
+    'avatar.uploader.saving': 'Saving…',
+    'avatar.uploader.back': 'Back',
+    'avatar.uploader.thumbnailCrop.description': 'Crop the image to create a thumbnail. The thumbnail will appear next to your posts, private messages and comments.',
+    'avatar.uploader.save': 'Save',
+    'avatar.uploader.complete.avatarAlt': 'Avatar',
+    'avatar.uploader.complete.thumbnailAlt': 'Thumbnail',
+    'avatar.uploader.complete.publishPost': 'Publish post',
+    'avatar.uploader.complete.continue': 'Continue',
+
     // ── Login page ───────────────────────────────────────────────────────────
     'page.auth.login': 'Login',
     'page.auth.registration': 'Registration',

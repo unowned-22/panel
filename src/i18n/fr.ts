@@ -89,6 +89,33 @@ export const fr: TranslationDictionary = {
     // ── Shared auth ──────────────────────────────────────────────────────────
     'page.auth.back-to-login': '← Retour à la connexion',
 
+    // ── Avatar uploader ───────────────────────────────────────────────────────
+    'avatar.uploader.title.upload': 'Télécharger une nouvelle photo',
+    'avatar.uploader.title.profileCrop': 'Votre photo de profil',
+    'avatar.uploader.title.thumbnailCrop': 'Créer une miniature',
+    'avatar.uploader.title.complete': 'Votre photo de profil',
+    'avatar.uploader.close': 'Fermer',
+    'avatar.uploader.dropzone.help': 'Téléchargez une photo réelle de vous afin que vos amis puissent vous reconnaître facilement.',
+    'avatar.uploader.dropzone.formats': 'Vous pouvez télécharger une image en format JPG, GIF, PNG, WEBP ou HEIC/HEIF.',
+    'avatar.uploader.dropzone.select': 'Sélectionner un fichier',
+    'avatar.uploader.dropzone.footer': 'Si vous rencontrez des problèmes avec le téléchargement, essayez d’utiliser une photo plus petite.',
+    'avatar.uploader.validation.tooLarge': 'Le fichier est trop volumineux. Maximum {max} Mo.',
+    'avatar.uploader.validation.unsupportedFormat': 'Format de fichier non pris en charge.',
+    'avatar.uploader.validation.minSize': 'L’image doit mesurer au moins {size}x{size} px.',
+    'avatar.uploader.validation.readFailed': 'Impossible de lire l’image.',
+    'avatar.uploader.profileCrop.description': 'Veuillez sélectionner une zone pour votre photo de profil. Vous pouvez faire pivoter l’image pour la positionner correctement.',
+    'avatar.uploader.profileCrop.rotateLeft': 'Tourner à gauche',
+    'avatar.uploader.profileCrop.rotateRight': 'Tourner à droite',
+    'avatar.uploader.profileCrop.saveAndContinue': 'Enregistrer et continuer',
+    'avatar.uploader.saving': 'Enregistrement…',
+    'avatar.uploader.back': 'Retour',
+    'avatar.uploader.thumbnailCrop.description': 'Recadrez l’image pour créer une miniature. La miniature apparaîtra à côté de vos publications, messages privés et commentaires.',
+    'avatar.uploader.save': 'Enregistrer',
+    'avatar.uploader.complete.avatarAlt': 'Avatar',
+    'avatar.uploader.complete.thumbnailAlt': 'Miniature',
+    'avatar.uploader.complete.publishPost': 'Publier',
+    'avatar.uploader.complete.continue': 'Continuer',
+
     // ── Login page ───────────────────────────────────────────────────────────
     'page.auth.login': 'Login',
     'page.auth.registration': 'S\'inscrire',

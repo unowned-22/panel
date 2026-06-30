@@ -89,6 +89,33 @@ export const ru: TranslationDictionary = {
     // ── Shared auth ──────────────────────────────────────────────────────────
     'page.auth.back-to-login': '← Вернуться ко входу',
 
+    // ── Avatar uploader ───────────────────────────────────────────────────────
+    'avatar.uploader.title.upload': 'Загрузить новое фото',
+    'avatar.uploader.title.profileCrop': 'Ваша фотография профиля',
+    'avatar.uploader.title.thumbnailCrop': 'Создать миниатюру',
+    'avatar.uploader.title.complete': 'Ваша фотография профиля',
+    'avatar.uploader.close': 'Закрыть',
+    'avatar.uploader.dropzone.help': 'Загрузите настоящее фото, чтобы друзья могли легко вас узнать.',
+    'avatar.uploader.dropzone.formats': 'Вы можете загрузить изображение в формате JPG, GIF, PNG, WEBP или HEIC/HEIF.',
+    'avatar.uploader.dropzone.select': 'Выбрать файл',
+    'avatar.uploader.dropzone.footer': 'Если возникают проблемы с загрузкой, попробуйте использовать фото меньшего размера.',
+    'avatar.uploader.validation.tooLarge': 'Файл слишком большой. Максимум {max} МБ.',
+    'avatar.uploader.validation.unsupportedFormat': 'Неподдерживаемый формат файла.',
+    'avatar.uploader.validation.minSize': 'Изображение должно быть не менее {size}×{size} пикселей.',
+    'avatar.uploader.validation.readFailed': 'Не удалось прочитать изображение.',
+    'avatar.uploader.profileCrop.description': 'Выберите область для фотографии профиля. Вы можете повернуть изображение, чтобы правильно его позиционировать.',
+    'avatar.uploader.profileCrop.rotateLeft': 'Повернуть влево',
+    'avatar.uploader.profileCrop.rotateRight': 'Повернуть вправо',
+    'avatar.uploader.profileCrop.saveAndContinue': 'Сохранить и продолжить',
+    'avatar.uploader.saving': 'Сохранение…',
+    'avatar.uploader.back': 'Назад',
+    'avatar.uploader.thumbnailCrop.description': 'Обрежьте изображение, чтобы создать миниатюру. Миниатюра будет отображаться рядом с вашими публикациями, личными сообщениями и комментариями.',
+    'avatar.uploader.save': 'Сохранить',
+    'avatar.uploader.complete.avatarAlt': 'Аватар',
+    'avatar.uploader.complete.thumbnailAlt': 'Миниатюра',
+    'avatar.uploader.complete.publishPost': 'Опубликовать пост',
+    'avatar.uploader.complete.continue': 'Продолжить',
+
     // ── Login page ───────────────────────────────────────────────────────────
     'page.auth.login': 'Логин',
     'page.auth.registration': 'Регистрация',

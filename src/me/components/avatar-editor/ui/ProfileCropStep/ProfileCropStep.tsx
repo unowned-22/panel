@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "@/hooks/use-translation";
 import styles from "./ProfileCropStep.module.css";
 import { CropArea } from "../CropArea/CropArea";
 import { useAvatarUploaderStore } from "../../model/store";
@@ -7,6 +8,7 @@ import { useImageTransform } from "../../hooks/useImageTransform";
 import type { CropArea as CropAreaT } from "../../model/types";
 
 export function ProfileCropStep() {
+  const { t } = useTranslation();
   const { imageUrl, setStep } = useAvatarUploaderStore();
   const { rotation, rotateLeft, rotateRight } = useImageTransform();
   const { commit } = useImageCrop();
@@ -17,16 +19,12 @@ export function ProfileCropStep() {
 
   return (
     <div className={styles.root}>
-      <p className={styles.desc}>
-        Please select an area for your profile picture.
-        <br />
-        You can rotate the image to position it properly.
-      </p>
+      <p className={styles.desc}>{t('avatar.uploader.profileCrop.description')}</p>
       <div className={styles.cropWrap}>
         <CropArea imageUrl={imageUrl} rotation={rotation} aspect={1} onChange={(c) => setCrop(c)} />
         <div className={styles.rotateBtns}>
-          <button className={styles.rotateBtn} onClick={rotateLeft} aria-label="Rotate left">⟲</button>
-          <button className={styles.rotateBtn} onClick={rotateRight} aria-label="Rotate right">⟳</button>
+          <button className={styles.rotateBtn} onClick={rotateLeft} aria-label={t('avatar.uploader.profileCrop.rotateLeft')}>⟲</button>
+          <button className={styles.rotateBtn} onClick={rotateRight} aria-label={t('avatar.uploader.profileCrop.rotateRight')}>⟳</button>
         </div>
       </div>
       <div className={styles.actions}>
@@ -43,10 +41,10 @@ export function ProfileCropStep() {
             }
           }}
         >
-          {busy ? "Saving…" : "Save and continue"}
+          {busy ? t('avatar.uploader.saving') : t('avatar.uploader.profileCrop.saveAndContinue')}
         </button>
         <button className={styles.secondary} onClick={() => setStep("upload")}>
-          Back
+          {t('avatar.uploader.back')}
         </button>
       </div>
     </div>
