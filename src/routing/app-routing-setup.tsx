@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router';
 import { RequireAuth } from '@/auth/require-auth';
+import { RequireGuest } from '@/auth/require-guest';
 import { AuthRouting } from "@/auth/auth-routing";
 import { ErrorRouting } from '@/errors/error-routing';
 import { MainLayout } from '@/layouts/main/layout';
@@ -14,6 +15,9 @@ import Friends from "@/me/pages/friends";
 import Photos from "@/me/pages/photos";
 import Calls from "@/me/pages/calls";
 import Video from "@/me/pages/video/video";
+import { CreateVideo } from "@/me/pages/video/video-create";
+import { CommunityComments } from "@/me/pages/video/video-community";
+import { ChannelAnalytics } from "@/me/pages/video/video-analytics";
 import VideoPage from "@/me/pages/video/video-player";
 import Groups from "@/me/pages/groups";
 import Messenger from "@/me/pages/messenger";
@@ -27,6 +31,17 @@ import Market from "@/me/pages/market";
 import Music from "@/me/pages/music";
 import Search from "@/me/pages/search";
 import Feed from "@/me/pages/me/feed";
+import { CreateMusic } from "@/me/pages/audio/create";
+import { MusicAnalytics } from "@/me/pages/audio/analytics";
+import { MusicRadio } from "@/me/pages/audio/radio";
+import { MusicLive } from "@/me/pages/audio/live";
+import { MusicAlbums } from "@/me/pages/audio/albums";
+import { MusicPodcasts } from "@/me/pages/audio/podcasts";
+import { MusicTrackComments } from "@/me/pages/audio/track-comments";
+import { MusicCollabPlaylists } from "@/me/pages/audio/collab-playlists";
+import { MusicDistribution } from "@/me/pages/audio/distribution";
+import { MusicContentId } from "@/me/pages/audio/content-id";
+import { MusicTrafficSources } from "@/me/pages/audio/sources";
 
 import Profile from "@/me/pages/me/profile";
 import UserProfile from "@/me/pages/user-profile";
@@ -44,12 +59,25 @@ export function AppRoutingSetup() {
                     <Route path="/me/games" element={<Games />} />
                     <Route path="/me/market" element={<Market />} />
                     <Route path="/me/music" element={<Music />} />
+                    <Route path="/me/music/create" element={<CreateMusic />} />
+                    <Route path="/me/music/analytics" element={<MusicAnalytics />} />
+                    <Route path="/me/music/radio" element={<MusicRadio />} />
+                    <Route path="/me/music/live" element={<MusicLive />} />
+                    <Route path="/me/music/albums" element={<MusicAlbums />} />
+                    <Route path="/me/music/podcasts" element={<MusicPodcasts />} />
+                    <Route path="/me/music/comments" element={<MusicTrackComments />} />
+                    <Route path="/me/music/collab" element={<MusicCollabPlaylists />} />
+                    <Route path="/me/music/distribution" element={<MusicDistribution />} />
+                    <Route path="/me/music/content-id" element={<MusicContentId />} />
+                    <Route path="/me/music/sources" element={<MusicTrafficSources />} />
                     <Route path="/me/notifications" element={<Notification />} />
                     <Route path="/me/friends" element={<Friends />} />
                     <Route path="/me/photos" element={<Photos />} />
                     <Route path="/me/calls" element={<Calls />} />
                     <Route path="/me/video" element={<Video />} />
-                    <Route path="/me/video/create" element={<Video />} />
+                    <Route path="/me/video/create" element={<CreateVideo />} />
+                    <Route path="/me/video/community" element={<CommunityComments />} />
+                    <Route path="/me/video/analytics" element={<ChannelAnalytics />} />
                     <Route path="/me/video/q/:video" element={<VideoPage />} />
                     <Route path="/me/groups" element={<Groups />} />
                     <Route path="/me/analytics" element={<Analytics />} />
@@ -67,7 +95,9 @@ export function AppRoutingSetup() {
                 </Route>
             </Route>
             <Route path="error/*" element={<ErrorRouting />} />
-            <Route path="auth/*" element={<AuthRouting />} />
+            <Route element={<RequireGuest />}>
+                <Route path="auth/*" element={<AuthRouting />} />
+            </Route>
             <Route path="*" element={<Navigate to="/error/404" />} />
         </Routes>
     );

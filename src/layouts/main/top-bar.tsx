@@ -1,6 +1,6 @@
 import {
     ChevronDown, LogOut, Settings, Trash2, CheckCircle2, Users, Bell, MoreHorizontal, CheckCheck,
-    Check, Search, Music, Video, UsersRound, Newspaper, UserIcon
+    Check, Search, Music, Video, UsersRound, Newspaper, UserIcon, User
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCallback, useState, useRef } from "react";
@@ -23,7 +23,7 @@ import type { Language } from "@/i18n/types.ts";
 import { useTranslation } from '@/hooks/use-translation';
 import { authActions } from '@/auth/auth-actions';
 import { useNotifications } from "@/hooks/use-notification";
-import { notificationMeta, formatRelativeTime } from "@/lib/notification-meta";
+import { notificationMeta, formatRelativeTime, renderNotificationTitle } from "@/lib/notification-meta";
 import { PlayerPopover } from "@/components/player/PlayerPopover";
 
 export type SearchEntry = {
@@ -214,20 +214,20 @@ export const TopBar = () => {
                         className="w-105 rounded-xl border-border bg-popover p-0 shadow-elevated"
                     >
                         <div className="flex items-center justify-between px-4 py-3">
-                            <div className="text-sm font-semibold">Уведомления</div>
+                            <div className="text-sm font-semibold">{t('notif.page.title')}</div>
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={markAllRead}
                                     disabled={totalUnread === 0}
                                     className="rounded-md px-2 py-1 text-xs font-medium text-primary hover:bg-secondary disabled:opacity-50"
                                 >
-                                    Прочитать все
+                                    {t('notif.mark.all.read')}
                                 </button>
                                 <Link
                                     to="/me/settings"
                                     className="rounded-md bg-secondary px-3 py-1.5 text-xs font-medium hover:bg-accent"
                                 >
-                                    Настройки
+                                    {t('notif.settings')}
                                 </Link>
                             </div>
                         </div>
@@ -235,13 +235,15 @@ export const TopBar = () => {
                         <div className="px-2 pb-2">
                             {popupItems.length === 0 && (
                                 <p className="px-3 py-6 text-center text-sm text-muted-foreground">
-                                    Нет новых уведомлений
+                                    {t('notif.empty.list')}
                                 </p>
                             )}
                             {popupItems.map((n) => {
-                                const meta = notificationMeta(n);
+                                const meta = notificationMeta(n, t);
                                 const read = isItemRead(n.id);
                                 const strId = String(n.id);
+                                const actor = meta.actor;
+                                const profileHref = actor?.username ? `/profile/${actor.username}` : null;
                                 return (
                                     <div
                                         key={n.id}
@@ -253,24 +255,52 @@ export const TopBar = () => {
                                         {!read && (
                                             <span className="absolute left-0.5 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-primary" />
                                         )}
-                                        <div
-                                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full overflow-hidden"
-                                            style={{ background: meta.iconBg }}
-                                        >
-                                            {meta.icon}
-                                        </div>
+                                        {actor ? (
+                                            <Link
+                                                to={profileHref ?? "#"}
+                                                className="relative h-10 w-10 shrink-0"
+                                                aria-label={actor.name}
+                                            >
+                                                <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-secondary">
+                                                    {actor.avatarUrl ? (
+                                                        <img
+                                                            src={actor.avatarUrl}
+                                                            alt={actor.name}
+                                                            className="h-full w-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <User className="h-5 w-5 text-muted-foreground" />
+                                                    )}
+                                                </span>
+                                                <span
+                                                    className="absolute -bottom-0.5 -right-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full ring-2 ring-popover"
+                                                    style={{ background: meta.iconBg }}
+                                                >
+                                                    {meta.icon}
+                                                </span>
+                                            </Link>
+                                        ) : (
+                                            <div
+                                                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full overflow-hidden"
+                                                style={{ background: meta.iconBg }}
+                                            >
+                                                {meta.icon}
+                                            </div>
+                                        )}
                                         <div className="min-w-0 flex-1">
                                             <div className="flex items-start justify-between gap-2">
-                                                <p className="text-sm leading-snug">{meta.title}</p>
+                                                <p className="text-sm leading-snug">
+                                                    {renderNotificationTitle(meta, profileHref, Link)}
+                                                </p>
                                                 <div className="flex shrink-0 items-center gap-1">
                                                     <span className="text-xs text-muted-foreground">
-                                                        {formatRelativeTime(n.created_at)}
+                                                        {formatRelativeTime(n.created_at, t)}
                                                     </span>
                                                     <DropdownMenu>
                                                         <DropdownMenuTrigger asChild>
                                                             <button
                                                                 className="rounded-md p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-secondary group-hover:opacity-100 data-[state=open]:opacity-100"
-                                                                aria-label="Действия"
+                                                                aria-label={t('notif.action.menu')}
                                                             >
                                                                 <MoreHorizontal className="h-4 w-4" />
                                                             </button>
@@ -279,12 +309,12 @@ export const TopBar = () => {
                                                             {read ? (
                                                                 <DropdownMenuItem onClick={() => markUnread(strId)} className="gap-2">
                                                                     <Check className="h-4 w-4" />
-                                                                    Отметить как непрочитанное
+                                                                    {t('notif.action.mark.unread')}
                                                                 </DropdownMenuItem>
                                                             ) : (
                                                                 <DropdownMenuItem onClick={() => markRead(strId)} className="gap-2">
                                                                     <CheckCheck className="h-4 w-4" />
-                                                                    Отметить как прочитанное
+                                                                    {t('notif.action.mark.read')}
                                                                 </DropdownMenuItem>
                                                             )}
                                                         </DropdownMenuContent>
@@ -301,7 +331,7 @@ export const TopBar = () => {
                             to="/me/notifications"
                             className="block border-t border-border py-3.5 text-center text-sm font-medium hover:bg-secondary/50"
                         >
-                            Показать все
+                            {t('notif.show.all')}
                         </Link>
                     </PopoverContent>
                 </Popover>

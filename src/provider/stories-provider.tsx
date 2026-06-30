@@ -2,9 +2,11 @@ import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react
 import { type StoryItem, type StoryUser, StoriesContext } from "@/context/stories-context";
 import { storiesActions } from "@/components/stories/api/stories";
 import { useAccount } from "@/hooks/use-account";
+import { useAuthStore } from "@/auth/auth.store";
 
 export const StoriesProvider = ({ children }: { children: ReactNode }) => {
     const { activeAccount } = useAccount();
+    const isAuthenticated = useAuthStore((s) => !!s.activeAccountId && !!s.tokens[s.activeAccountId]);
     const [users, setUsers] = useState<StoryUser[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -16,7 +18,7 @@ export const StoriesProvider = ({ children }: { children: ReactNode }) => {
             let image: string | undefined;
             let background: string | undefined;
             let text: string | undefined;
-            // Prefer a pre-rendered composite image when available
+
             if (s.rendered_url) {
                 image = s.rendered_url;
             } else if (s.background && s.background.kind === 'media' && s.background.url) {
@@ -50,13 +52,20 @@ export const StoriesProvider = ({ children }: { children: ReactNode }) => {
     };
 
     useEffect(() => {
+        if (!isAuthenticated) {
+            setUsers((prev) => prev.filter((u) => u.isMe));
+            setIsLoading(false);
+            setError(null);
+            return;
+        }
+
         let mounted = true;
         (async () => {
             try {
                 setIsLoading(true)
                 const feed: any[] = await storiesActions.listFeed();
                 if (!mounted) return;
-                // Group feed rows by user_id and merge slides into a single StoryUser per author
+
                 const byUser = new Map<number, { rows: any[] }>();
                 for (const row of feed) {
                     const uid = Number((row as any).user_id);
@@ -95,9 +104,8 @@ export const StoriesProvider = ({ children }: { children: ReactNode }) => {
             }
         })();
         return () => { mounted = false };
-    }, [activeAccount]);
+    }, [activeAccount, isAuthenticated]);
 
-    // Keep my avatar/name in sync with active account visual data.
     useEffect(() => {
         setUsers((prev) => prev.map((u) => (u.isMe ? {
             ...u,
@@ -107,7 +115,6 @@ export const StoriesProvider = ({ children }: { children: ReactNode }) => {
     }, [activeAccount]);
 
     const addMyStory = useCallback(async (state: any) => {
-        // publish via API then refresh my stories
         await storiesActions.publish(state);
         try {
             const resp: any[] = await storiesActions.listMine();
@@ -118,7 +125,7 @@ export const StoriesProvider = ({ children }: { children: ReactNode }) => {
         } catch (err) {
             // ignore
         }
-        // refresh feed cache (best-effort)
+
         try {
             await storiesActions.listFeed();
         } catch (e) {
@@ -144,7 +151,6 @@ export const StoriesProvider = ({ children }: { children: ReactNode }) => {
 
     const removeMyStory = useCallback(async (storyId: number) => {
         await storiesActions.remove(storyId);
-        // refresh my stories
         const resp = await storiesActions.listMine();
         const allSlides: any[] = [];
         for (const row of resp) if (row && Array.isArray(row.slides)) for (const sl of row.slides) allSlides.push({ ...(sl as any), created_at: (sl as any).created_at });

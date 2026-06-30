@@ -1,5 +1,12 @@
 import { apiClient } from '@/lib/api-client';
 
+export interface NotificationActorPayload {
+    actor_name?: string;
+    actor_username?: string;
+    actor_avatar_url?: string;
+    entity_title?: string;
+}
+
 export interface ApiNotification {
     id: number;
     user_id: number;
@@ -7,7 +14,7 @@ export interface ApiNotification {
     type: string;
     entity_type: string;
     entity_id: number;
-    payload: Record<string, unknown> | null;
+    payload: (Record<string, unknown> & NotificationActorPayload) | null;
     is_read: boolean;
     created_at: string;
 }
@@ -51,10 +58,6 @@ export function typeToSection(type: string): SectionKey {
             return 'profile';
     }
 }
-
-// Server wraps every response in { data: <payload> }
-// For the list endpoint the payload itself is { data: [...], page, limit, total, totalPages }
-// So the full shape is: { data: { data: ApiNotification[], page, limit, total, totalPages } }
 
 interface NotificationListPayload {
     data: ApiNotification[];

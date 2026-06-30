@@ -1,9 +1,11 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { MoreHorizontal, Check, CheckCheck } from "lucide-react";
+import { MoreHorizontal, Check, CheckCheck, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNotifications } from "@/hooks/use-notification";
 import { useAccount, getInitials } from "@/hooks/use-account";
+import { useTranslation } from "@/hooks/use-translation";
+import type { TranslationDictionary } from "@/i18n/types";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -12,17 +14,21 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { type SectionKey, typeToSection } from "@/api/notifications";
-import { notificationMeta, formatRelativeTime } from "@/lib/notification-meta";
+import { notificationMeta, formatRelativeTime, renderNotificationTitle } from "@/lib/notification-meta";
 
-const SECTIONS: { key: SectionKey; label: string }[] = [
-    { key: "profile",       label: "Уведомления профиля" },
-    { key: "groups",        label: "Сообщества" },
-    { key: "feedback",      label: "Обратная связь" },
-    { key: "friends",       label: "Друзья" },
-    { key: "services",      label: "Сервисы" },
-    { key: "communication", label: "Общение" },
-    { key: "account",       label: "Аккаунт" },
+const SECTION_KEYS: SectionKey[] = [
+    "profile", "groups", "feedback", "friends", "services", "communication", "account",
 ];
+
+const SECTION_LABEL_KEYS: Record<SectionKey, string> = {
+    profile: "notif.section.profile",
+    groups: "notif.section.groups",
+    feedback: "notif.section.feedback",
+    friends: "notif.section.friends",
+    services: "notif.section.services",
+    communication: "notif.section.communication",
+    account: "notif.section.account",
+};
 
 const EMPTY_GROUPED: Record<SectionKey, never[]> = {
     profile: [], groups: [], feedback: [],
@@ -40,8 +46,8 @@ const NotificationSkeleton = () => (
 );
 
 const Notifications = () => {
+    const { t } = useTranslation();
     const [section, setSection] = useState<SectionKey>("profile");
-    const current = SECTIONS.find((s) => s.key === section)!;
 
     const { activeAccount } = useAccount();
     const {
@@ -91,7 +97,7 @@ const Notifications = () => {
                                 {getInitials(activeAccount.name)}
                             </div>
                             <div className="min-w-0">
-                                <h1 className="text-lg font-semibold leading-tight truncate">Уведомления</h1>
+                                <h1 className="text-lg font-semibold leading-tight truncate">{t('notif.page.title')}</h1>
                                 <div className="text-xs text-muted-foreground truncate">
                                     {activeAccount.name} · {activeAccount.username}
                                 </div>
@@ -103,19 +109,19 @@ const Notifications = () => {
                                 disabled={currentUnreadCount === 0}
                                 className="text-sm font-medium text-primary hover:underline disabled:opacity-50 disabled:no-underline"
                             >
-                                Прочитать все
+                                {t('notif.mark.all.read')}
                             </button>
                             <Link
                                 to="/settings"
                                 className="text-sm font-medium text-primary hover:underline"
                             >
-                                Настройки
+                                {t('notif.settings')}
                             </Link>
                         </div>
                     </header>
 
                     <div className="px-5 pb-2 text-[11px] font-bold tracking-wider text-muted-foreground">
-                        {current.label.toUpperCase()}
+                        {t(SECTION_LABEL_KEYS[section] as keyof TranslationDictionary).toUpperCase()}
                     </div>
 
                     <ul className="px-2 pb-3">
@@ -131,15 +137,18 @@ const Notifications = () => {
                         {/* Empty state */}
                         {!showSkeleton && items.length === 0 && (
                             <li className="px-3 py-8 text-center text-sm text-muted-foreground">
-                                Нет уведомлений в этой категории
+                                {t('notif.empty.category')}
                             </li>
                         )}
 
                         {/* Notification items */}
                         {items.map((n) => {
-                            const meta = notificationMeta(n);
+                            const meta = notificationMeta(n, t);
                             const read = isItemRead(n.id);
                             const strId = String(n.id);
+                            const actor = meta.actor;
+                            const profileHref = actor?.username ? `/profile/${actor.username}` : null;
+
                             return (
                                 <li
                                     key={n.id}
@@ -151,26 +160,55 @@ const Notifications = () => {
                                     {!read && (
                                         <span className="absolute left-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-primary" />
                                     )}
-                                    <div
-                                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full overflow-hidden"
-                                        style={{ background: meta.iconBg }}
-                                    >
-                                        {meta.icon}
-                                    </div>
+
+                                    {/* Avatar with type badge, or a plain icon for system notifications */}
+                                    {actor ? (
+                                        <Link
+                                            to={profileHref ?? "#"}
+                                            className="relative h-11 w-11 shrink-0"
+                                            aria-label={actor.name}
+                                        >
+                                            <span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-secondary">
+                                                {actor.avatarUrl ? (
+                                                    <img
+                                                        src={actor.avatarUrl}
+                                                        alt={actor.name}
+                                                        className="h-full w-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <User className="h-5 w-5 text-muted-foreground" />
+                                                )}
+                                            </span>
+                                            <span
+                                                className="absolute -bottom-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full ring-2 ring-background"
+                                                style={{ background: meta.iconBg }}
+                                            >
+                                                {meta.icon}
+                                            </span>
+                                        </Link>
+                                    ) : (
+                                        <div
+                                            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full overflow-hidden"
+                                            style={{ background: meta.iconBg }}
+                                        >
+                                            {meta.icon}
+                                        </div>
+                                    )}
+
                                     <div className="min-w-0 flex-1">
                                         <div className="flex items-start justify-between gap-3">
                                             <p className="text-sm leading-snug text-foreground/95">
-                                                {meta.title}
+                                                {renderNotificationTitle(meta, profileHref, Link)}
                                             </p>
                                             <div className="flex shrink-0 items-center gap-1">
                                                 <span className="text-xs text-muted-foreground">
-                                                    {formatRelativeTime(n.created_at)}
+                                                    {formatRelativeTime(n.created_at, t)}
                                                 </span>
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
                                                         <button
                                                             className="rounded-md p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-secondary group-hover:opacity-100 data-[state=open]:opacity-100"
-                                                            aria-label="Действия"
+                                                            aria-label={t('notif.action.menu')}
                                                         >
                                                             <MoreHorizontal className="h-4 w-4" />
                                                         </button>
@@ -179,12 +217,12 @@ const Notifications = () => {
                                                         {read ? (
                                                             <DropdownMenuItem onClick={() => markUnread(strId)} className="gap-2">
                                                                 <Check className="h-4 w-4" />
-                                                                Отметить как непрочитанное
+                                                                {t('notif.action.mark.unread')}
                                                             </DropdownMenuItem>
                                                         ) : (
                                                             <DropdownMenuItem onClick={() => markRead(strId)} className="gap-2">
                                                                 <CheckCheck className="h-4 w-4" />
-                                                                Отметить как прочитанное
+                                                                {t('notif.action.mark.read')}
                                                             </DropdownMenuItem>
                                                         )}
                                                     </DropdownMenuContent>
@@ -205,14 +243,14 @@ const Notifications = () => {
                                 disabled={isLoading}
                                 className="text-sm font-medium text-primary hover:underline disabled:opacity-50"
                             >
-                                {isLoading ? "Загрузка..." : "Загрузить ещё"}
+                                {isLoading ? t('notif.loading') : t('notif.load.more')}
                             </button>
                         </div>
                     )}
 
                     {!hasMore && notifications.length > 0 && (
                         <div className="border-t border-border/60 px-5 py-5 text-center text-sm text-muted-foreground">
-                            Показаны последние новости
+                            {t('notif.no.more')}
                         </div>
                     )}
                 </section>
@@ -221,21 +259,21 @@ const Notifications = () => {
             {/* ── Sidebar ──────────────────────────────────────────────── */}
             <aside className="hidden xl:flex flex-col w-70 shrink-0 py-0 gap-3 sticky top-18 self-start max-h-[calc(100vh-72px)]">
                 <div className="panel-card p-2">
-                    {SECTIONS.map((s) => {
-                        const sectionItems = grouped[s.key] ?? [];
+                    {SECTION_KEYS.map((key) => {
+                        const sectionItems = grouped[key] ?? [];
                         const unread = sectionItems.filter((n) => !isItemRead(n.id)).length;
                         return (
                             <button
-                                key={s.key}
-                                onClick={() => setSection(s.key)}
+                                key={key}
+                                onClick={() => setSection(key)}
                                 className={cn(
                                     "flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm transition-colors",
-                                    section === s.key
+                                    section === key
                                         ? "bg-secondary font-semibold text-foreground"
                                         : "text-foreground/85 hover:bg-secondary/60",
                                 )}
                             >
-                                <span>{s.label}</span>
+                                <span>{t(SECTION_LABEL_KEYS[key] as keyof TranslationDictionary)}</span>
                                 {unread > 0 && (
                                     <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground">
                                         {unread}

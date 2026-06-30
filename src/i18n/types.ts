@@ -482,4 +482,60 @@ export interface TranslationDictionary {
     'cover.upload.desc': string;
     'cover.upload.btn': string;
     'cover.upload.hint': string;
+
+    // ── Notifications ─────────────────────────────────────────────────────────
+    'notif.page.title': string;
+    'notif.mark.all.read': string;
+    'notif.settings': string;
+    'notif.empty.category': string;
+    'notif.empty.list': string;
+    'notif.load.more': string;
+    'notif.show.all': string;
+    'notif.loading': string;
+    'notif.no.more': string;
+    'notif.action.mark.read': string;
+    'notif.action.mark.unread': string;
+    'notif.action.menu': string;
+
+    'notif.section.profile': string;
+    'notif.section.groups': string;
+    'notif.section.feedback': string;
+    'notif.section.friends': string;
+    'notif.section.services': string;
+    'notif.section.communication': string;
+    'notif.section.account': string;
+
+    'notif.time.now': string;
+    /** Use .replace('{n}', n) */
+    'notif.time.minutes': string;
+    /** Use .replace('{n}', n) */
+    'notif.time.hours': string;
+    'notif.time.yesterday': string;
+    /** Use .replace('{n}', n) */
+    'notif.time.days': string;
+
+    /** Use .replace('{name}', name) */
+    'notif.type.friendRequestReceived': string;
+    /** Use .replace('{name}', name) */
+    'notif.type.friendRequestAccepted': string;
+    /** Use .replace('{name}', name) */
+    'notif.type.storyPublished': string;
+    /** Use .replace('{name}', name).replace('{title}', title) */
+    'notif.type.storyPublishedTitled': string;
+    /** Use .replace('{name}', name) */
+    'notif.type.storyLike': string;
+    /** Use .replace('{name}', name) */
+    'notif.type.storyComment': string;
+    /** Use .replace('{name}', name) */
+    'notif.type.storyReply': string;
+    /** Use .replace('{name}', name) */
+    'notif.type.mention': string;
+    /** Use .replace('{name}', name) */
+    'notif.type.message': string;
+    'notif.type.newLogin': string;
+    'notif.type.accountSecurity.title': string;
+    'notif.type.accountSecurity.desc': string;
+    'notif.type.service': string;
+    'notif.type.default': string;
+    'notif.someone': string;
 }
