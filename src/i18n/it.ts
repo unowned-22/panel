@@ -89,6 +89,33 @@ export const it: TranslationDictionary = {
     // ── Shared auth ──────────────────────────────────────────────────────────
     'page.auth.back-to-login': '← Torna al login',
 
+    // ── Avatar uploader ───────────────────────────────────────────────────────
+    'avatar.uploader.title.upload': 'Carica una nuova foto',
+    'avatar.uploader.title.profileCrop': 'La tua foto del profilo',
+    'avatar.uploader.title.thumbnailCrop': 'Crea miniatura',
+    'avatar.uploader.title.complete': 'La tua foto del profilo',
+    'avatar.uploader.close': 'Chiudi',
+    'avatar.uploader.dropzone.help': 'Carica una foto reale di te stesso in modo che gli amici possano riconoscerti facilmente.',
+    'avatar.uploader.dropzone.formats': 'Puoi caricare un\'immagine in formato JPG, GIF, PNG, WEBP o HEIC/HEIF.',
+    'avatar.uploader.dropzone.select': 'Seleziona un file',
+    'avatar.uploader.dropzone.footer': 'Se hai problemi con il caricamento, prova a usare una foto più piccola.',
+    'avatar.uploader.validation.tooLarge': 'Il file è troppo grande. Max {max} MB.',
+    'avatar.uploader.validation.unsupportedFormat': 'Formato file non supportato.',
+    'avatar.uploader.validation.minSize': 'L\'immagine deve essere almeno {size}x{size} px.',
+    'avatar.uploader.validation.readFailed': 'Impossibile leggere l\'immagine.',
+    'avatar.uploader.profileCrop.description': 'Seleziona un\'area per la foto del profilo. Puoi ruotare l\'immagine per posizionarla correttamente.',
+    'avatar.uploader.profileCrop.rotateLeft': 'Ruota a sinistra',
+    'avatar.uploader.profileCrop.rotateRight': 'Ruota a destra',
+    'avatar.uploader.profileCrop.saveAndContinue': 'Salva e continua',
+    'avatar.uploader.saving': 'Salvataggio…',
+    'avatar.uploader.back': 'Indietro',
+    'avatar.uploader.thumbnailCrop.description': 'Ritaglia l\'immagine per creare una miniatura. La miniatura apparirà accanto ai tuoi post, messaggi privati e commenti.',
+    'avatar.uploader.save': 'Salva',
+    'avatar.uploader.complete.avatarAlt': 'Avatar',
+    'avatar.uploader.complete.thumbnailAlt': 'Miniatura',
+    'avatar.uploader.complete.publishPost': 'Pubblica post',
+    'avatar.uploader.complete.continue': 'Continua',
+
     // ── Login page ───────────────────────────────────────────────────────────
     'page.auth.login': 'Login',
     'page.auth.registration': 'Registrati',

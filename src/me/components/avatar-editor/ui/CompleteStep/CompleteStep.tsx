@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "@/hooks/use-translation";
 import styles from "./CompleteStep.module.css";
 import { useAvatarUploaderStore } from "../../model/store";
 import type { AvatarUploaderResult } from "../../model/types";
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export function CompleteStep({ onComplete }: Props) {
+  const { t } = useTranslation();
   const state = useAvatarUploaderStore();
   const [publish, setPublish] = useState(false);
 
@@ -39,18 +41,16 @@ export function CompleteStep({ onComplete }: Props) {
   return (
     <div className={styles.root}>
       <div className={styles.previews}>
-        <div className={styles.avatar}>{profileUrl && <img src={profileUrl} alt="Avatar" />}</div>
-        <div className={styles.thumb}>{thumbUrl && <img src={thumbUrl} alt="Thumbnail" />}</div>
+        <div className={styles.avatar}>{profileUrl && <img src={profileUrl} alt={t('avatar.uploader.complete.avatarAlt')} />}</div>
+        <div className={styles.thumb}>{thumbUrl && <img src={thumbUrl} alt={t('avatar.uploader.complete.thumbnailAlt')} />}</div>
       </div>
       <label className={styles.publish}>
         <input type="checkbox" checked={publish} onChange={(e) => setPublish(e.target.checked)} />
-        Publish post
+        {t('avatar.uploader.complete.publishPost')}
       </label>
       <div className={styles.actions}>
-        <button className={styles.primary} onClick={handleContinue}>Continue</button>
-        <button className={styles.secondary} onClick={() => state.setStep("thumbnailCrop")}>
-          Back
-        </button>
+        <button className={styles.primary} onClick={handleContinue}>{t('avatar.uploader.complete.continue')}</button>
+        <button className={styles.secondary} onClick={() => state.setStep("thumbnailCrop")}>{t('avatar.uploader.back')}</button>
       </div>
     </div>
   );

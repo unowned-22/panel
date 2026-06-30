@@ -1,11 +1,12 @@
 import { useEffect } from "react";
+import { useTranslation } from "@/hooks/use-translation";
 import styles from "./AvatarUploader.module.css";
 import { useAvatarUploaderStore } from "./model/store";
 import { UploadStep } from "./ui/UploadStep/UploadStep";
 import { ProfileCropStep } from "./ui/ProfileCropStep/ProfileCropStep";
 import { ThumbnailStep } from "./ui/ThumbnailStep/ThumbnailStep";
 import { CompleteStep } from "./ui/CompleteStep/CompleteStep";
-import type { AvatarUploaderProps } from "./model/types";
+import type { AvatarUploaderProps, Step } from "./model/types";
 
 const DEFAULT_TYPES = [
   "image/jpeg",
@@ -16,11 +17,11 @@ const DEFAULT_TYPES = [
   "image/heif",
 ];
 
-const TITLES: Record<string, string> = {
-  upload: "Upload new photo",
-  profileCrop: "Your profile photo",
-  thumbnailCrop: "Create thumbnail",
-  complete: "Your profile photo",
+const TITLES: Record<Step, keyof import('@/i18n/types').TranslationDictionary> = {
+  upload: 'avatar.uploader.title.upload',
+  profileCrop: 'avatar.uploader.title.profileCrop',
+  thumbnailCrop: 'avatar.uploader.title.thumbnailCrop',
+  complete: 'avatar.uploader.title.complete',
 };
 
 export function AvatarUploader({
@@ -31,6 +32,7 @@ export function AvatarUploader({
   minimumImageSize = 300,
   allowedTypes = DEFAULT_TYPES,
 }: AvatarUploaderProps) {
+  const { t } = useTranslation();
   const { step, reset } = useAvatarUploaderStore();
 
   useEffect(() => {
@@ -53,8 +55,8 @@ export function AvatarUploader({
     <div className={styles.overlay} role="dialog" aria-modal="true">
       <div className={styles.modal}>
         <div className={styles.header}>
-          <h2 className={styles.title}>{TITLES[step]}</h2>
-          <button className={styles.close} onClick={handleClose} aria-label="Close">×</button>
+          <h2 className={styles.title}>{t(TITLES[step])}</h2>
+          <button className={styles.close} onClick={handleClose} aria-label={t('avatar.uploader.close')}>×</button>
         </div>
         {step === "upload" && (
           <UploadStep

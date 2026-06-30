@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/hooks/use-translation";
 import styles from "./ThumbnailStep.module.css";
 import { CropArea } from "../CropArea/CropArea";
 import { ThumbnailPreview } from "../ThumbnailPreview/ThumbnailPreview";
@@ -8,6 +9,7 @@ import { loadImage } from "../../services/canvasUtils";
 import type { CropArea as CropAreaT } from "../../model/types";
 
 export function ThumbnailStep() {
+  const { t } = useTranslation();
   const { profileBlobUrl, setStep } = useAvatarUploaderStore();
   const { commit } = useThumbnailCrop();
   const [crop, setCrop] = useState<CropAreaT | null>(null);
@@ -25,10 +27,7 @@ export function ThumbnailStep() {
 
   return (
     <div className={styles.root}>
-      <p className={styles.desc}>
-        Crop the image to create a thumbnail. The thumbnail will appear next to your posts,
-        private messages and comments.
-      </p>
+      <p className={styles.desc}>{t('avatar.uploader.thumbnailCrop.description')}</p>
       <div className={styles.body}>
         <CropArea imageUrl={profileBlobUrl} aspect={1} onChange={(c) => setCrop(c)} />
         <ThumbnailPreview src={profileBlobUrl} crop={crop} imageSize={imageSize} />
@@ -47,10 +46,10 @@ export function ThumbnailStep() {
             }
           }}
         >
-          {busy ? "Saving…" : "Save"}
+          {busy ? t('avatar.uploader.saving') : t('avatar.uploader.save')}
         </button>
         <button className={styles.secondary} onClick={() => setStep("profileCrop")}>
-          Back
+          {t('avatar.uploader.back')}
         </button>
       </div>
     </div>

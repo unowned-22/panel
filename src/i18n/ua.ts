@@ -89,6 +89,33 @@ export const ua: TranslationDictionary = {
     // ── Shared auth ──────────────────────────────────────────────────────────
     'page.auth.back-to-login': '← Повернутися до входу',
 
+    // ── Avatar uploader ───────────────────────────────────────────────────────
+    'avatar.uploader.title.upload': 'Завантажити нове фото',
+    'avatar.uploader.title.profileCrop': 'Ваше фото профілю',
+    'avatar.uploader.title.thumbnailCrop': 'Створити мініатюру',
+    'avatar.uploader.title.complete': 'Ваше фото профілю',
+    'avatar.uploader.close': 'Закрити',
+    'avatar.uploader.dropzone.help': 'Завантажте реальне фото, щоб друзі могли легко вас упізнати.',
+    'avatar.uploader.dropzone.formats': 'Ви можете завантажити зображення у форматі JPG, GIF, PNG, WEBP або HEIC/HEIF.',
+    'avatar.uploader.dropzone.select': 'Вибрати файл',
+    'avatar.uploader.dropzone.footer': 'Якщо виникають проблеми із завантаженням, спробуйте використати фото меншого розміру.',
+    'avatar.uploader.validation.tooLarge': 'Файл занадто великий. Максимум {max} МБ.',
+    'avatar.uploader.validation.unsupportedFormat': 'Непідтримуваний формат файлу.',
+    'avatar.uploader.validation.minSize': 'Зображення має бути не менше {size}×{size} пікселів.',
+    'avatar.uploader.validation.readFailed': 'Не вдалося прочитати зображення.',
+    'avatar.uploader.profileCrop.description': 'Виберіть область для фото профілю. Ви можете повернути зображення, щоб правильно його розташувати.',
+    'avatar.uploader.profileCrop.rotateLeft': 'Повернути вліво',
+    'avatar.uploader.profileCrop.rotateRight': 'Повернути вправо',
+    'avatar.uploader.profileCrop.saveAndContinue': 'Зберегти і продовжити',
+    'avatar.uploader.saving': 'Збереження…',
+    'avatar.uploader.back': 'Назад',
+    'avatar.uploader.thumbnailCrop.description': 'Обріжте зображення, щоб створити мініатюру. Мініатюра з’явиться поруч із вашими дописами, приватними повідомленнями та коментарями.',
+    'avatar.uploader.save': 'Зберегти',
+    'avatar.uploader.complete.avatarAlt': 'Аватар',
+    'avatar.uploader.complete.thumbnailAlt': 'Мініатюра',
+    'avatar.uploader.complete.publishPost': 'Опублікувати допис',
+    'avatar.uploader.complete.continue': 'Продовжити',
+
     // ── Login page ───────────────────────────────────────────────────────────
     'page.auth.login': 'Логін',
     'page.auth.registration': 'Зареєструватися',
