@@ -1,4 +1,5 @@
 import { createContext } from "react";
+import type { Background, CanvasElement } from "@/components/stories/types/stories";
 
 export type LinkZone = {
     url: string;
@@ -14,6 +15,8 @@ export type LinkZone = {
 export type StoryItem = {
     id: string;
     image?: string;
+    background?: Background | null;
+    elements?: CanvasElement[];
     createdAt: number;
     storyId?: number;
     seen?: boolean;

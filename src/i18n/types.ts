@@ -248,6 +248,22 @@ export interface TranslationDictionary {
     'stories.editor.text.fill.none': string;
     'stories.editor.text.fill.filled': string;
     'stories.editor.text.fill.outline': string;
+    'stories.editor.filters.title': string;
+    'stories.editor.link.title': string;
+    'stories.editor.link.style.label': string;
+    'stories.editor.link.style.pill.desc': string;
+    'stories.editor.link.style.card.desc': string;
+    'stories.editor.link.caption.label': string;
+    'stories.editor.link.optional': string;
+    'stories.editor.link.caption.placeholder': string;
+    'stories.editor.link.preview.label': string;
+    'stories.editor.link.add': string;
+    'stories.viewer.delete': string;
+    'stories.viewer.delete.error': string;
+    'stories.viewer.reply.error': string;
+    'stories.viewer.like.error': string;
+    'stories.viewer.mute': string;
+    'stories.viewer.unmute': string;
     // ── Friends page ──────────────────────────────────────────────────────────
     'page.friends.tabs.all': string;
     'page.friends.tabs.incoming': string;

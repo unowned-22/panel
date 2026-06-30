@@ -16,8 +16,6 @@ export const StoriesProvider = ({ children }: { children: ReactNode }) => {
             const id = s.id ?? `${storyId ?? 'me'}-${idx}`;
             const createdAt = s.created_at ? Date.parse(s.created_at) : Date.now();
             let image: string | undefined;
-            let background: string | undefined;
-            let text: string | undefined;
 
             if (s.rendered_url) {
                 image = s.rendered_url;
@@ -28,11 +26,15 @@ export const StoriesProvider = ({ children }: { children: ReactNode }) => {
                 const imgEl = s.elements.find((e: any) => e.type === 'image');
                 if (imgEl && imgEl.url) image = imgEl.url;
             }
-            if (!image && s.text) text = s.text;
-            if (!image && s.background && (s.background.kind === 'color' || s.background.kind === 'gradient' || s.background.kind === 'pattern')) {
-                background = s.background.value || s.background.preview || undefined;
-            }
-            return { id: String(id), image, background, text, createdAt, storyId } as StoryItem;
+
+            return {
+                id: String(id),
+                image,
+                background: s.background ?? null,
+                elements: Array.isArray(s.elements) ? s.elements : undefined,
+                createdAt,
+                storyId,
+            } as StoryItem;
         });
     };
 
@@ -43,6 +45,8 @@ export const StoriesProvider = ({ children }: { children: ReactNode }) => {
             return {
                 id: String(id),
                 image: s.rendered_url,
+                background: s.background ?? null,
+                elements: Array.isArray(s.elements) ? s.elements : undefined,
                 createdAt,
                 storyId,
                 seen: !!s.seen,
