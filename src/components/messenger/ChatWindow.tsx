@@ -3,15 +3,18 @@ import {
     X, Phone, MoreHorizontal, Plus, Mic, Send, Reply as ReplyIcon,
     Paperclip, Video, BadgeCheck, Pin, Forward as ForwardIcon,
     Image as ImageIcon, FileText, Search, LayoutPanelLeft, CheckCheck,
+    Music, MapPin, BarChart3, Grid3x3,
 } from "lucide-react";
 import { type ChatContact, type Message, type MessageFile } from "@/context/messenger-context";
 import { useMessenger } from "@/hooks/use-messenger";
+import { toast } from "@/hooks/use-toast";
 import AudioMessage from "@/components/messenger/AudioMessage";
 import VideoMessage from "@/components/messenger/VideoMessage";
 import LinkPreview, { extractUrls } from "@/components/messenger/LinkPreview";
 import MessageContextMenu from "@/components/messenger/MessageContextMenu";
 import EmojiPicker from "@/components/messenger/EmojiPicker";
 import FileAttachment from "@/components/messenger/FileAttachment";
+import { ChatWallpaper } from "./ChatWallpaper";
 import {
     DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -64,7 +67,11 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const endRef = useRef<HTMLDivElement>(null);
     const imageInputRef = useRef<HTMLInputElement>(null);
+    const videoInputRef = useRef<HTMLInputElement>(null);
+    const audioInputRef = useRef<HTMLInputElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const notify = (label: string) => toast({ title: label });
 
     useEffect(() => {
         endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -150,9 +157,11 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
     let lastDate = "";
 
     return (
-        <>
+        <div className="relative flex flex-col h-full overflow-hidden">
+            <ChatWallpaper />
+
             {/* Header */}
-            <div className="h-14 px-4 flex items-center gap-3 border-b border-border/60">
+            <div className="h-14 px-4 flex items-center gap-3 border-b border-border/60 bg-background relative z-10">
                 <button
                     onClick={onClose}
                     className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-secondary text-foreground/70"
@@ -263,6 +272,7 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
                                     <MessageContextMenu
                                         messageText={msg.text}
                                         senderName={msg.senderName}
+                                        isOwn={msg.isOwn}
                                         isPinned={msg.pinned}
                                         reactions={msg.reactions}
                                         onReply={() => setReplyTo({ id: msg.id, senderName: msg.senderName, text: msg.text })}
@@ -402,6 +412,8 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
                 {/* Composer */}
                 <div className="flex items-end gap-2 px-4 py-3">
                     <input ref={imageInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handlePickImages} />
+                    <input ref={videoInputRef} type="file" accept="video/*" multiple className="hidden" onChange={handlePickFiles} />
+                    <input ref={audioInputRef} type="file" accept="audio/*" multiple className="hidden" onChange={handlePickFiles} />
                     <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handlePickFiles} />
 
                     <DropdownMenu>
@@ -413,12 +425,27 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
                                 <Plus className="w-4 h-4" />
                             </button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start" side="top" className="w-44">
+                        <DropdownMenuContent align="start" side="top" className="w-48">
                             <DropdownMenuItem onClick={() => imageInputRef.current?.click()} className="gap-2 cursor-pointer">
-                                <ImageIcon size={16} className="text-primary" /> Фото или видео
+                                <ImageIcon size={16} className="text-primary" /> Фото
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => videoInputRef.current?.click()} className="gap-2 cursor-pointer">
+                                <Video size={16} className="text-primary" /> Видео
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => audioInputRef.current?.click()} className="gap-2 cursor-pointer">
+                                <Music size={16} className="text-primary" /> Музыка
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => notify("Сервисные вложения скоро появятся")} className="gap-2 cursor-pointer">
+                                <Grid3x3 size={16} className="text-primary" /> Сервис
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => fileInputRef.current?.click()} className="gap-2 cursor-pointer">
-                                <FileText size={16} className="text-primary" /> Документ
+                                <FileText size={16} className="text-primary" /> Файл
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => notify("Геолокация скоро появится")} className="gap-2 cursor-pointer">
+                                <MapPin size={16} className="text-primary" /> Карта
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => notify("Опросы скоро появятся")} className="gap-2 cursor-pointer">
+                                <BarChart3 size={16} className="text-primary" /> Опрос
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -463,6 +490,6 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
                     )}
                 </div>
             </div>
-        </>
+        </div>
     );
 };
