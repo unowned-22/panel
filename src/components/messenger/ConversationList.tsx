@@ -9,6 +9,7 @@ import {
     ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { toast } from "@/hooks/use-toast";
+import { useTranslation } from "@/hooks/use-translation";
 import { type ChatContact } from "@/context/messenger-context";
 
 interface Props {
@@ -64,17 +65,18 @@ export const ConversationList = ({
                                  }: Props) => {
     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState<typeof FILTERS[number]>("Все");
+    const { t } = useTranslation();
 
     const notify = (label: string) => toast({ title: label });
 
-    const handleMarkUnread = (id: string) => (onMarkUnread ? onMarkUnread(id) : notify("Отмечено как непрочитанное"));
-    const handlePinChat = (id: string) => (onPinChat ? onPinChat(id) : notify("Чат закреплён"));
-    const handleArchiveChat = (id: string) => (onArchiveChat ? onArchiveChat(id) : notify("Чат архивирован"));
+    const handleMarkUnread = (id: string) => (onMarkUnread ? onMarkUnread(id) : notify(t('messenger.chatMenu.toast.markedUnread')));
+    const handlePinChat = (id: string) => (onPinChat ? onPinChat(id) : notify(t('messenger.chatMenu.toast.pinned')));
+    const handleArchiveChat = (id: string) => (onArchiveChat ? onArchiveChat(id) : notify(t('messenger.chatMenu.toast.archived')));
     const handleMuteChat = (id: string, duration: "1h" | "8h" | "1w" | "forever") =>
-        (onMuteChat ? onMuteChat(id, duration) : notify("Уведомления отключены"));
-    const handleClearHistory = (id: string) => (onClearHistory ? onClearHistory(id) : notify("История очищена"));
-    const handleDeleteChat = (id: string) => (onDeleteChat ? onDeleteChat(id) : notify("Чат удалён"));
-    const handleLeaveChat = (id: string) => (onLeaveChat ? onLeaveChat(id) : notify("Вы вышли из чата"));
+        (onMuteChat ? onMuteChat(id, duration) : notify(t('messenger.chatMenu.toast.muted')));
+    const handleClearHistory = (id: string) => (onClearHistory ? onClearHistory(id) : notify(t('messenger.chatMenu.toast.cleared')));
+    const handleDeleteChat = (id: string) => (onDeleteChat ? onDeleteChat(id) : notify(t('messenger.chatMenu.toast.deleted')));
+    const handleLeaveChat = (id: string) => (onLeaveChat ? onLeaveChat(id) : notify(t('messenger.chatMenu.toast.left')));
 
     const favorites = contacts.find(c => c.id === FAVORITES_ID);
     const rest = contacts.filter(c => c.id !== FAVORITES_ID);
@@ -158,10 +160,10 @@ export const ConversationList = ({
                         </div>
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5">
-                                <span className="text-[13.5px] font-semibold truncate">Избранное</span>
+                                <span className="text-[13.5px] font-semibold truncate">{t('messenger.favorites.name')}</span>
                                 {favorites.time && <span className="text-[11px] text-muted-foreground ml-auto shrink-0">{favorites.time}</span>}
                             </div>
-                            <p className="text-[12.5px] text-muted-foreground truncate mt-0.5">{favorites.preview || "Заметки для себя"}</p>
+                            <p className="text-[12.5px] text-muted-foreground truncate mt-0.5">{favorites.preview || t('messenger.favorites.defaultPreview')}</p>
                         </div>
                     </button>
                 )}
@@ -203,44 +205,44 @@ export const ConversationList = ({
                         </ContextMenuTrigger>
                         <ContextMenuContent className="w-56 rounded-xl p-1">
                             <ContextMenuItem className="gap-3 px-3 py-2 text-sm cursor-pointer" onClick={() => handleMarkUnread(c.id)}>
-                                <MailOpen size={18} className="text-muted-foreground" />Отметить непрочитанным
+                                <MailOpen size={18} className="text-muted-foreground" />{t('messenger.chatMenu.markUnread')}
                             </ContextMenuItem>
                             <ContextMenuItem className="gap-3 px-3 py-2 text-sm cursor-pointer" onClick={() => handlePinChat(c.id)}>
                                 {c.pinned ? <PinOff size={18} className="text-muted-foreground" /> : <Pin size={18} className="text-muted-foreground" />}
-                                {c.pinned ? "Открепить чат" : "Закрепить чат"}
+                                {c.pinned ? t('messenger.chatMenu.unpin') : t('messenger.chatMenu.pin')}
                             </ContextMenuItem>
                             <ContextMenuItem className="gap-3 px-3 py-2 text-sm cursor-pointer" onClick={() => handleArchiveChat(c.id)}>
-                                <Archive size={18} className="text-muted-foreground" />Архивировать
+                                <Archive size={18} className="text-muted-foreground" />{t('messenger.chatMenu.archive')}
                             </ContextMenuItem>
                             <ContextMenuSub>
                                 <ContextMenuSubTrigger className="gap-3 px-3 py-2 text-sm cursor-pointer">
-                                    <BellOff size={18} className="text-muted-foreground" />Отключить уведомления
+                                    <BellOff size={18} className="text-muted-foreground" />{t('messenger.chatMenu.mute')}
                                 </ContextMenuSubTrigger>
                                 <ContextMenuSubContent className="w-48 rounded-xl p-1">
                                     <ContextMenuItem className="gap-3 px-3 py-2 text-sm cursor-pointer" onClick={() => handleMuteChat(c.id, "1h")}>
-                                        На 1 час
+                                        {t('messenger.chatMenu.mute.1h')}
                                     </ContextMenuItem>
                                     <ContextMenuItem className="gap-3 px-3 py-2 text-sm cursor-pointer" onClick={() => handleMuteChat(c.id, "8h")}>
-                                        На 8 часов
+                                        {t('messenger.chatMenu.mute.8h')}
                                     </ContextMenuItem>
                                     <ContextMenuItem className="gap-3 px-3 py-2 text-sm cursor-pointer" onClick={() => handleMuteChat(c.id, "1w")}>
-                                        На 1 неделю
+                                        {t('messenger.chatMenu.mute.1w')}
                                     </ContextMenuItem>
                                     <ContextMenuItem className="gap-3 px-3 py-2 text-sm cursor-pointer" onClick={() => handleMuteChat(c.id, "forever")}>
-                                        <Bell size={14} className="text-muted-foreground" />Навсегда
+                                        <Bell size={14} className="text-muted-foreground" />{t('messenger.chatMenu.mute.forever')}
                                     </ContextMenuItem>
                                 </ContextMenuSubContent>
                             </ContextMenuSub>
                             <ContextMenuSeparator />
                             <ContextMenuItem className="gap-3 px-3 py-2 text-sm cursor-pointer text-destructive focus:text-destructive" onClick={() => handleDeleteChat(c.id)}>
-                                <Trash2 size={18} />Удалить чат
+                                <Trash2 size={18} />{t('messenger.chatMenu.deleteChat')}
                             </ContextMenuItem>
                             <ContextMenuItem className="gap-3 px-3 py-2 text-sm cursor-pointer text-destructive focus:text-destructive" onClick={() => handleClearHistory(c.id)}>
-                                <Eraser size={18} />Очистить историю
+                                <Eraser size={18} />{t('messenger.chatMenu.clearHistory')}
                             </ContextMenuItem>
                             {c.isGroup && (
                                 <ContextMenuItem className="gap-3 px-3 py-2 text-sm cursor-pointer text-destructive focus:text-destructive" onClick={() => handleLeaveChat(c.id)}>
-                                    <LogOut size={18} />Выйти из чата
+                                    <LogOut size={18} />{t('messenger.chatMenu.leaveChat')}
                                 </ContextMenuItem>
                             )}
                         </ContextMenuContent>

@@ -17,7 +17,7 @@ import type {
     ReactionSummary
 } from '@/context/messenger-context';
 import { messengerApi, type ApiConversation, type ApiMessage, type ApiReactionSummary } from '@/api/messenger';
-import { useAuthStore } from '@/auth/auth.store';
+import { useAuthStore } from "@/modules/auth/auth.store";
 import { useSocket } from '@/hooks/use-socket';
 
 const DRAFT_PREFIX = 'draft:';

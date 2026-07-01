@@ -457,13 +457,13 @@ const Profile = () => {
 
                     // const file = e.target.files?.[0];
                     // if (!file) return;
-                    // await authActions.uploadCover(file);
+                    // await authApi.uploadCover(file);
                     // e.target.value = '';
 
-                    // await authActions.uploadCover(result.originalFile);
+                    // await authApi.uploadCover(result.originalFile);
 
                     // если backend умеет принимать координаты кропа — передай их тоже:
-                    // await authActions.uploadCover(result.originalFile, { mobile: result.mobile, desktop: result.desktop });
+                    // await authApi.uploadCover(result.originalFile, { mobile: result.mobile, desktop: result.desktop });
                     // setCover(data);
 
                     console.log(result.mobile, result.desktop)

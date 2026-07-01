@@ -8,6 +8,7 @@ import {
 import { type ChatContact, type Message, type MessageFile } from "@/context/messenger-context";
 import { useMessenger } from "@/hooks/use-messenger";
 import { toast } from "@/hooks/use-toast";
+import { useTranslation } from "@/hooks/use-translation";
 import AudioMessage from "@/components/messenger/AudioMessage";
 import VideoMessage from "@/components/messenger/VideoMessage";
 import LinkPreview, { extractUrls } from "@/components/messenger/LinkPreview";
@@ -72,6 +73,7 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const notify = (label: string) => toast({ title: label });
+    const { t } = useTranslation();
 
     useEffect(() => {
         endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -427,25 +429,25 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start" side="top" className="w-48">
                             <DropdownMenuItem onClick={() => imageInputRef.current?.click()} className="gap-2 cursor-pointer">
-                                <ImageIcon size={16} className="text-primary" /> Фото
+                                <ImageIcon size={16} className="text-primary" /> {t('messenger.attach.photo')}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => videoInputRef.current?.click()} className="gap-2 cursor-pointer">
-                                <Video size={16} className="text-primary" /> Видео
+                                <Video size={16} className="text-primary" /> {t('messenger.attach.video')}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => audioInputRef.current?.click()} className="gap-2 cursor-pointer">
-                                <Music size={16} className="text-primary" /> Музыка
+                                <Music size={16} className="text-primary" /> {t('messenger.attach.music')}
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => notify("Сервисные вложения скоро появятся")} className="gap-2 cursor-pointer">
-                                <Grid3x3 size={16} className="text-primary" /> Сервис
+                            <DropdownMenuItem onClick={() => notify(t('messenger.attach.comingSoon.service'))} className="gap-2 cursor-pointer">
+                                <Grid3x3 size={16} className="text-primary" /> {t('messenger.attach.service')}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => fileInputRef.current?.click()} className="gap-2 cursor-pointer">
-                                <FileText size={16} className="text-primary" /> Файл
+                                <FileText size={16} className="text-primary" /> {t('messenger.attach.file')}
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => notify("Геолокация скоро появится")} className="gap-2 cursor-pointer">
-                                <MapPin size={16} className="text-primary" /> Карта
+                            <DropdownMenuItem onClick={() => notify(t('messenger.attach.comingSoon.map'))} className="gap-2 cursor-pointer">
+                                <MapPin size={16} className="text-primary" /> {t('messenger.attach.map')}
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => notify("Опросы скоро появятся")} className="gap-2 cursor-pointer">
-                                <BarChart3 size={16} className="text-primary" /> Опрос
+                            <DropdownMenuItem onClick={() => notify(t('messenger.attach.comingSoon.poll'))} className="gap-2 cursor-pointer">
+                                <BarChart3 size={16} className="text-primary" /> {t('messenger.attach.poll')}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>

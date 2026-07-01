@@ -2,7 +2,7 @@ import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react
 import { type StoryItem, type StoryUser, StoriesContext } from "@/context/stories-context";
 import { storiesActions } from "@/components/stories/api/stories";
 import { useAccount } from "@/hooks/use-account";
-import { useAuthStore } from "@/auth/auth.store";
+import { useAuthStore } from "@/modules/auth/auth.store";
 
 export const StoriesProvider = ({ children }: { children: ReactNode }) => {
     const { activeAccount } = useAccount();

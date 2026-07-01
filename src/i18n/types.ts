@@ -1,4 +1,4 @@
-export type Language = 'en' | 'ua' | 'it' | 'es' | 'fr' | 'de' | 'ru';
+export type LanguageCode = 'en' | 'ua' | 'it' | 'es' | 'fr' | 'de' | 'ru';
 
 export interface TranslationDictionary {
     'name': string;

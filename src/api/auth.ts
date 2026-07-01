@@ -1,7 +1,7 @@
 import { apiClient } from '@/lib/api-client';
-import { useAuthStore } from '@/auth/auth.store';
+import { useAuthStore } from "@/modules/auth/auth.store";
 import { clearPreferencesCache } from '@/lib/user-preferences';
-import type { AuthModel, UserModel } from './auth-model';
+import type { AuthModel, UserModel } from '@/context/account-context';
 import type { CropRect } from '@/me/components/cover-editor';
 
 export interface CoverUploadResponse {
@@ -10,7 +10,7 @@ export interface CoverUploadResponse {
     cover_desktop_url: string;
 }
 
-export const authActions = {
+export const authApi = {
     async login(email: string, password: string): Promise<UserModel> {
         const body = await apiClient.post<{ data: AuthModel }>(
             '/auth/login',

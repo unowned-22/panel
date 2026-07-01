@@ -19,9 +19,9 @@ import {
 import { useAccount, getInitials } from "@/hooks/use-account";
 import { cn } from "@/lib/utils";
 import { toAbsoluteUrl } from '@/lib/helpers';
-import type { Language } from "@/i18n/types.ts";
+import type { LanguageCode } from "@/i18n/types";
 import { useTranslation } from '@/hooks/use-translation';
-import { authActions } from '@/auth/auth-actions';
+import { authApi } from "@/api/auth";
 import { useNotifications } from "@/hooks/use-notification";
 import { notificationMeta, formatRelativeTime, renderNotificationTitle } from "@/lib/notification-meta";
 import { PlayerPopover } from "@/components/player/PlayerPopover";
@@ -54,7 +54,7 @@ const TYPE_ICONS: Record<SearchEntry["type"], any> = {
     people: UserIcon, group: UsersRound, post: Newspaper, music: Music, video: Video,
 };
 
-const LANGUAGE_OPTIONS: { code: Language; flag: string; label: string }[] = [
+const LANGUAGE_OPTIONS: { code: LanguageCode; flag: string; label: string }[] = [
     { code: 'en', flag: toAbsoluteUrl('/flags/united-states.svg'), label: 'English' },
     { code: 'ua', flag: toAbsoluteUrl('/flags/ukraine.svg'),       label: 'Українська' },
     { code: 'ru', flag: toAbsoluteUrl('/flags/russia.svg'),        label: 'Русский' },
@@ -89,13 +89,13 @@ export const TopBar = () => {
     };
 
     const handleLanguageChange = useCallback((langCode: string) => {
-        setLanguage(langCode as Language);
+        setLanguage(langCode as LanguageCode);
     }, [setLanguage]);
 
     const handleLogout = useCallback(async () => {
         if (isLoggingOut) return;
         setIsLoggingOut(true);
-        await authActions.logout();
+        await authApi.logout();
     }, [isLoggingOut]);
 
     const popupItems = notifications.slice(0, 5);

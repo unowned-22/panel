@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { AuthModel, UserModel } from './auth-model';
+import type { AuthModel, UserModel } from '@/context/account-context';
 
 interface AuthState {
     tokens: Record<string, AuthModel>;

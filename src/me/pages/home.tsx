@@ -18,7 +18,7 @@ import {
 import { useState } from "react";
 import { AvatarUploader, type AvatarUploaderResult } from "@/me/components/avatar-editor";
 import { CoverEditorModal, type CoverCropResult } from "@/me/components/cover-editor";
-import { authActions } from "@/auth/auth-actions";
+import { authApi } from "@/api/auth";
 import { useStories } from "@/hooks/use-stories";
 import { getInitials, useAccount } from "@/hooks/use-account";
 import { useTranslation } from "@/hooks/use-translation";
@@ -100,11 +100,11 @@ const Home = () => {
     const removeCover = (): void => {
         setCoverMenuOpen(false);
         setCover(null);
-        authActions.deleteCover()
+        authApi.deleteCover()
     }
     const removeAvatar = (): void => {
         setAvatar(null)
-        authActions.deleteAvatar()
+        authApi.deleteAvatar()
     }
 
     return (
@@ -390,7 +390,7 @@ const Home = () => {
                 userName={activeAccount.name}
                 onClose={() => setCoverEditorOpen(false)}
                 onSave={async (result: CoverCropResult) => {
-                    const res = await authActions.uploadCover(result.originalFile, {
+                    const res = await authApi.uploadCover(result.originalFile, {
                         mobile: result.mobile,
                         desktop: result.desktop,
                     });
@@ -402,7 +402,7 @@ const Home = () => {
                 open={avatarUploaderOpen}
                 onClose={() => setAvatarUploaderOpen(false)}
                 onComplete={async (result: AvatarUploaderResult) => {
-                    await authActions.uploadAvatar(result.originalFile)
+                    await authApi.uploadAvatar(result.originalFile)
                     setAvatar(URL.createObjectURL(result.profileImage));
                 }}
                 maxFileSize={20 * 1024 * 1024}

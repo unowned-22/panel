@@ -37,9 +37,9 @@ function App() {
                                                     <MessengerProvider>
                                                         <AccountProvider>
                                                             <StoriesProvider>
-                                                                <Toaster />
-                                                                <Sonner />
                                                                 <BrowserRouter basename={BASE_URL}>
+                                                                    <Toaster />
+                                                                    <Sonner />
                                                                     <AppRouting />
                                                                 </BrowserRouter>
                                                             </StoriesProvider>

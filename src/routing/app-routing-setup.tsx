@@ -1,7 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router';
-import { RequireAuth } from '@/auth/require-auth';
-import { RequireGuest } from '@/auth/require-guest';
-import { AuthRouting } from "@/auth/auth-routing";
+import { Auth, RequireAuth, RequireGuest } from "@/modules/auth";
 import { ErrorRouting } from '@/errors/error-routing';
 import { MainLayout } from '@/layouts/main/layout';
 import Home from "@/me/pages/home";
@@ -96,7 +94,7 @@ export function AppRoutingSetup() {
             </Route>
             <Route path="error/*" element={<ErrorRouting />} />
             <Route element={<RequireGuest />}>
-                <Route path="auth/*" element={<AuthRouting />} />
+                <Route path="auth/*" element={<Auth />} />
             </Route>
             <Route path="*" element={<Navigate to="/error/404" />} />
         </Routes>

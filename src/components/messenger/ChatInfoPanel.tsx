@@ -6,6 +6,7 @@ import {
     Camera, Search, MoreVertical,
 } from "lucide-react";
 import { useMessenger } from "@/hooks/use-messenger";
+import { useTranslation } from "@/hooks/use-translation";
 import { toast } from "@/hooks/use-toast";
 import {
     DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
@@ -24,22 +25,13 @@ const formatSize = (b: number) => {
     return `${(b / 1024 / 1024).toFixed(2)} МБ`;
 };
 
-/**
- * NOTE: инвайт-ссылка (`joinLink`) и переключатель "показать последние 250
- * сообщений" — сейчас чисто визуальные, локальный state. Чтобы это работало
- * по-настоящему, нужен эндпоинт на бэкенде (генерация/ревокация ссылки на
- * группу) — в messenger-context.ts такого метода пока нет.
- *
- * QR-код — здесь только каркас экрана. Настоящий QR нужно рендерить через
- * библиотеку (например, `qrcode.react` или `qrcode` + canvas) — рисовать
- * QR вручную в SVG без библиотеки не имеет смысла, код не будет читаемым.
- */
 const MOCK_JOIN_LINK = "https://vk.me/join/a5PWbsMogPWY01tvg30pmWrCvI";
 
 type View = "main" | "link" | "settings";
 
 const ChatInfoPanel = ({ chatId, onClose }: ChatInfoPanelProps) => {
     const { contacts, getMembers, getMediaFromChat, getFilesFromChat } = useMessenger();
+    const { t } = useTranslation();
     const contact = contacts.find((c) => c.id === chatId);
     const members = getMembers(chatId);
     const media = getMediaFromChat(chatId);
@@ -78,7 +70,7 @@ const ChatInfoPanel = ({ chatId, onClose }: ChatInfoPanelProps) => {
                     <button onClick={() => setView("main")} className="p-2 hover:bg-secondary rounded-lg text-foreground/70" aria-label="Назад">
                         <ChevronLeft size={20} />
                     </button>
-                    <h3 className="font-semibold text-sm">Настройки</h3>
+                    <h3 className="font-semibold text-sm">{t('messenger.info.settings.title')}</h3>
                 </div>
 
                 <div className="p-4 space-y-5">
@@ -96,7 +88,7 @@ const ChatInfoPanel = ({ chatId, onClose }: ChatInfoPanelProps) => {
                     </div>
 
                     <div className="space-y-1.5">
-                        <label className="text-xs text-muted-foreground">Название</label>
+                        <label className="text-xs text-muted-foreground">{t('messenger.info.settings.name')}</label>
                         <div className="relative">
                             <input
                                 value={settingsName}
@@ -112,7 +104,7 @@ const ChatInfoPanel = ({ chatId, onClose }: ChatInfoPanelProps) => {
                     </div>
 
                     <div className="space-y-1.5">
-                        <label className="text-xs text-muted-foreground">Описание</label>
+                        <label className="text-xs text-muted-foreground">{t('messenger.info.settings.description')}</label>
                         <textarea
                             value={settingsDesc}
                             onChange={(e) => setSettingsDesc(e.target.value)}
@@ -124,18 +116,18 @@ const ChatInfoPanel = ({ chatId, onClose }: ChatInfoPanelProps) => {
 
                     <div className="divide-y divide-border/60 border-t border-border/60">
                         {[
-                            ["Кто может приглашать участников в чат", "Все участники"],
-                            ["Кто может редактировать информацию чата", "Все участники"],
-                            ["Кто может менять закреплённое сообщение", "Все участники"],
-                            ["Кто может отправлять массовые упоминания", "Все участники"],
-                            ["Кто может видеть ссылку на чат", "Все участники"],
-                            ["Кто может начинать групповые звонки", "Все участники"],
-                            ["Кто может назначать администраторов", "Только создатель"],
-                            ["Кто может менять оформление чата", "Все участники"],
+                            [t('messenger.info.settings.perm.invite'), t('messenger.info.settings.perm.everyone')],
+                            [t('messenger.info.settings.perm.editInfo'), t('messenger.info.settings.perm.everyone')],
+                            [t('messenger.info.settings.perm.pinned'), t('messenger.info.settings.perm.everyone')],
+                            [t('messenger.info.settings.perm.mentionAll'), t('messenger.info.settings.perm.everyone')],
+                            [t('messenger.info.settings.perm.viewLink'), t('messenger.info.settings.perm.everyone')],
+                            [t('messenger.info.settings.perm.startCalls'), t('messenger.info.settings.perm.everyone')],
+                            [t('messenger.info.settings.perm.admins'), t('messenger.info.settings.perm.ownerOnly')],
+                            [t('messenger.info.settings.perm.theme'), t('messenger.info.settings.perm.everyone')],
                         ].map(([label, value]) => (
                             <button
                                 key={label}
-                                onClick={() => notify("Настройка прав скоро будет доступна")}
+                                onClick={() => notify(t('messenger.info.toast.permComingSoon'))}
                                 className="w-full flex items-center justify-between gap-2 py-3 text-left hover:bg-secondary/40 transition-colors -mx-1 px-1 rounded-lg"
                             >
                                 <div>
@@ -150,10 +142,10 @@ const ChatInfoPanel = ({ chatId, onClose }: ChatInfoPanelProps) => {
 
                 <div className="mt-auto p-4 border-t border-border sticky bottom-0 bg-card">
                     <button
-                        onClick={() => notify("Настройки сохранены")}
+                        onClick={() => notify(t('messenger.info.toast.settingsSaved'))}
                         className="w-full h-9 rounded-lg bg-foreground text-background text-sm font-medium hover:bg-foreground/90 transition-colors"
                     >
-                        Сохранить
+                        {t('messenger.info.settings.save')}
                     </button>
                 </div>
             </aside>
@@ -168,26 +160,26 @@ const ChatInfoPanel = ({ chatId, onClose }: ChatInfoPanelProps) => {
                     <button onClick={() => setView("main")} className="p-2 hover:bg-secondary rounded-lg text-foreground/70" aria-label="Назад">
                         <ChevronLeft size={20} />
                     </button>
-                    <h3 className="font-semibold text-sm">Ссылка на чат</h3>
+                    <h3 className="font-semibold text-sm">{t('messenger.info.link.title')}</h3>
                 </div>
 
                 <div className="p-4 space-y-4">
                     <div className="flex bg-secondary rounded-lg p-1">
-                        {(["link", "qr"] as const).map((t) => (
+                        {(["link", "qr"] as const).map((tabKey) => (
                             <button
-                                key={t}
-                                onClick={() => setLinkTab(t)}
+                                key={tabKey}
+                                onClick={() => setLinkTab(tabKey)}
                                 className={`flex-1 h-8 rounded-md text-[13px] font-medium transition-colors ${
-                                    linkTab === t ? "bg-card shadow-sm" : "text-muted-foreground hover:text-foreground"
+                                    linkTab === tabKey ? "bg-card shadow-sm" : "text-muted-foreground hover:text-foreground"
                                 }`}
                             >
-                                {t === "link" ? "Ссылка" : "QR-код"}
+                                {tabKey === "link" ? t('messenger.info.link.tab.link') : t('messenger.info.link.tab.qr')}
                             </button>
                         ))}
                     </div>
 
                     <div className="flex items-center justify-between">
-                        <span className="text-[13px]">Показать последние 250 сообщений</span>
+                        <span className="text-[13px]">{t('messenger.info.link.showRecent')}</span>
                         <button
                             onClick={() => setShowRecentInLink((v) => !v)}
                             className={`w-9 h-5 rounded-full relative transition-colors shrink-0 ${showRecentInLink ? "bg-primary" : "bg-secondary"}`}
@@ -208,23 +200,23 @@ const ChatInfoPanel = ({ chatId, onClose }: ChatInfoPanelProps) => {
                             </div>
                             <p className="text-xs text-muted-foreground">
                                 Чтобы приглашение стало недействительным, вы можете{" "}
-                                <button onClick={() => notify("Ссылка аннулирована")} className="text-primary hover:underline">
-                                    аннулировать ссылку
+                                <button onClick={() => notify(t('messenger.info.toast.linkRevoked'))} className="text-primary hover:underline">
+                                    {t('messenger.info.link.revoke')}
                                 </button>
                                 .
                             </p>
                             <div className="flex gap-2">
                                 <button
-                                    onClick={() => { navigator.clipboard.writeText(MOCK_JOIN_LINK); notify("Ссылка скопирована"); }}
+                                    onClick={() => { navigator.clipboard.writeText(MOCK_JOIN_LINK); notify(t('messenger.info.toast.linkCopied')); }}
                                     className="flex-1 h-9 rounded-lg bg-secondary hover:bg-secondary/70 text-sm font-medium flex items-center justify-center gap-2 transition-colors"
                                 >
-                                    <Copy size={15} /> Скопировать
+                                    <Copy size={15} /> {t('messenger.info.link.copy')}
                                 </button>
                                 <button
-                                    onClick={() => notify("Поделиться ссылкой")}
+                                    onClick={() => notify(t('messenger.info.link.share'))}
                                     className="flex-1 h-9 rounded-lg bg-secondary hover:bg-secondary/70 text-sm font-medium flex items-center justify-center gap-2 transition-colors"
                                 >
-                                    <Share2 size={15} /> Поделиться
+                                    <Share2 size={15} /> {t('messenger.info.link.share')}
                                 </button>
                             </div>
                         </>
@@ -238,23 +230,23 @@ const ChatInfoPanel = ({ chatId, onClose }: ChatInfoPanelProps) => {
                             </div>
                             <p className="text-xs text-muted-foreground text-center">
                                 Чтобы приглашение стало недействительным, вы можете{" "}
-                                <button onClick={() => notify("QR-код аннулирован")} className="text-primary hover:underline">
-                                    аннулировать QR-код
+                                <button onClick={() => notify(t('messenger.info.toast.qrRevoked'))} className="text-primary hover:underline">
+                                    {t('messenger.info.link.revokeQr')}
                                 </button>
                                 .
                             </p>
                             <div className="flex gap-2">
                                 <button
-                                    onClick={() => notify("QR-код скачан")}
+                                    onClick={() => notify(t('messenger.info.toast.qrDownloaded'))}
                                     className="flex-1 h-9 rounded-lg bg-secondary hover:bg-secondary/70 text-sm font-medium flex items-center justify-center gap-2 transition-colors"
                                 >
-                                    <Download size={15} /> Скачать
+                                    <Download size={15} /> {t('messenger.info.link.download')}
                                 </button>
                                 <button
-                                    onClick={() => notify("Поделиться QR-кодом")}
+                                    onClick={() => notify(t('messenger.info.link.share'))}
                                     className="flex-1 h-9 rounded-lg bg-secondary hover:bg-secondary/70 text-sm font-medium flex items-center justify-center gap-2 transition-colors"
                                 >
-                                    <Share2 size={15} /> Поделиться
+                                    <Share2 size={15} /> {t('messenger.info.link.share')}
                                 </button>
                             </div>
                         </>
@@ -306,56 +298,56 @@ const ChatInfoPanel = ({ chatId, onClose }: ChatInfoPanelProps) => {
                     <DropdownMenuTrigger asChild>
                         <button className="flex-1 flex flex-col items-center gap-1.5 py-2 rounded-lg bg-secondary hover:bg-secondary/70 text-primary transition-colors">
                             <Phone size={18} />
-                            <span className="text-xs font-medium">Позвонить</span>
+                            <span className="text-xs font-medium">{t('messenger.info.call')}</span>
                         </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="center">
-                        <DropdownMenuItem onClick={() => notify("Аудиозвонок")} className="gap-2 cursor-pointer">
-                            <Phone size={15} /> Аудиозвонок
+                        <DropdownMenuItem onClick={() => notify(t('messenger.info.call.audio'))} className="gap-2 cursor-pointer">
+                            <Phone size={15} /> {t('messenger.info.call.audio')}
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => notify("Видеозвонок")} className="gap-2 cursor-pointer">
-                            <Video size={15} /> Видеозвонок
+                        <DropdownMenuItem onClick={() => notify(t('messenger.info.call.video'))} className="gap-2 cursor-pointer">
+                            <Video size={15} /> {t('messenger.info.call.video')}
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
 
                 <button
-                    onClick={() => { setMuted((m) => !m); notify(muted ? "Уведомления включены" : "Уведомления отключены"); }}
+                    onClick={() => { setMuted((m) => !m); notify(muted ? t('messenger.info.mute.off') : t('messenger.info.mute.on')); }}
                     className="flex-1 flex flex-col items-center gap-1.5 py-2 rounded-lg bg-secondary hover:bg-secondary/70 text-primary transition-colors"
                 >
                     {muted ? <BellOff size={18} /> : <Bell size={18} />}
-                    <span className="text-xs font-medium">{muted ? "Отключено" : "Включено"}</span>
+                    <span className="text-xs font-medium">{muted ? t('messenger.info.mute.on') : t('messenger.info.mute.off')}</span>
                 </button>
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <button className="flex-1 flex flex-col items-center gap-1.5 py-2 rounded-lg bg-secondary hover:bg-secondary/70 text-primary transition-colors">
                             <MoreHorizontal size={18} />
-                            <span className="text-xs font-medium">Ещё</span>
+                            <span className="text-xs font-medium">{t('messenger.info.more')}</span>
                         </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="center" className="w-52">
-                        <DropdownMenuItem onClick={() => notify("Чат архивирован")} className="gap-2 cursor-pointer">
-                            <Archive size={15} /> Архивировать
+                        <DropdownMenuItem onClick={() => notify(t('messenger.info.toast.archived'))} className="gap-2 cursor-pointer">
+                            <Archive size={15} /> {t('messenger.chatMenu.archive')}
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => notify("Отмечено как непрочитанное")} className="gap-2 cursor-pointer">
-                            <MailOpen size={15} /> Отметить непрочитанным
+                        <DropdownMenuItem onClick={() => notify(t('messenger.info.toast.markedUnread'))} className="gap-2 cursor-pointer">
+                            <MailOpen size={15} /> {t('messenger.chatMenu.markUnread')}
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => notify("Чат закреплён")} className="gap-2 cursor-pointer">
-                            <Pin size={15} /> Закрепить чат
+                        <DropdownMenuItem onClick={() => notify(t('messenger.info.toast.pinnedChat'))} className="gap-2 cursor-pointer">
+                            <Pin size={15} /> {t('messenger.chatMenu.pin')}
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => notify("Параметры упоминаний")} className="gap-2 cursor-pointer">
-                            <MessageSquareDot size={15} /> Параметры упоминаний
+                        <DropdownMenuItem onClick={() => notify(t('messenger.info.more.mentionSettings'))} className="gap-2 cursor-pointer">
+                            <MessageSquareDot size={15} /> {t('messenger.info.more.mentionSettings')}
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => notify("Чат удалён")} className="gap-2 cursor-pointer text-destructive focus:text-destructive">
-                            <Trash2 size={15} /> Удалить чат
+                        <DropdownMenuItem onClick={() => notify(t('messenger.info.toast.deleted'))} className="gap-2 cursor-pointer text-destructive focus:text-destructive">
+                            <Trash2 size={15} /> {t('messenger.chatMenu.deleteChat')}
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => notify("История очищена")} className="gap-2 cursor-pointer text-destructive focus:text-destructive">
-                            <Eraser size={15} /> Очистить историю
+                        <DropdownMenuItem onClick={() => notify(t('messenger.info.toast.cleared'))} className="gap-2 cursor-pointer text-destructive focus:text-destructive">
+                            <Eraser size={15} /> {t('messenger.chatMenu.clearHistory')}
                         </DropdownMenuItem>
                         {contact.isGroup && (
-                            <DropdownMenuItem onClick={() => notify("Вы вышли из чата")} className="gap-2 cursor-pointer text-destructive focus:text-destructive">
-                                <LogOut size={15} /> Выйти из чата
+                            <DropdownMenuItem onClick={() => notify(t('messenger.info.toast.left'))} className="gap-2 cursor-pointer text-destructive focus:text-destructive">
+                                <LogOut size={15} /> {t('messenger.chatMenu.leaveChat')}
                             </DropdownMenuItem>
                         )}
                     </DropdownMenuContent>
@@ -373,16 +365,16 @@ const ChatInfoPanel = ({ chatId, onClose }: ChatInfoPanelProps) => {
                         <Copy
                             size={15}
                             className="text-muted-foreground shrink-0"
-                            onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(MOCK_JOIN_LINK); notify("Ссылка скопирована"); }}
+                            onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(MOCK_JOIN_LINK); notify(t('messenger.info.toast.linkCopied')); }}
                         />
                     </button>
 
                     <button
-                        onClick={() => notify("Стикеры чата скоро появятся")}
+                        onClick={() => notify(t('messenger.info.toast.stickersComingSoon'))}
                         className="flex items-center gap-2 px-4 py-3 border-b border-border hover:bg-secondary/40 transition-colors text-left"
                     >
                         <MessageSquareDot size={15} className="text-primary shrink-0" />
-                        <span className="text-[13px] text-primary flex-1">Стикеры чата</span>
+                        <span className="text-[13px] text-primary flex-1">{t('messenger.info.stickers')}</span>
                         <ChevronRight size={15} className="text-muted-foreground shrink-0" />
                     </button>
                 </>
@@ -391,7 +383,7 @@ const ChatInfoPanel = ({ chatId, onClose }: ChatInfoPanelProps) => {
             {members.length > 0 && contact.isGroup && (
                 <div className="py-2 border-b border-border">
                     <p className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                        Участники · {members.length}
+                        {t('messenger.info.members')} · {members.length}
                     </p>
                     <div className="px-4 pb-2">
                         <div className="relative">
@@ -399,19 +391,19 @@ const ChatInfoPanel = ({ chatId, onClose }: ChatInfoPanelProps) => {
                             <input
                                 value={memberSearch}
                                 onChange={(e) => setMemberSearch(e.target.value)}
-                                placeholder="Поиск"
+                                placeholder={t('messenger.info.members.search')}
                                 className="w-full h-8 pl-8 pr-3 rounded-lg bg-secondary text-[13px] placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
                             />
                         </div>
                     </div>
                     <button
-                        onClick={() => notify("Добавление участников скоро появится")}
+                        onClick={() => notify(t('messenger.info.toast.addMembersComingSoon'))}
                         className="w-full flex items-center gap-3 px-4 py-2 hover:bg-secondary/60 transition-colors text-primary"
                     >
                         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                             <UserPlus size={16} />
                         </div>
-                        <span className="text-sm font-medium">Добавить участников</span>
+                        <span className="text-sm font-medium">{t('messenger.info.members.add')}</span>
                     </button>
                     {filteredMembers.map((m, idx) => (
                         <div key={m.id} className="flex items-center gap-3 px-4 py-2 hover:bg-secondary/60 transition-colors group">

@@ -34,7 +34,7 @@ import {
 import { StoriesViewer } from "@/components/stories";
 import { profileApi, type ProfileRecord } from "@/api/profile";
 import { friendshipApi, type FriendshipRecord } from "@/api/friendship";
-import { useAuthStore } from "@/auth/auth.store";
+import { useAuthStore } from "@/modules/auth/auth.store";
 import {getInitials} from "@/hooks/use-account.ts";
 
 type FriendStatus = "none" | "friends" | "incoming" | "outgoing";

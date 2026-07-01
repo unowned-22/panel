@@ -216,8 +216,8 @@ async function safeText(res: Response): Promise<string> {
     }
 }
 
-import type { AuthModel } from '@/auth/auth-model';
-import { useAuthStore } from '@/auth/auth.store';
+import type { AuthModel } from '@/context/account-context';
+import { useAuthStore } from "@/modules/auth/auth.store";
 
 export const apiClient = new ApiClient({
     baseUrl: import.meta.env.VITE_API_URL ?? '',

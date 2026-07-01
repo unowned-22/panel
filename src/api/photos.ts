@@ -1,5 +1,5 @@
 import { apiClient } from '@/lib/api-client';
-import { useAuthStore } from '@/auth/auth.store';
+import { useAuthStore } from "@/modules/auth/auth.store";
 import { ApiError } from '@/lib/api-client';
 
 export type PhotoVisibility = 'everyone' | 'friends' | 'nobody';

@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { toAbsoluteUrl } from "@/lib/helpers.ts";
 import { friendshipApi, type FriendshipRecord, type UserSuggestion } from "@/api/friendship";
-import { useAuthStore } from "@/auth/auth.store";
+import { useAuthStore } from "@/modules/auth/auth.store";
 import { useTranslation } from '@/hooks/use-translation';
 import type { TranslationDictionary } from '@/i18n/types';
 
