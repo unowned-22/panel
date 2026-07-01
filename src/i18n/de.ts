@@ -48,6 +48,14 @@ export const de: TranslationDictionary = {
     'page.home.my.questions': 'Meine Fragen',
     'page.home.my.wishlist': 'Meine Wünsche',
     'page.home.memories': 'Erinnerungen',
+    'page.home.photos.empty': 'Sie haben noch keine Fotos hinzugefügt',
+    'page.home.photos.upload.error': 'Foto konnte nicht hochgeladen werden',
+    'page.home.photos.showAll': 'Alle anzeigen',
+    'page.home.albums.empty': 'Sie haben noch kein Album erstellt',
+    'page.home.friends.empty': 'Sie haben noch keine Freunde',
+    'page.home.friends.add': 'Freunde hinzufügen',
+    'page.home.friends.showAll': 'Alle Freunde anzeigen',
+    'page.home.friends.user': 'Benutzer #{id}',
 
     // ── Account page ──────────────────────────────────────────────────────────
     'page.account.back': 'Zurück',

@@ -48,6 +48,14 @@ export const ua: TranslationDictionary = {
     'page.home.my.questions': 'Мої запитання',
     'page.home.my.wishlist': 'Мої бажання',
     'page.home.memories': 'Спогади',
+    'page.home.photos.empty': 'Ви ще не додали фото',
+    'page.home.photos.upload.error': 'Не вдалося завантажити фото',
+    'page.home.photos.showAll': 'Показати всі',
+    'page.home.albums.empty': 'Ви ще не створили альбом',
+    'page.home.friends.empty': 'У вас ще немає друзів',
+    'page.home.friends.add': 'Додати друзів',
+    'page.home.friends.showAll': 'Показати всіх друзів',
+    'page.home.friends.user': 'Користувач #{id}',
 
     // ── Account page ──────────────────────────────────────────────────────────
     'page.account.back': 'Назад',

@@ -48,6 +48,14 @@ export interface TranslationDictionary {
     'page.home.my.questions': string;
     'page.home.my.wishlist': string;
     'page.home.memories': string;
+    'page.home.photos.empty': string;
+    'page.home.photos.upload.error': string;
+    'page.home.photos.showAll': string;
+    'page.home.albums.empty': string;
+    'page.home.friends.empty': string;
+    'page.home.friends.add': string;
+    'page.home.friends.showAll': string;
+    'page.home.friends.user': string;
 
     // ── Home page ───────────────────────────────────────────────────────────
     'page.settings.general': string;

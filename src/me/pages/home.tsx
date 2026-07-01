@@ -10,12 +10,12 @@ import {
     ChevronDown,
     ChevronRight, Crop,
     FileQuestion,
-    Image as ImageIcon, ListFilter, Music,
+    Image as ImageIcon, ListFilter, Loader2, Music,
     PenLine, Play,
     Plus, RotateCcw,
     Trash2, Video, WandSparkles
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AvatarUploader, type AvatarUploaderResult } from "@/me/components/avatar-editor";
 import { CoverEditorModal, type CoverCropResult } from "@/me/components/cover-editor";
 import { authApi } from "@/api/auth";
@@ -29,6 +29,12 @@ import { ApiError } from "@/lib/api-client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { toAbsoluteUrl } from "@/lib/helpers";
+import { Skeleton } from "@/components/ui/skeleton";
+import { usePhotos, useAlbums } from "@/hooks/use-photos";
+import { photosApi } from "@/api/photos";
+import type { Album as ApiAlbum, Photo } from "@/api/photos";
+import { AlbumFormDialog, PhotoViewer } from "@/components/photos";
+import { friendshipApi, type FriendshipRecord } from "@/api/friendship";
 
 type TabKey = "photos" | "albums" | "videos" | "clips" | "music" | "articles";
 
@@ -47,11 +53,6 @@ const userVideos = [
     { thumb: "/post-1.jpg", duration: "2:10", title: "Концерт" },
 ];
 const userClips = ["/post-photo-2.jpg", "/post-photo-3.jpg", "/post-photo-1.jpg", "/post-photo-4.jpg"];
-const userAlbums = [
-    { cover: "/post-photo-1.jpg", title: "Путешествия", count: 24 },
-    { cover: "/photo-1.jpg", title: "Семья", count: 12 },
-    { cover: "/post-1.jpg", title: "Концерты", count: 8 },
-];
 const userTracks = [
     { title: "Midnight Drive", artist: "Lo-Fi Bear", duration: "3:24" },
     { title: "Soft Rain", artist: "Aurora", duration: "2:58" },
@@ -61,8 +62,6 @@ const userArticles = [
     { title: "Как я научился фотографировать на смартфон", time: "5 мин чтения", date: "20 апр" },
     { title: "Минимализм в повседневной жизни", time: "8 мин чтения", date: "12 мар" },
 ];
-const profilePhotos = ["/post-photo-1.jpg", "/post-photo-2.jpg", "/post-photo-3.jpg", "/post-photo-4.jpg", "/photo-1.jpg", "/post-1.jpg"];
-
 const Home = () => {
     const { t } = useTranslation();
     const { activeAccount } = useAccount();
@@ -85,6 +84,74 @@ const Home = () => {
     const [viewerOpen, setViewerOpen] = useState(false);
     const [storyEditorOpen, setStoryEditorOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<TabKey>("photos");
+
+    // Photos / albums preview data ------------------------------------------------
+    const photosQuery = usePhotos(1, 6);
+    const albumsQuery = useAlbums(1, 6);
+    const photos = photosQuery.data?.items ?? [];
+    const albums = (albumsQuery.data?.items ?? []) as ApiAlbum[];
+
+    const photoInputRef = useRef<HTMLInputElement>(null);
+    const [photoUploading, setPhotoUploading] = useState(false);
+    const [createAlbumOpen, setCreateAlbumOpen] = useState(false);
+    const [viewerPhoto, setViewerPhoto] = useState<Photo | null>(null);
+
+    const handleQuickPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        e.target.value = "";
+        if (!file) return;
+        setPhotoUploading(true);
+        try {
+            await photosApi.uploadPhoto(file);
+            await photosQuery.refetch();
+        } catch (err) {
+            toast({
+                title: err instanceof ApiError ? err.message : t('page.home.photos.upload.error'),
+                variant: "destructive",
+            });
+        } finally {
+            setPhotoUploading(false);
+        }
+    };
+
+    const handleCreateAlbum = async (title: string, description: string) => {
+        try {
+            await photosApi.createAlbum({ title, description });
+            await albumsQuery.refetch();
+        } catch {
+            toast({ title: t('photos.album.create.error'), variant: "destructive" });
+        } finally {
+            setCreateAlbumOpen(false);
+        }
+    };
+
+    // Friends preview data ---------------------------------------------------------
+    const [friends, setFriends] = useState<FriendshipRecord[]>([]);
+    const [friendsTotal, setFriendsTotal] = useState(0);
+    const [friendsLoading, setFriendsLoading] = useState(true);
+
+    useEffect(() => {
+        let active = true;
+        setFriendsLoading(true);
+        friendshipApi.listFriends(1, 5)
+            .then((res) => {
+                if (!active) return;
+                setFriends(res.data ?? []);
+                setFriendsTotal(res.total ?? 0);
+            })
+            .catch(() => {
+                if (!active) return;
+                setFriends([]);
+                setFriendsTotal(0);
+            })
+            .finally(() => {
+                if (active) setFriendsLoading(false);
+            });
+        return () => { active = false; };
+    }, []);
+
+    const otherFriendId = (f: FriendshipRecord) =>
+        f.requester_id === activeAccount.user?.id ? f.addressee_id : f.requester_id;
 
     const openAvatarUpload = () => {
         setAvatarMenuOpen(false);
@@ -257,32 +324,94 @@ const Home = () => {
 
                         {activeTab === "photos" && (
                             <>
-                                <div className="grid grid-cols-3 gap-1 overflow-hidden rounded-lg">
-                                    {profilePhotos.map((src, index) => (
-                                        <img key={src + index} src={src} alt={`Фото ${index + 1}`} className="aspect-square w-full object-cover" loading="lazy" />
-                                    ))}
-                                </div>
-                                <div className="mt-3 grid grid-cols-2 gap-2">
-                                    <button className="button-pill bg-secondary/70!">Загрузить фото</button>
-                                    <button className="button-pill bg-secondary/70!">Показать всё</button>
-                                </div>
+                                {photosQuery.isLoading ? (
+                                    <div className="grid grid-cols-3 gap-1 overflow-hidden rounded-lg">
+                                        {Array.from({ length: 6 }).map((_, i) => (
+                                            <Skeleton key={i} className="aspect-square w-full rounded-none" />
+                                        ))}
+                                    </div>
+                                ) : photos.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center gap-6 py-10">
+                                        <div className="text-sm text-muted-foreground">{t('page.home.photos.empty')}</div>
+                                        <button
+                                            onClick={() => photoInputRef.current?.click()}
+                                            disabled={photoUploading}
+                                            className="button-pill gap-2"
+                                        >
+                                            {photoUploading && <Loader2 className="h-4 w-4 animate-spin" />}
+                                            {t('page.photos.upload.photo')}
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className="grid grid-cols-3 gap-1 overflow-hidden rounded-lg">
+                                            {photos.map((p) => (
+                                                <button key={p.id} onClick={() => setViewerPhoto(p)} className="block aspect-square w-full overflow-hidden border-0 bg-transparent p-0">
+                                                    <img src={p.preview_url ?? p.url} alt="Фото" className="h-full w-full object-cover" loading="lazy" />
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <div className="mt-3 grid grid-cols-2 gap-2">
+                                            <button
+                                                onClick={() => photoInputRef.current?.click()}
+                                                disabled={photoUploading}
+                                                className="button-pill bg-secondary/70! gap-2"
+                                            >
+                                                {photoUploading && <Loader2 className="h-4 w-4 animate-spin" />}
+                                                {t('page.photos.upload.photo')}
+                                            </button>
+                                            <Link to="/me/photos" className="button-pill bg-secondary/70!">{t('page.home.photos.showAll')}</Link>
+                                        </div>
+                                    </>
+                                )}
+                                <input
+                                    ref={photoInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={handleQuickPhotoUpload}
+                                />
                             </>
                         )}
 
                         {activeTab === "albums" && (
-                            <div className="grid grid-cols-3 gap-2">
-                                {userAlbums.map((a) => (
-                                    <div key={a.title} className="overflow-hidden rounded-lg">
-                                        <div className="aspect-square overflow-hidden rounded-lg bg-secondary">
-                                            <img src={a.cover} alt={a.title} className="h-full w-full object-cover" loading="lazy" />
+                            albumsQuery.isLoading ? (
+                                <div className="grid grid-cols-3 gap-2">
+                                    {Array.from({ length: 3 }).map((_, i) => (
+                                        <div key={i}>
+                                            <Skeleton className="aspect-square w-full rounded-lg" />
+                                            <Skeleton className="mt-2 h-3 w-3/4" />
                                         </div>
-                                        <div className="mt-2 px-1">
-                                            <div className="truncate text-sm font-semibold">{a.title}</div>
-                                            <div className="text-xs text-muted-foreground">{a.count} фото</div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                                    ))}
+                                </div>
+                            ) : albums.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center gap-6 py-10">
+                                    <div className="text-sm text-muted-foreground">{t('page.home.albums.empty')}</div>
+                                    <button onClick={() => setCreateAlbumOpen(true)} className="button-pill">
+                                        {t('photos.album.create')}
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-3 gap-2">
+                                    {albums.map((a) => (
+                                        <Link key={a.id} to={`/me/photos/album/${a.id}`} className="overflow-hidden rounded-lg">
+                                            <div className="aspect-square overflow-hidden rounded-lg bg-secondary">
+                                                {a.cover_url ? (
+                                                    <img src={a.cover_url} alt={a.title} className="h-full w-full object-cover" loading="lazy" />
+                                                ) : (
+                                                    <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                                                        <ImageIcon className="h-8 w-8" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="mt-2 px-1">
+                                                <div className="truncate text-sm font-semibold">{a.title}</div>
+                                                <div className="text-xs text-muted-foreground">{t('photos.photos.photo.count').replace('{count}', String(a.photo_count))}</div>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            )
                         )}
 
                         {activeTab === "videos" && (
@@ -351,11 +480,51 @@ const Home = () => {
                 </div>
                 <aside className="hidden xl:flex flex-col w-70 shrink-0 gap-3 sticky top-18 self-start max-h-[calc(100vh-72px)]">
                     <div className="panel-card p-5">
-                        <div className="mb-9 font-semibold">Друзья</div>
-                        <div className="text-center text-sm text-muted-foreground">У вас пока нет друзей</div>
-                        <button className="button-pill mt-8 w-full gap-2">
-                            <Plus className="h-4 w-4" />Добавить друзей
-                        </button>
+                        <div className={cn("font-semibold flex items-center justify-between", !friendsLoading && friends.length === 0 ? "mb-9" : "mb-4")}>
+                            {t('sidebar.friends')}
+                            {friendsTotal > 0 && <span className="text-sm font-normal text-muted-foreground">{friendsTotal}</span>}
+                        </div>
+
+                        {friendsLoading ? (
+                            <div className="flex flex-col gap-3">
+                                {Array.from({ length: 3 }).map((_, i) => (
+                                    <div key={i} className="flex items-center gap-3">
+                                        <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
+                                        <Skeleton className="h-3 flex-1" />
+                                    </div>
+                                ))}
+                            </div>
+                        ) : friends.length === 0 ? (
+                            <>
+                                <div className="text-center text-sm text-muted-foreground">{t('page.home.friends.empty')}</div>
+                                <Link to="/me/friends" className="button-pill mt-8 w-full gap-2">
+                                    <Plus className="h-4 w-4" />{t('page.home.friends.add')}
+                                </Link>
+                            </>
+                        ) : (
+                            <>
+                                <div className="flex flex-col gap-1">
+                                    {friends.map((f) => {
+                                        const id = otherFriendId(f);
+                                        return (
+                                            <Link
+                                                key={f.id}
+                                                to={`/profile/${id}`}
+                                                className="flex items-center gap-3 rounded-lg p-1.5 hover:bg-secondary/60"
+                                            >
+                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-semibold">
+                                                    {String(id).charAt(0)}
+                                                </div>
+                                                <div className="min-w-0 flex-1 truncate text-sm font-medium">{t('page.home.friends.user').replace('{id}', String(id))}</div>
+                                            </Link>
+                                        );
+                                    })}
+                                </div>
+                                <Link to="/me/friends" className="button-pill mt-4 w-full gap-2">
+                                    {t('page.home.friends.showAll')}
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </aside>
             </div>
@@ -407,6 +576,23 @@ const Home = () => {
                 }}
                 maxFileSize={20 * 1024 * 1024}
                 allowedTypes={["image/jpeg", "image/png", "image/webp", "image/gif", "image/heic", "image/heif"]}
+            />
+
+            <AlbumFormDialog
+                open={createAlbumOpen}
+                onOpenChange={setCreateAlbumOpen}
+                title={t('photos.album.create')}
+                submitLabel={t('photos.album.create')}
+                onSubmit={handleCreateAlbum}
+            />
+
+            <PhotoViewer
+                open={!!viewerPhoto}
+                onOpenChange={(o) => !o && setViewerPhoto(null)}
+                photo={viewerPhoto}
+                onPhotoUpdate={(p) => setViewerPhoto(p)}
+                onToggleLike={(id, liked) => photosQuery.toggleLike(id, liked)}
+                albums={albums}
             />
         </>
     );
