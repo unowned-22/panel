@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { AlbumView, AlbumFormDialog, PhotoViewer } from "@/components/photos";
 import { useAlbumPhotos } from "@/hooks/use-photos";
 import { photosApi } from "@/api/photos";
@@ -13,6 +14,7 @@ const PhotoAlbum = () => {
     const navigate = useNavigate();
     const toast = useToast();
     const { t } = useTranslation();
+    const qc = useQueryClient();
 
     const [album, setAlbum] = useState<ApiAlbum | null>(null);
     const [albumLoading, setAlbumLoading] = useState(true);
@@ -45,7 +47,11 @@ const PhotoAlbum = () => {
         if (!file || !albumId) return;
         try {
             await photosApi.uploadPhoto(file, undefined, albumId);
-            await albumPhotosQuery.refetch();
+            await Promise.all([
+                albumPhotosQuery.invalidate(),
+                qc.invalidateQueries({ queryKey: ['photos'] }),
+                qc.invalidateQueries({ queryKey: ['albums'] }),
+            ]);
         } catch {
             toast.toast({ title: t('errors.error') });
         }
@@ -57,6 +63,10 @@ const PhotoAlbum = () => {
         try {
             await photosApi.deleteAlbum(albumId);
             toast.toast({ title: t('photos.album.delete.success') });
+            await Promise.all([
+                qc.invalidateQueries({ queryKey: ['albums'] }),
+                qc.invalidateQueries({ queryKey: ['photos'] }),
+            ]);
             navigate('/me/photos');
         } catch {
             toast.toast({ title: t('errors.error'), description: t('photos.album.delete.error') });
@@ -69,6 +79,7 @@ const PhotoAlbum = () => {
             const updated = await photosApi.updateAlbum(albumId, { title, description });
             setAlbum(updated);
             toast.toast({ title: t('photos.album.updated') });
+            await qc.invalidateQueries({ queryKey: ['albums'] });
         } catch {
             toast.toast({ title: t('errors.error'), description: t('photos.album.create.error') });
         } finally {

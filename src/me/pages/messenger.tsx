@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMessenger } from "@/hooks/use-messenger";
+import { useCall } from "@/hooks/use-call";
 import { profileApi } from "@/api/profile";
+import { toast } from "@/hooks/use-toast";
 import { ConversationList } from "@/components/messenger/ConversationList";
 import { CreateGroupPanel } from "@/components/messenger/CreateGroupPanel";
 import { ChatWindow } from "@/components/messenger/ChatWindow";
@@ -9,6 +11,7 @@ import { EmptyChatState } from "@/components/messenger/EmptyChatState";
 import ChatInfoPanel from "@/components/messenger/ChatInfoPanel";
 import CreateChatDialog from "@/components/messenger/CreateChatDialog";
 import CallScreen from "@/components/messenger/CallScreen";
+import IncomingCallDialog from "@/components/messenger/IncomingCallDialog";
 import ForwardDialog from "@/components/messenger/ForwardDialog";
 
 const Messenger = () => {
@@ -23,10 +26,15 @@ const Messenger = () => {
     const [creatingChat, setCreatingChat] = useState(false);
     const [infoOpen, setInfoOpen] = useState(false);
     const [createOpen, setCreateOpen] = useState(false);
-    const [call, setCall] = useState<{ type: "voice" | "video" } | null>(null);
     const [forwardMsgId, setForwardMsgId] = useState<string | null>(null);
     const [resolvingUser, setResolvingUser] = useState(false);
     const active = contacts.find(c => c.id === activeId) ?? null;
+    const { activeCall, incomingCall, startCall } = useCall();
+    // Собеседник для активного/входящего звонка ищется по conversationId,
+    // а не по текущему открытому чату — пользователь мог переключиться на
+    // другой диалог, пока идёт звонок.
+    const callContact = activeCall ? contacts.find(c => c.id === String(activeCall.conversationId)) : null;
+    const incomingContact = incomingCall ? contacts.find(c => c.id === String(incomingCall.conversationId)) : null;
 
     useEffect(() => {
         if (activeId) ensureLoaded(activeId);
@@ -95,6 +103,22 @@ const Messenger = () => {
         if (id) handleSelect(id as string);
     };
 
+    const handleStartCall = (type: "voice" | "video") => {
+        if (!active) return;
+        // Черновик — реального conversation_id ещё нет, звонок невозможен,
+        // пока не отправлено первое сообщение (см. sendPayload в messenger-context).
+        if (active.id.startsWith("draft:")) {
+            toast({
+                title: "Сначала напишите сообщение",
+                description: "Звонок доступен после создания диалога",
+            });
+            return;
+        }
+        const conversationId = Number(active.id);
+        if (Number.isNaN(conversationId)) return;
+        startCall(conversationId, type);
+    };
+
     return (
         <>
             <div className="panel-card overflow-hidden flex h-[calc(100vh-84px)]">
@@ -126,7 +150,7 @@ const Messenger = () => {
                             onClose={handleCloseChat}
                             onToggleInfo={() => setInfoOpen(v => !v)}
                             infoOpen={infoOpen}
-                            onStartCall={type => setCall({ type })}
+                            onStartCall={handleStartCall}
                             onForward={msgId => setForwardMsgId(msgId)}
                             onChatIdChange={setActiveId}
                         />
@@ -152,12 +176,17 @@ const Messenger = () => {
                 onCreated={id => handleSelect(id)}
             />
 
-            {call && active && (
+            {activeCall && (
                 <CallScreen
-                    type={call.type}
-                    contactName={active.name}
-                    contactAvatar={active.avatar}
-                    onEnd={() => setCall(null)}
+                    contactName={callContact?.name ?? "Собеседник"}
+                    contactAvatar={callContact?.avatar}
+                />
+            )}
+
+            {incomingCall && !activeCall && (
+                <IncomingCallDialog
+                    contactName={incomingContact?.name ?? "Входящий звонок"}
+                    contactAvatar={incomingContact?.avatar}
                 />
             )}
 

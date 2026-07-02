@@ -18,6 +18,7 @@ import { queryClient } from '@/lib/query-client';
 import { RepostsProvider } from "@/components/feed/RepostsContext.tsx";
 import { PlayerProvider } from "@/components/PlayerContext.tsx";
 import { MessengerProvider } from "@/provider/messenger-provider";
+import { CallProvider } from "@/provider/call-provider";
 
 const { BASE_URL } = import.meta.env;
 
@@ -29,27 +30,29 @@ function App() {
                     <HelmetProvider>
                         <LoadingBarContainer>
                             <SocketProvider>
-                                <NotificationsProvider>
-                                    <RepostsProvider>
-                                        <FriendRequestsProvider>
-                                            <SettingsProvider>
-                                                <PlayerProvider>
-                                                    <MessengerProvider>
-                                                        <AccountProvider>
-                                                            <StoriesProvider>
-                                                                <BrowserRouter basename={BASE_URL}>
-                                                                    <Toaster />
-                                                                    <Sonner />
-                                                                    <AppRouting />
-                                                                </BrowserRouter>
-                                                            </StoriesProvider>
-                                                        </AccountProvider>
-                                                    </MessengerProvider>
-                                                </PlayerProvider>
-                                            </SettingsProvider>
-                                        </FriendRequestsProvider>
-                                    </RepostsProvider>
-                                </NotificationsProvider>
+                                <CallProvider>
+                                    <NotificationsProvider>
+                                        <RepostsProvider>
+                                            <FriendRequestsProvider>
+                                                <SettingsProvider>
+                                                    <PlayerProvider>
+                                                        <MessengerProvider>
+                                                            <AccountProvider>
+                                                                <StoriesProvider>
+                                                                    <BrowserRouter basename={BASE_URL}>
+                                                                        <Toaster />
+                                                                        <Sonner />
+                                                                        <AppRouting />
+                                                                    </BrowserRouter>
+                                                                </StoriesProvider>
+                                                            </AccountProvider>
+                                                        </MessengerProvider>
+                                                    </PlayerProvider>
+                                                </SettingsProvider>
+                                            </FriendRequestsProvider>
+                                        </RepostsProvider>
+                                    </NotificationsProvider>
+                                </CallProvider>
                             </SocketProvider>
                         </LoadingBarContainer>
                     </HelmetProvider>
