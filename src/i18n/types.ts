@@ -10,6 +10,8 @@ export interface TranslationDictionary {
     'sidebar.friends': string;
     'sidebar.groups': string;
     'sidebar.photos': string;
+    'sidebar.albums': string;
+    'sidebar.articles': string;
     'sidebar.clips': string;
     'sidebar.video': string;
     'sidebar.music': string;
@@ -54,7 +56,6 @@ export interface TranslationDictionary {
     'page.home.albums.empty': string;
     'page.home.friends.empty': string;
     'page.home.friends.add': string;
-    'page.home.friends.showAll': string;
     'page.home.friends.user': string;
 
     // ── Home page ───────────────────────────────────────────────────────────

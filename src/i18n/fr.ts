@@ -10,6 +10,8 @@ export const fr: TranslationDictionary = {
     'sidebar.friends': 'Amis',
     'sidebar.groups': 'Communautés',
     'sidebar.photos': 'Photos',
+    'sidebar.albums': 'Albums',
+    'sidebar.articles': 'Articles',
     'sidebar.clips': 'Clips',
     'sidebar.video': 'Vidéos',
     'sidebar.music': 'Musique',
@@ -54,7 +56,6 @@ export const fr: TranslationDictionary = {
     'page.home.albums.empty': 'Vous n\'avez pas encore créé d\'album',
     'page.home.friends.empty': 'Vous n\'avez pas encore d\'amis',
     'page.home.friends.add': 'Ajouter des amis',
-    'page.home.friends.showAll': 'Afficher tous les amis',
     'page.home.friends.user': 'Utilisateur #{id}',
 
     // ── Account page ──────────────────────────────────────────────────────────

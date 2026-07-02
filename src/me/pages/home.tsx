@@ -35,16 +35,17 @@ import { photosApi } from "@/api/photos";
 import type { Album as ApiAlbum, Photo } from "@/api/photos";
 import { AlbumFormDialog, PhotoViewer } from "@/components/photos";
 import { friendshipApi, type FriendshipRecord } from "@/api/friendship";
+import type { TranslationDictionary } from "@/i18n/types.ts";
 
 type TabKey = "photos" | "albums" | "videos" | "clips" | "music" | "articles";
 
-const tabs: { key: TabKey; label: string; icon: typeof ImageIcon }[] = [
-    { key: "photos", label: "Фото", icon: ImageIcon },
-    { key: "albums", label: "Альбомы", icon: ImageIcon },
-    { key: "videos", label: "Видео", icon: Video },
-    { key: "clips", label: "Клипы", icon: Crop },
-    { key: "music", label: "Музыка", icon: Music },
-    { key: "articles", label: "Статьи", icon: ListFilter },
+const tabs: { key: TabKey; label: keyof TranslationDictionary; icon: typeof ImageIcon }[] = [
+    { key: "photos", label: "sidebar.photos", icon: ImageIcon },
+    { key: "albums", label: "sidebar.albums", icon: ImageIcon },
+    { key: "videos", label: "sidebar.video", icon: Video },
+    { key: "clips", label: "sidebar.clips", icon: Crop },
+    { key: "music", label: "sidebar.music", icon: Music },
+    { key: "articles", label: "sidebar.articles", icon: ListFilter },
 ];
 
 const userVideos = [
@@ -85,7 +86,6 @@ const Home = () => {
     const [storyEditorOpen, setStoryEditorOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<TabKey>("photos");
 
-    // Photos / albums preview data ------------------------------------------------
     const photosQuery = usePhotos(1, 6);
     const albumsQuery = useAlbums(1, 6);
     const photos = photosQuery.data?.items ?? [];
@@ -125,7 +125,6 @@ const Home = () => {
         }
     };
 
-    // Friends preview data ---------------------------------------------------------
     const [friends, setFriends] = useState<FriendshipRecord[]>([]);
     const [friendsTotal, setFriendsTotal] = useState(0);
     const [friendsLoading, setFriendsLoading] = useState(true);
@@ -316,7 +315,7 @@ const Home = () => {
                                             active ? "bg-secondary text-foreground" : "text-muted-foreground hover:bg-secondary/60",
                                         )}
                                     >
-                                        <Icon className="h-4 w-4" /> {label}
+                                        <Icon className="h-4 w-4" /> {t(label)}
                                     </button>
                                 );
                             })}
@@ -481,7 +480,10 @@ const Home = () => {
                 <aside className="hidden xl:flex flex-col w-70 shrink-0 gap-3 sticky top-18 self-start max-h-[calc(100vh-72px)]">
                     <div className="panel-card p-5">
                         <div className={cn("font-semibold flex items-center justify-between", !friendsLoading && friends.length === 0 ? "mb-9" : "mb-4")}>
-                            {t('sidebar.friends')}
+                            {friendsTotal > 0
+                                ? <Link to="/me/friends">{t('sidebar.friends')}</Link>
+                                : t('sidebar.friends')
+                            }
                             {friendsTotal > 0 && <span className="text-sm font-normal text-muted-foreground">{friendsTotal}</span>}
                         </div>
 
@@ -496,34 +498,31 @@ const Home = () => {
                             </div>
                         ) : friends.length === 0 ? (
                             <>
-                                <div className="text-center text-sm text-muted-foreground">{t('page.home.friends.empty')}</div>
+                                <div className="text-center text-sm text-muted-foreground">
+                                    {t('page.home.friends.empty')}
+                                </div>
                                 <Link to="/me/friends" className="button-pill mt-8 w-full gap-2">
                                     <Plus className="h-4 w-4" />{t('page.home.friends.add')}
                                 </Link>
                             </>
                         ) : (
-                            <>
-                                <div className="flex flex-col gap-1">
-                                    {friends.map((f) => {
-                                        const id = otherFriendId(f);
-                                        return (
-                                            <Link
-                                                key={f.id}
-                                                to={`/profile/${id}`}
-                                                className="flex items-center gap-3 rounded-lg p-1.5 hover:bg-secondary/60"
-                                            >
-                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-semibold">
-                                                    {String(id).charAt(0)}
-                                                </div>
-                                                <div className="min-w-0 flex-1 truncate text-sm font-medium">{t('page.home.friends.user').replace('{id}', String(id))}</div>
-                                            </Link>
-                                        );
-                                    })}
-                                </div>
-                                <Link to="/me/friends" className="button-pill mt-4 w-full gap-2">
-                                    {t('page.home.friends.showAll')}
-                                </Link>
-                            </>
+                            <div className="flex flex-col gap-1">
+                                {friends.map((f) => {
+                                    const id = otherFriendId(f);
+                                    return (
+                                        <Link
+                                            key={f.id}
+                                            to={`/profile/${id}`}
+                                            className="flex items-center gap-3 rounded-lg p-1.5 hover:bg-secondary/60"
+                                        >
+                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-semibold">
+                                                {String(id).charAt(0)}
+                                            </div>
+                                            <div className="min-w-0 flex-1 truncate text-sm font-medium">{t('page.home.friends.user').replace('{id}', String(id))}</div>
+                                        </Link>
+                                    );
+                                })}
+                            </div>
                         )}
                     </div>
                 </aside>
