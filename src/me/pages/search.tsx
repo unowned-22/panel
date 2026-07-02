@@ -1,8 +1,9 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Search as SearchIcon, User, UsersRound, Newspaper, Music, Video } from "lucide-react";
-import { SEARCH_INDEX, type SearchEntry } from "@/layouts/main/top-bar";
+import { SEARCH_INDEX, toPeopleEntry, type SearchEntry } from "@/layouts/main/top-bar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { usersSearchApi } from "@/api/user-search.api";
 
 const ICONS: Record<SearchEntry["type"], any> = {
     people: User,
@@ -20,16 +21,65 @@ const LABELS: Record<SearchEntry["type"], string> = {
     video: "Видео",
 };
 
+const PEOPLE_LIMIT = 20;
+
 const Search = () => {
     const [params] = useSearchParams();
     const q = (params.get("q") || "").trim();
+
+    // "Люди" — реальный поиск (Meilisearch, /api/v1/users/search).
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [people, setPeople] = useState<SearchEntry[]>([]);
+    const requestIdRef = useRef(0);
+    const abortRef = useRef<AbortController | null>(null);
 
-    const groups = useMemo(() => {
+    const runSearch = useCallback((value: string) => {
+        const requestId = ++requestIdRef.current;
+        abortRef.current?.abort();
+        const controller = new AbortController();
+        abortRef.current = controller;
+
+        setLoading(true);
+        setError(null);
+
+        usersSearchApi
+            .search(value, PEOPLE_LIMIT, controller.signal)
+            .then((items) => {
+                if (requestIdRef.current !== requestId) return;
+                setPeople(items.map(toPeopleEntry));
+            })
+            .catch((err) => {
+                if (requestIdRef.current !== requestId) return;
+                if (err?.name === "AbortError") return;
+                setError("Не удалось выполнить поиск. Проверьте соединение и попробуйте ещё раз.");
+            })
+            .finally(() => {
+                if (requestIdRef.current === requestId) setLoading(false);
+            });
+    }, []);
+
+    useEffect(() => {
+        if (!q || q.length < 2) {
+            abortRef.current?.abort();
+            setPeople([]);
+            setLoading(false);
+            setError(null);
+            return;
+        }
+        runSearch(q);
+    }, [q, runSearch]);
+
+    // TODO(global-search): group/post/music/video пока фильтруются локально
+    // по SEARCH_INDEX (моковые данные) — бэкенд ещё не отдаёт единый
+    // полнотекстовый поиск по всем сущностям, только по пользователям.
+    // Как только такой эндпоинт появится, этот блок нужно заменить на
+    // реальный запрос и убрать SEARCH_INDEX отсюда целиком.
+    const otherGroups = useMemo(() => {
         const lower = q.toLowerCase();
         if (lower.length < 2) return {} as Record<string, SearchEntry[]>;
         return SEARCH_INDEX
+            .filter((e) => e.type !== "people")
             .filter((e) => e.title.toLowerCase().includes(lower) || e.subtitle?.toLowerCase().includes(lower))
             .reduce<Record<string, SearchEntry[]>>((acc, e) => {
                 (acc[e.type] ||= []).push(e);
@@ -37,25 +87,14 @@ const Search = () => {
             }, {});
     }, [q]);
 
-    const total = Object.values(groups).reduce((s, a) => s + a.length, 0);
+    const groups = useMemo(() => {
+        const merged: Record<string, SearchEntry[]> = {};
+        if (people.length > 0) merged.people = people;
+        Object.assign(merged, otherGroups);
+        return merged;
+    }, [otherGroups, people]);
 
-    useEffect(() => {
-        if (!q || q.length < 2) {
-            setLoading(false);
-            setError(null);
-            return;
-        }
-        setLoading(true);
-        setError(null);
-        const timer = setTimeout(() => {
-            // Имитация случайной ошибки сети
-            if (Math.random() < 0.05) {
-                setError("Не удалось выполнить поиск. Проверьте соединение и попробуйте ещё раз.");
-            }
-            setLoading(false);
-        }, 800);
-        return () => clearTimeout(timer);
-    }, [q]);
+    const total = Object.values(groups).reduce((s, a) => s + a.length, 0);
 
     return (
         <div className="flex gap-4">
@@ -88,7 +127,15 @@ const Search = () => {
                     )}
 
                     {!loading && error && (
-                        <div></div>
+                        <div className="py-10 text-center">
+                            <p className="text-sm text-destructive mb-2">{error}</p>
+                            <button
+                                onClick={() => runSearch(q)}
+                                className="text-sm font-medium text-primary hover:underline"
+                            >
+                                Повторить
+                            </button>
+                        </div>
                     )}
 
                     {!loading && !error && q && total === 0 && (

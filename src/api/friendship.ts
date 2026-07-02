@@ -1,27 +1,32 @@
 import { apiClient } from '@/lib/api-client';
 
-export interface FriendshipRecord {
+export interface FriendUser {
     id: number;
-    requester_id: number;
-    addressee_id: number;
-    status: 'pending' | 'accepted' | 'rejected' | 'cancelled';
-    created_at: string;
-    updated_at: string;
+    username: string;
+    full_name: string;
+    avatar_url: string;
 }
 
-interface PaginatedFriendships {
-    data: FriendshipRecord[];
+// Ответ для /friends, /friends/requests/incoming, /friends/requests/outgoing —
+// теперь всегда содержит данные второго участника, а не только его ID.
+export interface FriendConnection {
+    friendship_id: number;
+    status: 'pending' | 'accepted' | 'rejected';
+    created_at: string;
+    updated_at: string;
+    user: FriendUser;
+}
+
+interface PaginatedConnections {
+    data: FriendConnection[];
     page: number;
     limit: number;
     total: number;
     totalPages: number;
 }
 
-export interface UserSuggestion {
-    id: number;
-    username: string;
-    full_name: string;
-    avatar_url: string;
+export interface UserSuggestion extends FriendUser {
+    mutual_friends_count: number;
 }
 
 interface PaginatedSuggestions {
@@ -32,23 +37,34 @@ interface PaginatedSuggestions {
     totalPages: number;
 }
 
+// Сырой friendship-объект без данных юзера — по-прежнему используется
+// в ответах send/accept/reject, эти эндпоинты не менялись.
+export interface FriendshipRecord {
+    id: number;
+    requester_id: number;
+    addressee_id: number;
+    status: 'pending' | 'accepted' | 'rejected' | 'cancelled';
+    created_at: string;
+    updated_at: string;
+}
+
 export const friendshipApi = {
-    async listFriends(page = 1, limit = 20): Promise<PaginatedFriendships> {
-        const res = await apiClient.get<{ data: PaginatedFriendships }>(
+    async listFriends(page = 1, limit = 20): Promise<PaginatedConnections> {
+        const res = await apiClient.get<{ data: PaginatedConnections }>(
             `/friends?page=${page}&limit=${limit}`,
         );
         return res.data;
     },
 
-    async listIncoming(page = 1, limit = 20): Promise<PaginatedFriendships> {
-        const res = await apiClient.get<{ data: PaginatedFriendships }>(
+    async listIncoming(page = 1, limit = 20): Promise<PaginatedConnections> {
+        const res = await apiClient.get<{ data: PaginatedConnections }>(
             `/friends/requests/incoming?page=${page}&limit=${limit}`,
         );
         return res.data;
     },
 
-    async listOutgoing(page = 1, limit = 20): Promise<PaginatedFriendships> {
-        const res = await apiClient.get<{ data: PaginatedFriendships }>(
+    async listOutgoing(page = 1, limit = 20): Promise<PaginatedConnections> {
+        const res = await apiClient.get<{ data: PaginatedConnections }>(
             `/friends/requests/outgoing?page=${page}&limit=${limit}`,
         );
         return res.data;
@@ -86,7 +102,6 @@ export const friendshipApi = {
         await apiClient.delete(`/friends/${id}`);
     },
 
-    // Placeholder
     async listSuggestions(page = 1, limit = 20): Promise<PaginatedSuggestions> {
         const res = await apiClient.get<{ data: PaginatedSuggestions }>(
             `/friends/suggestions?page=${page}&limit=${limit}`,

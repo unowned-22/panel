@@ -13,8 +13,7 @@ import {
     Loader2,
 } from "lucide-react";
 import { toAbsoluteUrl } from "@/lib/helpers.ts";
-import { friendshipApi, type FriendshipRecord, type UserSuggestion } from "@/api/friendship";
-import { useAuthStore } from "@/modules/auth/auth.store";
+import { friendshipApi, type FriendConnection, type UserSuggestion } from "@/api/friendship";
 import { useTranslation } from '@/hooks/use-translation';
 import type { TranslationDictionary } from '@/i18n/types';
 
@@ -79,24 +78,23 @@ const Pagination = ({ page, totalPages, onPage }: PaginationProps) => {
 };
 
 const Friends = () => {
-    const user = useAuthStore((s) => s.user);
     const [tab, setTab] = useState<Tab>("all");
     const [query, setQuery] = useState("");
 
     // Friends list
-    const [friends, setFriends] = useState<FriendshipRecord[]>([]);
+    const [friends, setFriends] = useState<FriendConnection[]>([]);
     const [friendsTotal, setFriendsTotal] = useState(0);
     const [friendsPage, setFriendsPage] = useState(1);
     const [friendsLoading, setFriendsLoading] = useState(false);
 
     // Incoming requests
-    const [incoming, setIncoming] = useState<FriendshipRecord[]>([]);
+    const [incoming, setIncoming] = useState<FriendConnection[]>([]);
     const [incomingTotal, setIncomingTotal] = useState(0);
     const [incomingPage, setIncomingPage] = useState(1);
     const [incomingLoading, setIncomingLoading] = useState(false);
 
     // Outgoing requests
-    const [outgoing, setOutgoing] = useState<FriendshipRecord[]>([]);
+    const [outgoing, setOutgoing] = useState<FriendConnection[]>([]);
     const [outgoingTotal, setOutgoingTotal] = useState(0);
     const [outgoingPage, setOutgoingPage] = useState(1);
     const [outgoingLoading, setOutgoingLoading] = useState(false);
@@ -174,13 +172,13 @@ const Friends = () => {
     useEffect(() => { loadOutgoing(1); }, [loadOutgoing]);
     useEffect(() => { loadSuggestions(1); }, [loadSuggestions]);
 
-    const handleRemoveFriend = async (friendship: FriendshipRecord) => {
-        setActionBusy(friendship.id, true);
+    const handleRemoveFriend = async (friendship: FriendConnection) => {
+        setActionBusy(friendship.friendship_id, true);
         try {
-            await friendshipApi.remove(friendship.id);
+            await friendshipApi.remove(friendship.friendship_id);
             await loadFriends(friendsPage);
         } finally {
-            setActionBusy(friendship.id, false);
+            setActionBusy(friendship.friendship_id, false);
         }
     };
 
@@ -224,17 +222,19 @@ const Friends = () => {
         }
     };
 
-    // Determine which user in the friendship record is "the other person"
-    const otherUserId = (f: FriendshipRecord) =>
-        f.requester_id === user?.id ? f.addressee_id : f.requester_id;
-
     const friendsTotalPages = Math.ceil(friendsTotal / PAGE_LIMIT) || 1;
     const incomingTotalPages = Math.ceil(incomingTotal / PAGE_LIMIT) || 1;
     const outgoingTotalPages = Math.ceil(outgoingTotal / PAGE_LIMIT) || 1;
     const suggestionsTotalPages = Math.ceil(suggestionsTotal / PAGE_LIMIT) || 1;
 
     const filteredFriends = query.trim()
-        ? friends.filter((f) => String(otherUserId(f)).includes(query))
+        ? friends.filter((f) => {
+            const q = query.trim().toLowerCase();
+            return (
+                f.user.full_name.toLowerCase().includes(q) ||
+                f.user.username.toLowerCase().includes(q)
+            );
+        })
         : friends;
 
     const { t, language } = useTranslation();
@@ -304,24 +304,22 @@ const Friends = () => {
                                     <UserCheck className="w-3.5 h-3.5" /> {t('page.friends.section.friends')}
                                 </div>
                                 {filteredFriends.map((f) => (
-                                    <div key={f.id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-secondary/60 transition-colors">
-                                        <Link to={`/profile/${otherUserId(f)}`} className="shrink-0">
-                                            <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center text-sm font-semibold">
-                                                {String(otherUserId(f)).charAt(0)}
-                                            </div>
+                                    <div key={f.friendship_id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-secondary/60 transition-colors">
+                                        <Link to={`/profile/${f.user.username}`} className="shrink-0">
+                                            <UserAvatar avatarUrl={f.user.avatar_url} name={f.user.full_name} className="w-12 h-12" />
                                         </Link>
                                         <div className="flex-1 min-w-0">
-                                            <Link to={`/profile/${otherUserId(f)}`} className="text-sm font-medium hover:underline truncate block">
-                                                Пользователь #{otherUserId(f)}
+                                            <Link to={`/profile/${f.user.username}`} className="text-sm font-medium hover:underline truncate block">
+                                                {f.user.full_name}
                                             </Link>
-                                            <div className="text-xs text-muted-foreground">{t('page.friends.label.friend')}</div>
+                                            <div className="text-xs text-muted-foreground truncate">@{f.user.username}</div>
                                         </div>
                                         <button
                                             onClick={() => handleRemoveFriend(f)}
-                                            disabled={actionLoading[f.id]}
+                                            disabled={actionLoading[f.friendship_id]}
                                             className="button-pill bg-secondary! text-sm flex items-center gap-1"
                                         >
-                                            {actionLoading[f.id] ? (
+                                            {actionLoading[f.friendship_id] ? (
                                                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
                                             ) : (
                                                 <UserX className="w-3.5 h-3.5" />
@@ -355,15 +353,13 @@ const Friends = () => {
                                     <Clock className="w-3.5 h-3.5" /> {t('page.friends.section.incoming')}
                                 </div>
                                 {incoming.map((f) => (
-                                    <div key={f.id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-secondary/60 transition-colors">
-                                        <Link to={`/profile/${f.requester_id}`} className="shrink-0">
-                                            <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center text-sm font-semibold">
-                                                {String(f.requester_id).charAt(0)}
-                                            </div>
+                                    <div key={f.friendship_id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-secondary/60 transition-colors">
+                                        <Link to={`/profile/${f.user.username}`} className="shrink-0">
+                                            <UserAvatar avatarUrl={f.user.avatar_url} name={f.user.full_name} className="w-12 h-12" />
                                         </Link>
                                         <div className="flex-1 min-w-0">
-                                            <Link to={`/profile/${f.requester_id}`} className="text-sm font-medium hover:underline truncate block">
-                                                Пользователь #{f.requester_id}
+                                            <Link to={`/profile/${f.user.username}`} className="text-sm font-medium hover:underline truncate block">
+                                                {f.user.full_name}
                                             </Link>
                                             <div className="text-xs text-muted-foreground">
                                                 {new Date(f.created_at).toLocaleDateString(language)}
@@ -371,11 +367,11 @@ const Friends = () => {
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <button
-                                                onClick={() => handleAccept(f.id)}
-                                                disabled={actionLoading[f.id]}
+                                                onClick={() => handleAccept(f.friendship_id)}
+                                                disabled={actionLoading[f.friendship_id]}
                                                 className="button-pill flex items-center gap-1"
                                             >
-                                                {actionLoading[f.id] ? (
+                                                {actionLoading[f.friendship_id] ? (
                                                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
                                                 ) : (
                                                     <UserCheck className="w-3.5 h-3.5" />
@@ -383,8 +379,8 @@ const Friends = () => {
                                                 {t('page.friends.action.accept')}
                                             </button>
                                             <button
-                                                onClick={() => handleReject(f.id)}
-                                                disabled={actionLoading[f.id]}
+                                                onClick={() => handleReject(f.friendship_id)}
+                                                disabled={actionLoading[f.friendship_id]}
                                                 className="button-pill bg-secondary! flex items-center gap-1"
                                             >
                                                 <UserX className="w-3.5 h-3.5" />
@@ -418,26 +414,24 @@ const Friends = () => {
                                     <UserPlus className="w-3.5 h-3.5" /> {t('page.friends.section.outgoing')}
                                 </div>
                                 {outgoing.map((f) => (
-                                    <div key={f.id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-secondary/60 transition-colors">
-                                        <Link to={`/profile/${f.addressee_id}`} className="shrink-0">
-                                            <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center text-sm font-semibold">
-                                                {String(f.addressee_id).charAt(0)}
-                                            </div>
+                                    <div key={f.friendship_id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-secondary/60 transition-colors">
+                                        <Link to={`/profile/${f.user.username}`} className="shrink-0">
+                                            <UserAvatar avatarUrl={f.user.avatar_url} name={f.user.full_name} className="w-12 h-12" />
                                         </Link>
                                         <div className="flex-1 min-w-0">
-                                            <Link to={`/profile/${f.addressee_id}`} className="text-sm font-medium hover:underline truncate block">
-                                                Пользователь #{f.addressee_id}
+                                            <Link to={`/profile/${f.user.username}`} className="text-sm font-medium hover:underline truncate block">
+                                                {f.user.full_name}
                                             </Link>
                                             <div className="text-xs text-muted-foreground">
                                                 {t('page.friends.label.sent').replace('{date}', new Date(f.created_at).toLocaleDateString(language))}
                                             </div>
                                         </div>
                                         <button
-                                            onClick={() => handleCancel(f.id)}
-                                            disabled={actionLoading[f.id]}
+                                            onClick={() => handleCancel(f.friendship_id)}
+                                            disabled={actionLoading[f.friendship_id]}
                                             className="button-pill bg-secondary! flex items-center gap-1"
                                         >
-                                            {actionLoading[f.id] ? (
+                                            {actionLoading[f.friendship_id] ? (
                                                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
                                             ) : null}
                                             {t('page.friends.action.cancel')}
@@ -476,6 +470,9 @@ const Friends = () => {
                                                 </Link>
                                                 <div className="text-xs text-muted-foreground truncate">
                                                     @{s.username}
+                                                    {s.mutual_friends_count > 0 && (
+                                                        <> · {t('page.friends.suggestion.mutual').replace('{count}', String(s.mutual_friends_count))}</>
+                                                    )}
                                                 </div>
                                             </div>
                                             <button

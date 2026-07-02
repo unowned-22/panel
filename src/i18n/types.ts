@@ -10,6 +10,8 @@ export interface TranslationDictionary {
     'sidebar.friends': string;
     'sidebar.groups': string;
     'sidebar.photos': string;
+    'sidebar.albums': string;
+    'sidebar.articles': string;
     'sidebar.clips': string;
     'sidebar.video': string;
     'sidebar.music': string;
@@ -54,7 +56,6 @@ export interface TranslationDictionary {
     'page.home.albums.empty': string;
     'page.home.friends.empty': string;
     'page.home.friends.add': string;
-    'page.home.friends.showAll': string;
     'page.home.friends.user': string;
 
     // ── Home page ───────────────────────────────────────────────────────────
@@ -291,13 +292,14 @@ export interface TranslationDictionary {
     'page.friends.empty.outgoing': string;
     'page.friends.empty.outgoing.desc': string;
     'page.friends.section.outgoing': string;
-    'page.friends.label.sent': string; // use .replace('{date}', date)
+    'page.friends.label.sent': string;
     'page.friends.action.cancel': string;
     'page.friends.section.suggestions': string;
     'page.friends.empty.suggestions': string;
     'page.friends.action.add': string;
     'page.friends.sidebar.title': string;
     'page.friends.sidebar.find': string;
+    'page.friends.suggestion.mutual': string;
     // ── Photos module ───────────────────────────────────────────────────────
     'page.photos.title': string;
     'page.albums.title': string;

@@ -10,6 +10,8 @@ export const it: TranslationDictionary = {
     'sidebar.friends': 'Amici',
     'sidebar.groups': 'Comunità',
     'sidebar.photos': 'Foto',
+    'sidebar.albums': 'Album',
+    'sidebar.articles': 'Articoli',
     'sidebar.clips': 'Clip',
     'sidebar.video': 'Video',
     'sidebar.music': 'Musica',
@@ -54,7 +56,6 @@ export const it: TranslationDictionary = {
     'page.home.albums.empty': 'Non hai ancora creato un album',
     'page.home.friends.empty': 'Non hai ancora amici',
     'page.home.friends.add': 'Aggiungi amici',
-    'page.home.friends.showAll': 'Mostra tutti gli amici',
     'page.home.friends.user': 'Utente #{id}',
 
     // ── Account page ──────────────────────────────────────────────────────────
@@ -296,6 +297,7 @@ export const it: TranslationDictionary = {
     'page.friends.action.add': 'Aggiungi',
     'page.friends.sidebar.title': 'I miei amici',
     'page.friends.sidebar.find': 'Cerca amici',
+    'page.friends.suggestion.mutual': 'Avete {count} amici in comune',
 
     // ── Photos module  ───────────────────────────────
     'page.photos.title': 'Le mie foto',

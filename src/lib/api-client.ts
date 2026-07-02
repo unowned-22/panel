@@ -35,7 +35,7 @@ export default class ApiClient {
         this.onAuthFailure = cfg.onAuthFailure;
     }
 
-    async get<T>(path: string, opts?: { logoutOn401?: boolean }): Promise<T> {
+    async get<T>(path: string, opts?: { logoutOn401?: boolean; signal?: AbortSignal }): Promise<T> {
         return this.request<T>('GET', path, undefined, opts);
     }
 
@@ -59,7 +59,7 @@ export default class ApiClient {
         return this.requestFormData<T>('POST', path, payload, opts);
     }
 
-    private async request<T>(method: string, path: string, body?: unknown, opts?: { logoutOn401?: boolean }): Promise<T> {
+    private async request<T>(method: string, path: string, body?: unknown, opts?: { logoutOn401?: boolean; signal?: AbortSignal }): Promise<T> {
         const url = `${this.baseUrl}${path}`;
         const headers: Record<string,string> = { 'Content-Type': 'application/json' };
         const token = this.getToken();
@@ -71,6 +71,7 @@ export default class ApiClient {
             method,
             headers,
             body: body === undefined ? undefined : JSON.stringify(body),
+            signal: opts?.signal,
         });
 
         if (res.status === 401) {

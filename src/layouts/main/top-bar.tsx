@@ -3,7 +3,7 @@ import {
     Check, Search, Music, Video, UsersRound, Newspaper, UserIcon, User
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useCallback, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
     DropdownMenu,
@@ -25,6 +25,7 @@ import { authApi } from "@/api/auth";
 import { useNotifications } from "@/hooks/use-notification";
 import { notificationMeta, formatRelativeTime, renderNotificationTitle } from "@/lib/notification-meta";
 import { PlayerPopover } from "@/components/player/PlayerPopover";
+import { usersSearchApi, type UserSearchItem } from "@/api/user-search.api";
 
 export type SearchEntry = {
     id: string;
@@ -34,6 +35,16 @@ export type SearchEntry = {
     href: string;
 };
 
+/**
+ * TODO(global-search): единого бэкенд-эндпоинта полнотекстового поиска по
+ * всем сущностям (сообщества, записи, музыка, видео) пока нет. Реально
+ * ищем сейчас только пользователей — через Meilisearch-индекс на бэкенде
+ * (GET /api/v1/users/search, см. AGENTS.md "User Search Feature Guidance").
+ * SEARCH_INDEX ниже остаётся локальным моком ТОЛЬКО для типов
+ * group/post/music/video — как только появится общий поисковый эндпоинт,
+ * SEARCH_INDEX нужно выпилить целиком и завести реальный поиск для всех
+ * типов разом.
+ */
 export const SEARCH_INDEX: SearchEntry[] = [
     { id: "p1", type: "people", title: "Анна Соколова", subtitle: "Москва", href: "/friends" },
     { id: "p2", type: "people", title: "Иван Петров", subtitle: "Санкт-Петербург", href: "/friends" },
@@ -49,6 +60,15 @@ export const SEARCH_INDEX: SearchEntry[] = [
     { id: "v1", type: "video", title: "Обзор нового VK", href: "/video" },
     { id: "v2", type: "video", title: "Топ-10 клипов 2026", href: "/clips" },
 ];
+
+/** Превращает результат /api/v1/users/search в SearchEntry для общей выдачи поиска. */
+export const toPeopleEntry = (u: UserSearchItem): SearchEntry => ({
+    id: `user-${u.id}`,
+    type: "people",
+    title: u.full_name || u.username,
+    subtitle: `@${u.username}`,
+    href: `/profile/${u.username}`,
+});
 
 const TYPE_ICONS: Record<SearchEntry["type"], any> = {
     people: UserIcon, group: UsersRound, post: Newspaper, music: Music, video: Video,
@@ -80,6 +100,46 @@ export const TopBar = () => {
     const [searchError, setSearchError] = useState<string | null>(null);
     const [suggestions, setSuggestions] = useState<SearchEntry[]>([]);
     const searchRef = useRef<HTMLDivElement>(null);
+    const searchRequestIdRef = useRef(0);
+    const searchAbortRef = useRef<AbortController | null>(null);
+
+    const runSearch = useCallback((value: string) => {
+        const requestId = ++searchRequestIdRef.current;
+        searchAbortRef.current?.abort();
+        const controller = new AbortController();
+        searchAbortRef.current = controller;
+
+        setSearchLoading(true);
+        setSearchError(null);
+
+        usersSearchApi
+            .search(value, 8, controller.signal)
+            .then((items) => {
+                if (searchRequestIdRef.current !== requestId) return;
+                setSuggestions(items.map(toPeopleEntry));
+            })
+            .catch((err) => {
+                if (searchRequestIdRef.current !== requestId) return;
+                if (err?.name === "AbortError") return;
+                setSearchError("Не удалось выполнить поиск. Проверьте соединение и попробуйте ещё раз.");
+            })
+            .finally(() => {
+                if (searchRequestIdRef.current === requestId) setSearchLoading(false);
+            });
+    }, []);
+
+    useEffect(() => {
+        const value = query.trim();
+        if (value.length < 2) {
+            searchAbortRef.current?.abort();
+            setSuggestions([]);
+            setSearchLoading(false);
+            setSearchError(null);
+            return;
+        }
+        const timer = setTimeout(() => runSearch(value), 250);
+        return () => clearTimeout(timer);
+    }, [query, runSearch]);
 
     const submitSearch = (q: string) => {
         const value = q.trim();
@@ -141,19 +201,7 @@ export const TopBar = () => {
                                 <div className="px-4 py-6 text-center">
                                     <p className="text-sm text-destructive mb-2">{searchError}</p>
                                     <button
-                                        onClick={() => {
-                                            setSearchError(null);
-                                            setSearchLoading(true);
-                                            setTimeout(() => {
-                                                const q = query.trim().toLowerCase();
-                                                setSuggestions(
-                                                    SEARCH_INDEX
-                                                        .filter((e) => e.title.toLowerCase().includes(q) || e.subtitle?.toLowerCase().includes(q))
-                                                        .slice(0, 8)
-                                                );
-                                                setSearchLoading(false);
-                                            }, 500);
-                                        }}
+                                        onClick={() => runSearch(query.trim())}
                                         className="text-sm font-medium text-primary hover:underline"
                                     >
                                         Повторить
@@ -172,7 +220,7 @@ export const TopBar = () => {
                                         return (
                                             <button
                                                 key={s.id}
-                                                onClick={() => submitSearch(s.title)}
+                                                onClick={() => { setOpenSearch(false); navigate(s.href); }}
                                                 className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-secondary/60"
                                             >
                                                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary shrink-0">

@@ -8,6 +8,8 @@ export const de: TranslationDictionary = {
     'sidebar.messenger': 'Messenger',
     'sidebar.calls': 'Anrufe',
     'sidebar.friends': 'Freunde',
+    'sidebar.albums': 'Alben',
+    'sidebar.articles': 'Artikel',
     'sidebar.groups': 'Gemeinschaften',
     'sidebar.photos': 'Fotos',
     'sidebar.clips': 'Clips',
@@ -54,7 +56,6 @@ export const de: TranslationDictionary = {
     'page.home.albums.empty': 'Sie haben noch kein Album erstellt',
     'page.home.friends.empty': 'Sie haben noch keine Freunde',
     'page.home.friends.add': 'Freunde hinzufügen',
-    'page.home.friends.showAll': 'Alle Freunde anzeigen',
     'page.home.friends.user': 'Benutzer #{id}',
 
     // ── Account page ──────────────────────────────────────────────────────────
@@ -296,6 +297,7 @@ export const de: TranslationDictionary = {
     'page.friends.action.add': 'Hinzufügen',
     'page.friends.sidebar.title': 'Meine Freunde',
     'page.friends.sidebar.find': 'Freunde suchen',
+    'page.friends.suggestion.mutual': 'Sie haben {count} gemeinsame Freunde',
 
     // ── Photos module ───────────────────────────────
     'page.photos.title': 'Meine Fotos',

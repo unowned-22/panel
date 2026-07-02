@@ -9,6 +9,7 @@ import {
     type KeyboardEvent,
 } from "react";
 import { cn } from "@/lib/utils";
+import { usersSearchApi, type UserSearchItem } from "@/api/user-search.api";
 
 export type MentionUser = {
     id: string;
@@ -18,6 +19,15 @@ export type MentionUser = {
     subtitle?: string;
 };
 
+/**
+ * Список "по умолчанию" больше не используется как основной источник
+ * совпадений — теперь это только fallback, который показывается сразу
+ * после ввода "@", пока пользователь ещё ничего не напечатал (бэкенд не
+ * умеет искать по пустому q, см. usersSearchApi.search). Можно передать
+ * сюда, например, недавних собеседников или друзей через проп `users`.
+ * Как только появляется хотя бы один символ запроса, список полностью
+ * подменяется результатами живого поиска.
+ */
 export const DEFAULT_MENTION_USERS: MentionUser[] = [
     { id: "u1", name: "Skylar Reeves", handle: "skylar", avatar: "/avatar-1.jpg", subtitle: "Дизайнер" },
     { id: "u2", name: "Mira Donovan", handle: "mira", avatar: "/avatar-2.jpg", subtitle: "Фотограф" },
@@ -28,6 +38,16 @@ export const DEFAULT_MENTION_USERS: MentionUser[] = [
     { id: "u7", name: "Daniil Orlov", handle: "daniil", subtitle: "Разработчик" },
 ];
 
+const SEARCH_DEBOUNCE_MS = 250;
+const SEARCH_LIMIT = 6;
+
+const toMentionUser = (u: UserSearchItem): MentionUser => ({
+    id: String(u.id),
+    name: u.full_name || u.username,
+    handle: u.username,
+    avatar: u.avatar_url ?? undefined,
+});
+
 type Props = {
     value: string;
     onChange: (v: string) => void;
@@ -35,7 +55,6 @@ type Props = {
     placeholder?: string;
     className?: string;
     users?: MentionUser[];
-    /** Render-prop wrapper around input for custom layouts */
 };
 
 const findActiveQuery = (
@@ -72,6 +91,11 @@ export const MentionInput = forwardRef<MentionInputHandle, Props>(function Menti
     const [open, setOpen] = useState(false);
     const [activeIdx, setActiveIdx] = useState(0);
 
+    const [remoteMatches, setRemoteMatches] = useState<MentionUser[]>([]);
+    const [searching, setSearching] = useState(false);
+    const requestIdRef = useRef(0);
+    const abortRef = useRef<AbortController | null>(null);
+
     useImperativeHandle(ref, () => ({
         focus: () => inputRef.current?.focus(),
         getInput: () => inputRef.current,
@@ -79,19 +103,56 @@ export const MentionInput = forwardRef<MentionInputHandle, Props>(function Menti
 
     const active = useMemo(() => findActiveQuery(value, caret), [value, caret]);
 
-    const matches = useMemo(() => {
-        if (!active) return [];
-        const q = active.query.toLowerCase();
-        const filtered = users.filter(
-            (u) => u.handle.toLowerCase().includes(q) || u.name.toLowerCase().includes(q),
-        );
-        return filtered.slice(0, 6);
+    // Живой поиск по /api/v1/users/search (Meilisearch, матчит username и full_name).
+    // Пустой query бэкенд не принимает, поэтому в этом случае просто чистим
+    // remoteMatches и ниже используем локальный fallback-список.
+    useEffect(() => {
+        const query = active?.query ?? "";
+
+        if (!query) {
+            abortRef.current?.abort();
+            setRemoteMatches([]);
+            setSearching(false);
+            return;
+        }
+
+        const requestId = ++requestIdRef.current;
+        abortRef.current?.abort();
+        const controller = new AbortController();
+        abortRef.current = controller;
+
+        setSearching(true);
+        const timer = setTimeout(() => {
+            usersSearchApi
+                .search(query, SEARCH_LIMIT, controller.signal)
+                .then((items) => {
+                    if (requestIdRef.current !== requestId) return; // пришёл устаревший ответ
+                    setRemoteMatches(items.map(toMentionUser));
+                })
+                .catch(() => {
+                    if (requestIdRef.current !== requestId) return;
+                    setRemoteMatches([]);
+                })
+                .finally(() => {
+                    if (requestIdRef.current === requestId) setSearching(false);
+                });
+        }, SEARCH_DEBOUNCE_MS);
+
+        return () => clearTimeout(timer);
+    }, [active?.query]);
+
+    const localFallback = useMemo(() => {
+        if (!active || active.query) return [];
+        return users.slice(0, SEARCH_LIMIT);
     }, [active, users]);
 
+    const matches = active?.query ? remoteMatches : localFallback;
+    const isQuerying = Boolean(active?.query) && searching;
+
     useEffect(() => {
-        setOpen(Boolean(active && matches.length > 0));
+        setOpen(Boolean(active && (matches.length > 0 || isQuerying)));
         setActiveIdx(0);
-    }, [active, matches.length]);
+    }, [active, matches.length, isQuerying]);
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         onChange(e.target.value);
@@ -163,40 +224,48 @@ export const MentionInput = forwardRef<MentionInputHandle, Props>(function Menti
                 placeholder={placeholder}
                 className="w-full h-10 px-3 rounded-full bg-secondary text-sm outline-none focus:ring-2 focus:ring-primary/40 placeholder:text-muted-foreground"
             />
-            {open && matches.length > 0 && (
+            {open && (
                 <div className="absolute bottom-full left-0 mb-2 w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-border bg-popover shadow-lg overflow-hidden z-50">
                     <div className="px-3 py-1.5 text-[11px] uppercase tracking-wide text-muted-foreground border-b border-border">
                         Упомянуть пользователя
                     </div>
-                    <ul className="max-h-64 overflow-y-auto py-1">
-                        {matches.map((u, i) => (
-                            <li key={u.id}>
-                                <button
-                                    type="button"
-                                    onMouseDown={(e) => {
-                                        e.preventDefault();
-                                        insertMention(u);
-                                    }}
-                                    onMouseEnter={() => setActiveIdx(i)}
-                                    className={cn(
-                                        "w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors",
-                                        i === activeIdx ? "bg-secondary" : "hover:bg-secondary/60",
-                                    )}
-                                >
-                                    <div className="w-8 h-8 rounded-full bg-secondary overflow-hidden shrink-0">
-                                        {u.avatar && <img src={u.avatar} alt="" className="w-full h-full object-cover" />}
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                        <div className="text-sm font-medium truncate">{u.name}</div>
-                                        <div className="text-xs text-muted-foreground truncate">
-                                            @{u.handle}
-                                            {u.subtitle ? ` · ${u.subtitle}` : ""}
+                    {matches.length === 0 && isQuerying && (
+                        <div className="px-3 py-3 text-sm text-muted-foreground">Поиск…</div>
+                    )}
+                    {matches.length === 0 && !isQuerying && active?.query && (
+                        <div className="px-3 py-3 text-sm text-muted-foreground">Никого не найдено</div>
+                    )}
+                    {matches.length > 0 && (
+                        <ul className="max-h-64 overflow-y-auto py-1">
+                            {matches.map((u, i) => (
+                                <li key={u.id}>
+                                    <button
+                                        type="button"
+                                        onMouseDown={(e) => {
+                                            e.preventDefault();
+                                            insertMention(u);
+                                        }}
+                                        onMouseEnter={() => setActiveIdx(i)}
+                                        className={cn(
+                                            "w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors",
+                                            i === activeIdx ? "bg-secondary" : "hover:bg-secondary/60",
+                                        )}
+                                    >
+                                        <div className="w-8 h-8 rounded-full bg-secondary overflow-hidden shrink-0">
+                                            {u.avatar && <img src={u.avatar} alt="" className="w-full h-full object-cover" />}
                                         </div>
-                                    </div>
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
+                                        <div className="min-w-0 flex-1">
+                                            <div className="text-sm font-medium truncate">{u.name}</div>
+                                            <div className="text-xs text-muted-foreground truncate">
+                                                @{u.handle}
+                                                {u.subtitle ? ` · ${u.subtitle}` : ""}
+                                            </div>
+                                        </div>
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                 </div>
             )}
         </div>
@@ -212,7 +281,6 @@ export const renderWithMentions = (text: string, users: MentionUser[] = DEFAULT_
     let m: RegExpExecArray | null;
     while ((m = re.exec(text)) !== null) {
         const [full, lead, handle] = m;
-        console.log(full)
         const idx = m.index + lead.length;
         if (idx > last) parts.push(text.slice(last, idx));
         parts.push({ handle, known: handles.has(handle.toLowerCase()) });
