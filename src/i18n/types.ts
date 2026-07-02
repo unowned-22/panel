@@ -292,13 +292,14 @@ export interface TranslationDictionary {
     'page.friends.empty.outgoing': string;
     'page.friends.empty.outgoing.desc': string;
     'page.friends.section.outgoing': string;
-    'page.friends.label.sent': string; // use .replace('{date}', date)
+    'page.friends.label.sent': string;
     'page.friends.action.cancel': string;
     'page.friends.section.suggestions': string;
     'page.friends.empty.suggestions': string;
     'page.friends.action.add': string;
     'page.friends.sidebar.title': string;
     'page.friends.sidebar.find': string;
+    'page.friends.suggestion.mutual': string;
     // ── Photos module ───────────────────────────────────────────────────────
     'page.photos.title': string;
     'page.albums.title': string;

@@ -297,6 +297,7 @@ export const en: TranslationDictionary = {
     'page.friends.action.add': 'Add',
     'page.friends.sidebar.title': 'My friends',
     'page.friends.sidebar.find': 'Find friends',
+    'page.friends.suggestion.mutual': 'You have {count} mutual friends',
     // ── Photos module ───────────────────────────────────────────────────────
     'page.photos.title': 'My photos',
     'page.albums.title': 'My Albums',

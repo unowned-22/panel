@@ -297,6 +297,7 @@ export const ua: TranslationDictionary = {
     'page.friends.action.add': 'Додати',
     'page.friends.sidebar.title': 'Мої друзі',
     'page.friends.sidebar.find': 'Пошук друзів',
+    'page.friends.suggestion.mutual': 'У вас {count} спільних друзів',
 
     // ── Photos module  ───────────────────────────────
     'page.photos.title': 'Мої фотографії',
