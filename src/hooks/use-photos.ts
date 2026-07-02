@@ -7,6 +7,7 @@ export function usePhotos(page = 1, limit = 24): UseQueryResult<PaginatedRespons
     toggleLike: (id: number, liked?: boolean) => void;
     deletePhoto: (id: number) => Promise<void>;
     movePhoto: (id: number, albumId: number | null) => Promise<void>;
+    invalidate: () => Promise<void>;
 } {
     const qc = useQueryClient();
     const key = ['photos', page, limit] as const;
@@ -33,15 +34,19 @@ export function usePhotos(page = 1, limit = 24): UseQueryResult<PaginatedRespons
             });
             return { prev };
         },
-            onError: (_err, _vars, ctx?: { prev?: PaginatedResponse<Photo> } | undefined) => {
+        onError: (_err, _vars, ctx?: { prev?: PaginatedResponse<Photo> } | undefined) => {
             if (ctx?.prev) qc.setQueryData(key, ctx.prev as any);
         },
-        onSettled: () => qc.invalidateQueries({ queryKey: key }),
+        onSettled: () => qc.invalidateQueries({ queryKey: ['photos'] }),
     });
 
     const deleteMutation = useMutation<void, Error, number>({
         mutationFn: async (id: number) => photosApi.deletePhoto(id),
-        onSuccess: () => qc.invalidateQueries({ queryKey: ['photos'] }),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ['photos'] });
+            qc.invalidateQueries({ queryKey: ['albums'] });
+            qc.invalidateQueries({ queryKey: ['albumPhotos'] });
+        },
     });
 
     const moveFn: MutationFunction<Photo, { id: number; albumId: number | null }> = async (vars) => photosApi.movePhoto(vars.id, vars.albumId);
@@ -51,6 +56,7 @@ export function usePhotos(page = 1, limit = 24): UseQueryResult<PaginatedRespons
         onSuccess: () => {
             qc.invalidateQueries({ queryKey: ['photos'] });
             qc.invalidateQueries({ queryKey: ['albumPhotos'] });
+            qc.invalidateQueries({ queryKey: ['albums'] });
         },
     });
 
@@ -59,16 +65,22 @@ export function usePhotos(page = 1, limit = 24): UseQueryResult<PaginatedRespons
         toggleLike: (id: number, liked = false) => likeMutation.mutate({ id, liked }),
         deletePhoto: (id: number) => deleteMutation.mutateAsync(id),
         movePhoto: (id: number, albumId: number | null) => moveMutation.mutateAsync({ id, albumId }),
+        invalidate: () => qc.invalidateQueries({ queryKey: ['photos'] }),
     } as unknown as UseQueryResult<PaginatedResponse<Photo>, Error> & {
         toggleLike: (id: number, liked?: boolean) => void;
         deletePhoto: (id: number) => Promise<void>;
         movePhoto: (id: number, albumId: number | null) => Promise<void>;
+        invalidate: () => Promise<void>;
     };
 }
 
-export function useAlbums(page = 1, limit = 24): UseQueryResult<PaginatedResponse<Album>, Error> {
+export function useAlbums(page = 1, limit = 24): UseQueryResult<PaginatedResponse<Album>, Error> & {
+    invalidate: () => Promise<void>;
+} {
+    const qc = useQueryClient();
     const key = ['albums', page, limit] as const;
-    return useQuery<PaginatedResponse<Album>, Error>({ queryKey: key, queryFn: () => photosApi.listMyAlbums(page, limit) });
+    const query = useQuery<PaginatedResponse<Album>, Error>({ queryKey: key, queryFn: () => photosApi.listMyAlbums(page, limit) });
+    return { ...query, invalidate: () => qc.invalidateQueries({ queryKey: ['albums'] }) };
 }
 
 export function useAlbumPhotos(albumId: number | null, page = 1, limit = 24) {
@@ -93,12 +105,16 @@ export function useAlbumPhotos(albumId: number | null, page = 1, limit = 24) {
             });
             return { prev };
         },
-            onError: (_err, _vars, ctx) => {
-                const c = ctx as any;
-                if (c?.prev) qc.setQueryData(key, c.prev);
+        onError: (_err, _vars, ctx) => {
+            const c = ctx as any;
+            if (c?.prev) qc.setQueryData(key, c.prev);
         },
         onSettled: () => qc.invalidateQueries({ queryKey: key }),
     });
 
-    return { ...query, toggleLike: (id: number, liked = false) => likeMutation.mutate({ id, liked }) } as const;
+    return {
+        ...query,
+        toggleLike: (id: number, liked = false) => likeMutation.mutate({ id, liked }),
+        invalidate: () => qc.invalidateQueries({ queryKey: ['albumPhotos'] }),
+    } as const;
 }

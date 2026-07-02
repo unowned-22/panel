@@ -70,7 +70,7 @@ const Photos = () => {
         try {
             await photosApi.createAlbum({ title, description });
             toast.toast({ title: t('photos.album.create.success'), description: title });
-            await albumsQuery.refetch();
+            await albumsQuery.invalidate();
         } catch {
             toast.toast({ title: t('errors.error'), description: t('photos.album.create.error') });
         } finally {
@@ -83,7 +83,7 @@ const Photos = () => {
         try {
             await photosApi.updateAlbum(editingAlbum.id, { title, description });
             toast.toast({ title: t('photos.album.updated') });
-            await albumsQuery.refetch();
+            await albumsQuery.invalidate();
         } catch {
             toast.toast({ title: t('errors.error'), description: t('photos.album.create.error') });
         } finally {
@@ -96,7 +96,7 @@ const Photos = () => {
             if (!confirm(t('photos.album.delete.confirm'))) return;
             await photosApi.deleteAlbum(id);
             toast.toast({ title: t('photos.album.delete.success') });
-            await albumsQuery.refetch();
+            await albumsQuery.invalidate();
         } catch {
             toast.toast({ title: t('errors.error'), description: t('photos.album.delete.error') });
         } finally {
@@ -109,7 +109,7 @@ const Photos = () => {
         if (!editAlbumId) return;
         try {
             await photosApi.setAlbumCover(editAlbumId, photoId);
-            await albumsQuery.refetch();
+            await albumsQuery.invalidate();
         } catch {
             toast.toast({ title: t('errors.error'), description: t('photos.setcover.error') });
         }
@@ -120,7 +120,7 @@ const Photos = () => {
         try {
             const photo = await photosApi.uploadPhoto(file, () => {}, editAlbumId);
             await photosApi.setAlbumCover(editAlbumId, photo.id);
-            await Promise.all([albumsQuery.refetch(), albumPhotosQuery.refetch()]);
+            await Promise.all([albumsQuery.invalidate(), albumPhotosQuery.invalidate()]);
         } catch {
             toast.toast({ title: t('errors.error'), description: t('photos.setcover.error') });
         }
@@ -143,9 +143,9 @@ const Photos = () => {
     const confirmUpload = async () => {
         await upload.start(uploadAlbumId);
         await Promise.all([
-            photosQuery.refetch(),
-            albumsQuery.refetch(),
-            uploadAlbumId ? albumPhotosQuery.refetch() : Promise.resolve(),
+            photosQuery.invalidate(),
+            albumsQuery.invalidate(),
+            uploadAlbumId ? albumPhotosQuery.invalidate() : Promise.resolve(),
         ]);
         setUploadOpen(false);
     };
@@ -155,7 +155,7 @@ const Photos = () => {
         try {
             await bulkDeletePhotos(Array.from(selectedIds));
             toast.toast({ title: t('photos.bulk.delete.success') });
-            await photosQuery.refetch();
+            await Promise.all([photosQuery.invalidate(), albumsQuery.invalidate()]);
             exitSelectionMode();
         } catch {
             toast.toast({ title: t('errors.error'), description: t('photos.delete.error') });
@@ -168,7 +168,7 @@ const Photos = () => {
         try {
             await bulkMovePhotos(Array.from(selectedIds), albumId);
             toast.toast({ title: t('photos.move.success') });
-            await Promise.all([photosQuery.refetch(), albumsQuery.refetch()]);
+            await Promise.all([photosQuery.invalidate(), albumsQuery.invalidate()]);
             exitSelectionMode();
         } catch {
             toast.toast({ title: t('errors.error'), description: t('photos.move.error') });

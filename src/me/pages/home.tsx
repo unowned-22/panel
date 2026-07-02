@@ -34,7 +34,7 @@ import { usePhotos, useAlbums } from "@/hooks/use-photos";
 import { photosApi } from "@/api/photos";
 import type { Album as ApiAlbum, Photo } from "@/api/photos";
 import { AlbumFormDialog, PhotoViewer } from "@/components/photos";
-import { friendshipApi, type FriendshipRecord } from "@/api/friendship";
+import { friendshipApi, type FriendConnection } from "@/api/friendship";
 import type { TranslationDictionary } from "@/i18n/types.ts";
 
 type TabKey = "photos" | "albums" | "videos" | "clips" | "music" | "articles";
@@ -103,7 +103,7 @@ const Home = () => {
         setPhotoUploading(true);
         try {
             await photosApi.uploadPhoto(file);
-            await photosQuery.refetch();
+            await photosQuery.invalidate();
         } catch (err) {
             toast({
                 title: err instanceof ApiError ? err.message : t('page.home.photos.upload.error'),
@@ -117,7 +117,7 @@ const Home = () => {
     const handleCreateAlbum = async (title: string, description: string) => {
         try {
             await photosApi.createAlbum({ title, description });
-            await albumsQuery.refetch();
+            await albumsQuery.invalidate();
         } catch {
             toast({ title: t('photos.album.create.error'), variant: "destructive" });
         } finally {
@@ -125,7 +125,7 @@ const Home = () => {
         }
     };
 
-    const [friends, setFriends] = useState<FriendshipRecord[]>([]);
+    const [friends, setFriends] = useState<FriendConnection[]>([]);
     const [friendsTotal, setFriendsTotal] = useState(0);
     const [friendsLoading, setFriendsLoading] = useState(true);
 
@@ -148,9 +148,6 @@ const Home = () => {
             });
         return () => { active = false; };
     }, []);
-
-    const otherFriendId = (f: FriendshipRecord) =>
-        f.requester_id === activeAccount.user?.id ? f.addressee_id : f.requester_id;
 
     const openAvatarUpload = () => {
         setAvatarMenuOpen(false);
@@ -507,21 +504,26 @@ const Home = () => {
                             </>
                         ) : (
                             <div className="flex flex-col gap-1">
-                                {friends.map((f) => {
-                                    const id = otherFriendId(f);
-                                    return (
-                                        <Link
-                                            key={f.id}
-                                            to={`/profile/${id}`}
-                                            className="flex items-center gap-3 rounded-lg p-1.5 hover:bg-secondary/60"
-                                        >
+                                {friends.map((f) => (
+                                    <Link
+                                        key={f.friendship_id}
+                                        to={`/profile/${f.user.username}`}
+                                        className="flex items-center gap-3 rounded-lg p-1.5 hover:bg-secondary/60"
+                                    >
+                                        {f.user.avatar_url ? (
+                                            <img
+                                                src={toAbsoluteUrl(f.user.avatar_url)}
+                                                alt={f.user.full_name}
+                                                className="h-10 w-10 shrink-0 rounded-full object-cover"
+                                            />
+                                        ) : (
                                             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-semibold">
-                                                {String(id).charAt(0)}
+                                                {f.user.full_name?.charAt(0)?.toUpperCase() ?? "?"}
                                             </div>
-                                            <div className="min-w-0 flex-1 truncate text-sm font-medium">{t('page.home.friends.user').replace('{id}', String(id))}</div>
-                                        </Link>
-                                    );
-                                })}
+                                        )}
+                                        <div className="min-w-0 flex-1 truncate text-sm font-medium">{f.user.full_name}</div>
+                                    </Link>
+                                ))}
                             </div>
                         )}
                     </div>
