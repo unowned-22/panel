@@ -7,7 +7,7 @@ import {
     type NavItemKey,
 } from "@/context/settings-context";
 import { fetchUserPreferences, saveUserPreferences } from "@/lib/user-preferences";
-import { useAuthStore } from "@/auth/auth.store";
+import { useAuthStore } from "@/modules/auth/auth.store";
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     const isAuthenticated = useAuthStore((s) => !!s.activeAccountId && !!s.tokens[s.activeAccountId]);

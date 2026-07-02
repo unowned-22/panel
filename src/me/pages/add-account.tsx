@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import { authActions } from "@/auth/auth-actions";
+import { authApi } from "@/api/auth";
 import { useAccount } from "@/hooks/use-account";
 import { useTranslation } from "@/hooks/use-translation";
 
@@ -23,7 +23,7 @@ const AddAccountPage = () => {
         (async () => {
             try {
                 const id = `acc_${Date.now().toString(36)}`
-                const user = await authActions.addAccount(email.trim(), password, id);
+                const user = await authApi.addAccount(email.trim(), password, id);
 
                 addAccount({
                     id: id,

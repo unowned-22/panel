@@ -35,12 +35,7 @@ src/
 │   └── app-routing-setup.tsx  # <Routes> with RequireAuth and layouts
 │
 ├── auth/                      # Everything related to authentication
-│   ├── auth-model.ts          # Types: AuthModel, UserModel, UUID
 │   ├── auth.store.ts          # Zustand store (tokens, activeAccountId, user)
-│   ├── auth-actions.ts        # All auth API operations (login, logout, register…)
-│   ├── auth-routing.tsx       # <Routes> for /auth/*
-│   ├── require-auth.tsx       # Guard: redirect to /auth/login if no token exists
-│   ├── use-auth.ts            # Hook: combines store + authActions
 │   └── pages/                 # Pages: login, registration, verify-email…
 │
 ├── me/                        # Current user feature module
@@ -81,6 +76,7 @@ src/
 │   ├── use-settings.ts        # useSettings()
 │   ├── use-stories.ts         # useStories()
 │   ├── use-toast.ts           # shadcn toast()
+│   ├── use-auth.ts            # combines store + authApi
 │   └── use-translation.ts     # useTranslation() → { t, language, setLanguage }
 │
 ├── lib/                       # Utilities without React

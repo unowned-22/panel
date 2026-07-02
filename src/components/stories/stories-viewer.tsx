@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { ChevronLeft, ChevronRight, Heart, Send, ExternalLink, Pause, Play, MoreVertical, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart, Send, ExternalLink, Pause, Play, MoreVertical, Trash2, Volume2, VolumeX } from "lucide-react";
 import { type StoryUser, type LinkZone } from "@/context/stories-context";
 import { toast } from "sonner";
 import { useStories } from "@/hooks/use-stories";
@@ -11,7 +11,10 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import {getInitials} from "@/hooks/use-account.ts";
+import { getInitials } from "@/hooks/use-account.ts";
+import { backgroundStyle } from "./utils";
+import { TextRender, StickerRender, LinkRender } from "./components/ElementRenders";
+import type { CanvasElement, ImageElement, LinkElement } from "./types/stories";
 
 type Props = {
     open: boolean;
@@ -19,7 +22,62 @@ type Props = {
     startUserId: string | null;
 };
 
-const DURATION = 5000;
+const DURATION = 5000; // только для image/color/text-слайдов — у видео своя длительность
+
+function ElementOverlay({ element, onLinkClick }: { element: CanvasElement; onLinkClick: (url: string) => void }) {
+    if (element.type === "drawing") {
+        return (
+            <svg className="absolute inset-0 pointer-events-none w-full h-full" style={{ zIndex: element.zIndex }}>
+                {element.paths.map((p, i) => (
+                    <polyline
+                        key={i}
+                        points={p.points.map((pt) => `${pt.x * 100}%,${pt.y * 100}%`).join(" ")}
+                        stroke={p.color}
+                        strokeWidth={p.size}
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    />
+                ))}
+            </svg>
+        );
+    }
+
+    const isImage = element.type === "image";
+    const style: CSSProperties = {
+        position: "absolute",
+        left: `${element.x}%`,
+        top: `${element.y}%`,
+        transform: `translate(-50%, -50%) rotate(${element.rotation}deg)`,
+        width: `${element.width}%`,
+        height: isImage ? `${(element as ImageElement).height}%` : undefined,
+        zIndex: element.zIndex,
+        pointerEvents: element.type === "link" ? "auto" : "none",
+    };
+
+    return (
+        <div style={style}>
+            {element.type === "text" && <TextRender element={element} editing={false} onCommit={() => {}} />}
+            {element.type === "sticker" && <StickerRender element={element} />}
+            {element.type === "image" && (
+                <img
+                    src={(element as ImageElement).preview ?? (element as ImageElement).url}
+                    alt=""
+                    className="h-full w-full object-cover rounded-md pointer-events-none select-none"
+                />
+            )}
+            {element.type === "link" && (
+                <button
+                    onClick={(e) => { e.stopPropagation(); onLinkClick((element as LinkElement).url); }}
+                    className="block w-full"
+                    aria-label={(element as LinkElement).title || (element as LinkElement).url}
+                >
+                    <LinkRender element={element as LinkElement} />
+                </button>
+            )}
+        </div>
+    );
+}
 
 export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
     const { t } = useTranslation();
@@ -33,12 +91,14 @@ export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
     const [likedMap, setLikedMap] = useState<Record<number, boolean>>({});
     const [inputFocused, setInputFocused] = useState(false);
     const [holdPause, setHoldPause] = useState(false);
-    const [isPausedByUser, setIsPausedByUser] = useState(false); // Состояние для кнопки Пауза
-    const [menuOpen, setMenuOpen] = useState(false); // Состояние для дропдауна меню
+    const [isPausedByUser, setIsPausedByUser] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
     const [confirmUrl, setConfirmUrl] = useState<string | null>(null);
+    const [muted, setMuted] = useState(true);
     const rafRef = useRef<number>(0);
     const startRef = useRef<number>(0);
     const pausedRef = useRef(false);
+    const videoRef = useRef<HTMLVideoElement>(null);
 
     useEffect(() => {
         pausedRef.current = inputFocused || holdPause || isPausedByUser || menuOpen;
@@ -58,6 +118,10 @@ export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
 
     const currentUser: StoryUser | undefined = visibleUsers[userIdx];
     const currentItem = currentUser?.items[itemIdx];
+    const isVideo = currentItem?.background?.kind === "media" && currentItem.background.mediaType === "video";
+    const videoSrc = isVideo && currentItem?.background?.kind === "media"
+        ? (currentItem.background.preview ?? currentItem.background.url)
+        : undefined;
 
     const next = () => {
         if (!currentUser) return;
@@ -88,8 +152,9 @@ export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
         }
     };
 
+    // прогресс для image/color/text слайдов — фиксированная длительность
     useEffect(() => {
-        if (!open || !currentItem) return;
+        if (!open || !currentItem || isVideo) return;
         startRef.current = performance.now();
         let lastP = 0;
         const tick = (t: number) => {
@@ -114,7 +179,15 @@ export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
             if (rafRef.current) cancelAnimationFrame(rafRef.current);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [open, userIdx, itemIdx]);
+    }, [open, userIdx, itemIdx, isVideo]);
+
+    // play/pause настоящего видео в синхроне с pausedRef
+    useEffect(() => {
+        const v = videoRef.current;
+        if (!v || !isVideo) return;
+        if (pausedRef.current) v.pause();
+        else v.play().catch(() => {});
+    }, [inputFocused, holdPause, isPausedByUser, menuOpen, isVideo, userIdx, itemIdx]);
 
     useEffect(() => {
         if (!open || !currentUser || !currentItem) return;
@@ -137,12 +210,15 @@ export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
             }
             onOpenChange(false);
         } catch (err) {
-            toast.error(t('stories.viewer.delete.error' as any))
+            toast.error(t('stories.viewer.delete.error'));
         }
     };
 
-    console.log(currentItem)
-    console.log(currentUser)
+    const handleLinkClick = (url: string) => {
+        setConfirmUrl(url);
+        setHoldPause(true);
+    };
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
@@ -183,9 +259,19 @@ export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
                             </div>
                         }
                         <span className="text-sm font-medium text-white">{currentUser.name}</span>
+                        {isVideo && (
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setMuted((m) => !m); }}
+                                onPointerDown={(e) => e.stopPropagation()}
+                                className="w-8 h-8 rounded-full flex items-center justify-center text-white hover:bg-white/10 transition-colors"
+                                aria-label={muted ? t('stories.viewer.unmute') : t('stories.viewer.mute')}
+                            >
+                                {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                            </button>
+                        )}
                         <button
                             onClick={() => setIsPausedByUser(!isPausedByUser)}
-                            className="ml-auto w-8 h-8 rounded-full flex items-center justify-center text-white hover:bg-white/10 transition-colors"
+                            className={`${isVideo ? "" : "ml-auto"} w-8 h-8 rounded-full flex items-center justify-center text-white hover:bg-white/10 transition-colors`}
                         >
                             {isPausedByUser ? <Play className="w-4 h-4 fill-white" /> : <Pause className="w-4 h-4 fill-white" />}
                         </button>
@@ -212,7 +298,7 @@ export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
                                             onClick={handleDeleteStory}
                                         >
                                             <Trash2 className="h-4 w-4" />
-                                            Удалить историю
+                                            {t('stories.viewer.delete')}
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
@@ -220,15 +306,38 @@ export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
                         )}
                     </div>
 
-                    <img src={currentItem.image} alt="story" className="w-full h-full object-cover" />
+                    {isVideo ? (
+                        <video
+                            key={currentItem.id}
+                            ref={videoRef}
+                            src={videoSrc}
+                            poster={currentItem.image}
+                            muted={muted}
+                            playsInline
+                            autoPlay
+                            className="w-full h-full object-cover"
+                            onTimeUpdate={(e) => {
+                                const v = e.currentTarget;
+                                if (v.duration) setProgress(Math.min(1, v.currentTime / v.duration));
+                            }}
+                            onEnded={next}
+                        />
+                    ) : currentItem.image ? (
+                        <img src={currentItem.image} alt="story" className="w-full h-full object-cover" />
+                    ) : (
+                        <div className="absolute inset-0" style={backgroundStyle(currentItem.background ?? null)} />
+                    )}
 
-                    {currentItem.linkZones?.map((zone: LinkZone, i: number) => (
+                    {isVideo && currentItem.elements?.map((el) => (
+                        <ElementOverlay key={el.id} element={el} onLinkClick={handleLinkClick} />
+                    ))}
+
+                    {!isVideo && currentItem.linkZones?.map((zone: LinkZone, i: number) => (
                         <button
                             key={i}
                             onClick={(e) => {
                                 e.stopPropagation();
-                                setConfirmUrl(zone.url);
-                                setHoldPause(true);
+                                handleLinkClick(zone.url);
                             }}
                             className="absolute z-15 flex items-center justify-center overflow-hidden"
                             style={{
@@ -295,7 +404,7 @@ export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
                                     setReply("");
                                     (document.activeElement as HTMLElement | null)?.blur?.();
                                 } catch (err) {
-                                    toast.error(t('stories.viewer.reply.error' as any))
+                                    toast.error(t('stories.viewer.reply.error'));
                                 }
                             }}
                             className="absolute bottom-0 left-0 right-0 z-30 p-3 flex items-center gap-2 bg-linear-to-t from-black/70 to-transparent"
@@ -325,7 +434,7 @@ export const StoriesViewer = ({ open, onOpenChange, startUserId }: Props) => {
                                         }
                                     } catch (e) {
                                         setLikedMap((m) => ({ ...m, [sid]: cur }));
-                                        toast.error(t('stories.viewer.like.error' as any))
+                                        toast.error(t('stories.viewer.like.error'));
                                     }
                                 }}
                                 className="w-10 h-10 rounded-full flex items-center justify-center text-white hover:bg-white/10"

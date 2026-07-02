@@ -8,7 +8,7 @@ import {
 } from "react";
 import { NotificationsContext, type Ctx } from "@/context/notification-context";
 import { notificationsApi, type ApiNotification } from "@/api/notifications";
-import { useAuthStore } from "@/auth/auth.store";
+import { useAuthStore } from "@/modules/auth/auth.store";
 import { useSocket } from "@/hooks/use-socket";
 
 const PAGE_LIMIT = 30;

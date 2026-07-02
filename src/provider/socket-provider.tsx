@@ -7,7 +7,7 @@ import {
     useState,
 } from "react";
 import { SocketContext, type Ctx, type SocketHandler, type WsFrame } from "@/context/socket-context";
-import { useAuthStore } from "@/auth/auth.store";
+import { useAuthStore } from "@/modules/auth/auth.store";
 
 const WS_RECONNECT_DELAY_MS = 5_000;
 

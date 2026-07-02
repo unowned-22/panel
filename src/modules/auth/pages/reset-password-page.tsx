@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { authActions } from "@/auth/auth-actions";
+import { authApi } from "@/api/auth";
 import { useTranslation } from "@/hooks/use-translation";
 import { toAbsoluteUrl } from "@/lib/helpers";
 
@@ -41,7 +41,7 @@ export function ResetPasswordPage() {
         (async () => {
             setLoading(true);
             try {
-                await authActions.resetPassword(token, newPassword);
+                await authApi.resetPassword(token, newPassword);
                 navigate("/auth/login", {
                     replace: true,
                     state: { passwordReset: true },

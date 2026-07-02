@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { authActions } from "@/auth/auth-actions";
+import { authApi } from "@/api/auth";
 import { useTranslation } from "@/hooks/use-translation";
 import { toAbsoluteUrl } from "@/lib/helpers";
 
@@ -19,7 +19,7 @@ export function ForgotPasswordPage() {
         (async () => {
             setLoading(true);
             try {
-                await authActions.requestPasswordReset(email.trim());
+                await authApi.requestPasswordReset(email.trim());
             } catch {
                 // intentionally silent — we never reveal whether the email exists
             } finally {

@@ -1,28 +1,28 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import type { Language, TranslationDictionary } from '@/i18n/types';
+import type { LanguageCode, TranslationDictionary } from '@/i18n/types';
 import { TranslationContext, dictionaries, SUPPORTED_LANGUAGES } from '@/context/translation-context';
 import { en } from '@/i18n/en';
 import { fetchUserPreferences, saveUserPreferences } from '@/lib/user-preferences';
-import { useAuthStore } from '@/auth/auth.store';
+import { useAuthStore } from "@/modules/auth/auth.store";
 
 const LANG_STORAGE_KEY = 'lang_v1';
 
-function getBrowserLanguage(): Language {
+function getBrowserLanguage(): LanguageCode {
     if (typeof navigator !== 'undefined') {
-        const browserLang = navigator.language.slice(0, 2) as Language;
+        const browserLang = navigator.language.slice(0, 2) as LanguageCode;
         if (SUPPORTED_LANGUAGES.includes(browserLang)) return browserLang;
     }
     return 'en';
 }
 
-function getInitialLanguage(): Language {
-    const stored = localStorage.getItem(LANG_STORAGE_KEY) as Language | null;
+function getInitialLanguage(): LanguageCode {
+    const stored = localStorage.getItem(LANG_STORAGE_KEY) as LanguageCode | null;
     if (stored && SUPPORTED_LANGUAGES.includes(stored)) return stored;
     return getBrowserLanguage();
 }
 
 export function TranslationProvider({ children }: { children: ReactNode }) {
-    const [language, setLanguageState] = useState<Language>(getInitialLanguage);
+    const [language, setLanguageState] = useState<LanguageCode>(getInitialLanguage);
     // Language preferences live on the user's account — nothing to fetch
     // (and no point calling the API) until someone is actually authenticated,
     // e.g. while sitting on the public /auth/login page.
@@ -39,7 +39,7 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
         });
     }, [isAuthenticated]);
 
-    const setLanguage = (lang: Language) => {
+    const setLanguage = (lang: LanguageCode) => {
         setLanguageState(lang);
         localStorage.setItem(LANG_STORAGE_KEY, lang);
         saveUserPreferences({ language: lang });

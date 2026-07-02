@@ -7,7 +7,7 @@ import {
 } from "react";
 import { FriendRequestsContext, type FriendRequestsCtx } from "@/context/friend-requests-context";
 import { friendshipApi } from "@/api/friendship";
-import { useAuthStore } from "@/auth/auth.store";
+import { useAuthStore } from "@/modules/auth/auth.store";
 import { useNotifications } from "@/hooks/use-notification";
 
 const FRIEND_REQUEST_RECEIVED = "friend_request_received";

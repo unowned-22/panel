@@ -1,5 +1,5 @@
-import { useAuthStore } from './auth.store';
-import { authActions } from './auth-actions';
+import { useAuthStore } from '@/modules/auth/auth.store';
+import { authApi } from "@/api/auth";
 
 export function useAuth() {
     const tokens         = useAuthStore((s) => s.tokens);
@@ -13,6 +13,6 @@ export function useAuth() {
         auth,
         user,
         isAdmin,
-        ...authActions,
+        ...authApi,
     };
 }

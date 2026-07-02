@@ -1,4 +1,4 @@
-export type Language = 'en' | 'ua' | 'it' | 'es' | 'fr' | 'de' | 'ru';
+export type LanguageCode = 'en' | 'ua' | 'it' | 'es' | 'fr' | 'de' | 'ru';
 
 export interface TranslationDictionary {
     'name': string;
@@ -48,6 +48,14 @@ export interface TranslationDictionary {
     'page.home.my.questions': string;
     'page.home.my.wishlist': string;
     'page.home.memories': string;
+    'page.home.photos.empty': string;
+    'page.home.photos.upload.error': string;
+    'page.home.photos.showAll': string;
+    'page.home.albums.empty': string;
+    'page.home.friends.empty': string;
+    'page.home.friends.add': string;
+    'page.home.friends.showAll': string;
+    'page.home.friends.user': string;
 
     // ── Home page ───────────────────────────────────────────────────────────
     'page.settings.general': string;
@@ -248,6 +256,22 @@ export interface TranslationDictionary {
     'stories.editor.text.fill.none': string;
     'stories.editor.text.fill.filled': string;
     'stories.editor.text.fill.outline': string;
+    'stories.editor.filters.title': string;
+    'stories.editor.link.title': string;
+    'stories.editor.link.style.label': string;
+    'stories.editor.link.style.pill.desc': string;
+    'stories.editor.link.style.card.desc': string;
+    'stories.editor.link.caption.label': string;
+    'stories.editor.link.optional': string;
+    'stories.editor.link.caption.placeholder': string;
+    'stories.editor.link.preview.label': string;
+    'stories.editor.link.add': string;
+    'stories.viewer.delete': string;
+    'stories.viewer.delete.error': string;
+    'stories.viewer.reply.error': string;
+    'stories.viewer.like.error': string;
+    'stories.viewer.mute': string;
+    'stories.viewer.unmute': string;
     // ── Friends page ──────────────────────────────────────────────────────────
     'page.friends.tabs.all': string;
     'page.friends.tabs.incoming': string;
@@ -482,4 +506,159 @@ export interface TranslationDictionary {
     'cover.upload.desc': string;
     'cover.upload.btn': string;
     'cover.upload.hint': string;
+
+    // ── Notifications ─────────────────────────────────────────────────────────
+    'notif.page.title': string;
+    'notif.mark.all.read': string;
+    'notif.settings': string;
+    'notif.empty.category': string;
+    'notif.empty.list': string;
+    'notif.load.more': string;
+    'notif.show.all': string;
+    'notif.loading': string;
+    'notif.no.more': string;
+    'notif.action.mark.read': string;
+    'notif.action.mark.unread': string;
+    'notif.action.menu': string;
+
+    'notif.section.profile': string;
+    'notif.section.groups': string;
+    'notif.section.feedback': string;
+    'notif.section.friends': string;
+    'notif.section.services': string;
+    'notif.section.communication': string;
+    'notif.section.account': string;
+
+    'notif.time.now': string;
+    /** Use .replace('{n}', n) */
+    'notif.time.minutes': string;
+    /** Use .replace('{n}', n) */
+    'notif.time.hours': string;
+    'notif.time.yesterday': string;
+    /** Use .replace('{n}', n) */
+    'notif.time.days': string;
+
+    /** Use .replace('{name}', name) */
+    'notif.type.friendRequestReceived': string;
+    /** Use .replace('{name}', name) */
+    'notif.type.friendRequestAccepted': string;
+    /** Use .replace('{name}', name) */
+    'notif.type.storyPublished': string;
+    /** Use .replace('{name}', name).replace('{title}', title) */
+    'notif.type.storyPublishedTitled': string;
+    /** Use .replace('{name}', name) */
+    'notif.type.storyLike': string;
+    /** Use .replace('{name}', name) */
+    'notif.type.storyComment': string;
+    /** Use .replace('{name}', name) */
+    'notif.type.storyReply': string;
+    /** Use .replace('{name}', name) */
+    'notif.type.mention': string;
+    /** Use .replace('{name}', name) */
+    'notif.type.message': string;
+    'notif.type.newLogin': string;
+    'notif.type.accountSecurity.title': string;
+    'notif.type.accountSecurity.desc': string;
+    'notif.type.service': string;
+    'notif.type.default': string;
+    'notif.someone': string;
+
+    // ── Messenger module ──────────────────────────────────────────────────────
+    'messenger.chatMenu.markUnread': string;
+    'messenger.chatMenu.pin': string;
+    'messenger.chatMenu.unpin': string;
+    'messenger.chatMenu.archive': string;
+    'messenger.chatMenu.mute': string;
+    'messenger.chatMenu.mute.1h': string;
+    'messenger.chatMenu.mute.8h': string;
+    'messenger.chatMenu.mute.1w': string;
+    'messenger.chatMenu.mute.forever': string;
+    'messenger.chatMenu.deleteChat': string;
+    'messenger.chatMenu.clearHistory': string;
+    'messenger.chatMenu.leaveChat': string;
+    'messenger.chatMenu.toast.markedUnread': string;
+    'messenger.chatMenu.toast.pinned': string;
+    'messenger.chatMenu.toast.archived': string;
+    'messenger.chatMenu.toast.muted': string;
+    'messenger.chatMenu.toast.deleted': string;
+    'messenger.chatMenu.toast.cleared': string;
+    'messenger.chatMenu.toast.left': string;
+    'messenger.attach.photo': string;
+    'messenger.attach.video': string;
+    'messenger.attach.music': string;
+    'messenger.attach.service': string;
+    'messenger.attach.file': string;
+    'messenger.attach.map': string;
+    'messenger.attach.poll': string;
+    'messenger.attach.comingSoon.service': string;
+    'messenger.attach.comingSoon.map': string;
+    'messenger.attach.comingSoon.poll': string;
+    'messenger.msgMenu.reply': string;
+    'messenger.msgMenu.forward': string;
+    'messenger.msgMenu.forward.toSaved': string;
+    'messenger.msgMenu.forward.pickChat': string;
+    'messenger.msgMenu.pin': string;
+    'messenger.msgMenu.unpin': string;
+    'messenger.msgMenu.markImportant': string;
+    'messenger.msgMenu.unmarkImportant': string;
+    'messenger.msgMenu.copyText': string;
+    'messenger.msgMenu.edit': string;
+    'messenger.msgMenu.delete': string;
+    'messenger.msgMenu.select': string;
+    'messenger.msgMenu.toast.copied': string;
+    'messenger.msgMenu.toast.forwardedToSaved': string;
+    'messenger.msgMenu.toast.markedImportant': string;
+    'messenger.msgMenu.toast.unmarkedImportant': string;
+    'messenger.msgMenu.toast.editComingSoon': string;
+    'messenger.msgMenu.toast.selected': string;
+    'messenger.favorites.name': string;
+    'messenger.favorites.defaultPreview': string;
+    'messenger.info.call': string;
+    'messenger.info.call.audio': string;
+    'messenger.info.call.video': string;
+    'messenger.info.mute.on': string;
+    'messenger.info.mute.off': string;
+    'messenger.info.more': string;
+    'messenger.info.more.mentionSettings': string;
+    'messenger.info.stickers': string;
+    'messenger.info.members': string;
+    'messenger.info.members.add': string;
+    'messenger.info.members.search': string;
+    'messenger.info.link.title': string;
+    'messenger.info.link.tab.link': string;
+    'messenger.info.link.tab.qr': string;
+    'messenger.info.link.showRecent': string;
+    'messenger.info.link.revoke': string;
+    'messenger.info.link.revokeQr': string;
+    'messenger.info.link.copy': string;
+    'messenger.info.link.share': string;
+    'messenger.info.link.download': string;
+    'messenger.info.settings.title': string;
+    'messenger.info.settings.name': string;
+    'messenger.info.settings.description': string;
+    'messenger.info.settings.save': string;
+    'messenger.info.settings.perm.invite': string;
+    'messenger.info.settings.perm.editInfo': string;
+    'messenger.info.settings.perm.pinned': string;
+    'messenger.info.settings.perm.mentionAll': string;
+    'messenger.info.settings.perm.viewLink': string;
+    'messenger.info.settings.perm.startCalls': string;
+    'messenger.info.settings.perm.admins': string;
+    'messenger.info.settings.perm.theme': string;
+    'messenger.info.settings.perm.everyone': string;
+    'messenger.info.settings.perm.ownerOnly': string;
+    'messenger.info.toast.pinnedChat': string;
+    'messenger.info.toast.archived': string;
+    'messenger.info.toast.markedUnread': string;
+    'messenger.info.toast.deleted': string;
+    'messenger.info.toast.cleared': string;
+    'messenger.info.toast.left': string;
+    'messenger.info.toast.linkCopied': string;
+    'messenger.info.toast.linkRevoked': string;
+    'messenger.info.toast.qrRevoked': string;
+    'messenger.info.toast.qrDownloaded': string;
+    'messenger.info.toast.settingsSaved': string;
+    'messenger.info.toast.stickersComingSoon': string;
+    'messenger.info.toast.addMembersComingSoon': string;
+    'messenger.info.toast.permComingSoon': string;
 }

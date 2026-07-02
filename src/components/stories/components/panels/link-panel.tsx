@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link2 } from "lucide-react";
 import { PanelHeader } from "../PanelHeader";
+import { useTranslation } from "@/hooks/use-translation";
 
 export type LinkDisplayStyle = "pill" | "card";
 
@@ -8,6 +9,11 @@ export interface LinkPayload {
     url: string;
     displayStyle: LinkDisplayStyle;
     title?: string;
+}
+
+interface LinkPanelProps {
+    onAdd: (payload: LinkPayload) => void;
+    onClose: () => void;
 }
 
 function extractHostname(raw: string): string {
@@ -23,7 +29,6 @@ function normalizeUrl(raw: string): string {
     return raw.startsWith("http") ? raw : `https://${raw}`;
 }
 
-// ── inline preview ─────────────────────────────────────────────────────────────
 function PillPreview({ label }: { label: string }) {
     return (
         <div className="inline-flex items-center gap-2 rounded-full bg-black/60 backdrop-blur-sm px-3 py-1.5 border border-white/20 max-w-full">
@@ -52,14 +57,8 @@ function CardPreview({ hostname, label }: { hostname: string; label: string }) {
     );
 }
 
-// ── main panel ─────────────────────────────────────────────────────────────────
-export function LinkPanel({
-                              onAdd,
-                              onClose,
-                          }: {
-    onAdd: (payload: LinkPayload) => void;
-    onClose: () => void;
-}) {
+export function LinkPanel({ onAdd, onClose }: LinkPanelProps) {
+    const { t } = useTranslation();
     const [url, setUrl] = useState("");
     const [style, setStyle] = useState<LinkDisplayStyle>("pill");
     const [title, setTitle] = useState("");
@@ -78,10 +77,9 @@ export function LinkPanel({
 
     return (
         <div>
-            <PanelHeader title="Ссылка" onClose={onClose} />
+            <PanelHeader title={t("stories.editor.link.title")} onClose={onClose} />
 
             <div className="p-4 space-y-5">
-                {/* ── URL ─────────────────────────────────────────────── */}
                 <div>
                     <label className="text-xs uppercase tracking-wider text-zinc-500">URL</label>
                     <div className="mt-1.5 flex items-center gap-2 rounded-lg bg-zinc-800 px-3 py-2.5 focus-within:ring-1 focus-within:ring-white/30">
@@ -97,9 +95,8 @@ export function LinkPanel({
                 </div>
 
                 <div>
-                    <label className="text-xs uppercase tracking-wider text-zinc-500">Вид</label>
+                    <label className="text-xs uppercase tracking-wider text-zinc-500">{t("stories.editor.link.style.label")}</label>
                     <div className="mt-2 grid grid-cols-2 gap-2">
-                        {/* Pill */}
                         <button
                             onClick={() => setStyle("pill")}
                             className={`rounded-xl p-3 text-left border transition-colors ${
@@ -114,10 +111,9 @@ export function LinkPanel({
                   {hostname || "example.com"}
                 </span>
                             </div>
-                            <p className="text-[11px] text-zinc-400">Только текст</p>
+                            <p className="text-[11px] text-zinc-400">{t("stories.editor.link.style.pill.desc")}</p>
                         </button>
 
-                        {/* Card */}
                         <button
                             onClick={() => setStyle("card")}
                             className={`rounded-xl p-3 text-left border transition-colors ${
@@ -141,20 +137,20 @@ export function LinkPanel({
                   {hostname || "example.com"}
                 </span>
                             </div>
-                            <p className="text-[11px] text-zinc-400">С иконкой сайта</p>
+                            <p className="text-[11px] text-zinc-400">{t("stories.editor.link.style.card.desc")}</p>
                         </button>
                     </div>
                 </div>
 
                 <div>
                     <label className="text-xs uppercase tracking-wider text-zinc-500">
-                        Подпись{" "}
-                        <span className="normal-case text-zinc-600">(необязательно)</span>
+                        {t("stories.editor.link.caption.label")}{" "}
+                        <span className="normal-case text-zinc-600">{t("stories.editor.link.optional")}</span>
                     </label>
                     <input
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        placeholder={hostname || "Название ссылки"}
+                        placeholder={hostname || t("stories.editor.link.caption.placeholder")}
                         className="mt-1.5 w-full rounded-lg bg-zinc-800 px-3 py-2.5 text-sm text-zinc-100 outline-none focus:ring-1 focus:ring-white/30 placeholder:text-zinc-500"
                     />
                 </div>
@@ -162,7 +158,7 @@ export function LinkPanel({
                 {hostname && (
                     <div>
                         <label className="text-xs uppercase tracking-wider text-zinc-500 mb-2 block">
-                            Превью
+                            {t("stories.editor.link.preview.label")}
                         </label>
                         <div className="rounded-xl bg-zinc-800/50 p-3 flex items-center justify-center min-h-14">
                             {style === "pill" ? (
@@ -179,7 +175,7 @@ export function LinkPanel({
                     disabled={!canAdd}
                     className="w-full rounded-lg bg-zinc-200 py-2.5 text-sm font-semibold text-zinc-900 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
                 >
-                    Добавить на слайд
+                    {t("stories.editor.link.add")}
                 </button>
             </div>
         </div>

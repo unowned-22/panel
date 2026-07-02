@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { useAuthStore } from '@/auth/auth.store';
+import { useAuthStore } from "@/modules/auth/auth.store";
 import { apiClient } from '@/lib/api-client';
 import {
     STORAGE_KEY,

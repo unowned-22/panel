@@ -1,5 +1,24 @@
-import type { UserModel } from '@/auth/auth-model';
+import type { LanguageCode } from '@/i18n/types';
 import { createContext } from "react";
+
+export interface AuthModel {
+    access_token: string;
+    refresh_token?: string;
+}
+
+export interface UserModel {
+    id: number;
+    username: string;
+    email: string;
+    full_name: string;
+    avatar_url: string;
+    cover_url: string;
+    cover_mobile_url: string;
+    cover_desktop_url: string;
+    role: string;
+    phone?: string;
+    language?: LanguageCode;
+}
 
 export type Account = {
     id: string;
@@ -15,7 +34,6 @@ export type AccountContextValue = {
     activeId: string;
     activeAccount: Account;
     switchAccount: (id: string) => void | Promise<void>;
-    // id is optional: pass it when tokens are already stored under a specific key
     addAccount: (acc: Omit<Account, "avatarColor"> & { avatarColor?: string }) => Account;
     removeAccount: (id: string) => void;
 };
