@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
     X, Phone, MoreHorizontal, Plus, Mic, Send, Reply as ReplyIcon,
-    Paperclip, Video, BadgeCheck, Pin, Forward as ForwardIcon,
+    Paperclip, Video, BadgeCheck, Pin, Forward as ForwardIcon, PhoneOff,
     Image as ImageIcon, FileText, Search, LayoutPanelLeft, CheckCheck,
     Music, MapPin, BarChart3, Grid3x3,
 } from "lucide-react";
@@ -267,6 +267,28 @@ export const ChatWindow = ({ active, onClose, onToggleInfo, infoOpen, onStartCal
                                         )}
                                     </div>
                                 )}
+                                {msg.call ? (
+                                    <div className={`flex items-center gap-2 px-3 py-2 ${msg.isOwn ? "flex-row-reverse" : ""}`}>
+                                        {msg.call.status === "ended" ? (
+                                            <Phone size={16} className={msg.isOwn ? "text-primary" : "text-green-500"} />
+                                        ) : (
+                                            <PhoneOff size={16} className="text-destructive" />
+                                        )}
+                                        <div className="flex flex-col">
+                                            <span className="text-[13px] font-medium">
+                                                {msg.isOwn ? "Исходящий звонок" : "Входящий звонок"}
+                                                {msg.call.callType === "video" && " (видео)"}
+                                            </span>
+                                            <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                                                {msg.isOwn ? "↗" : "↙"}{" "}
+                                                {msg.call.status === "missed" && "Не отвечен"}
+                                                {msg.call.status === "declined" && "Отклонён"}
+                                                {msg.call.status === "ended" &&
+                                                    `${Math.floor(msg.call.durationSeconds / 60)}:${(msg.call.durationSeconds % 60).toString().padStart(2, "0")}`}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ) : (<></>)}
                                 <div className={`max-w-[72%] flex flex-col ${msg.isOwn ? "items-end" : "items-start"}`}>
                                     {showName && (
                                         <span className="text-[11px] text-primary font-semibold mb-0.5 ml-1">{msg.senderName}</span>

@@ -30,6 +30,11 @@ export interface Message {
     forwardedFrom?: string;
     reactions?: ReactionSummary[];
     deliveryStatus?: string;
+    call?: {
+        callType: "voice" | "video";
+        status: "ended" | "missed" | "declined";
+        durationSeconds: number;
+    };
 }
 
 export interface ChatContact {

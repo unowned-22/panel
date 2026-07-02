@@ -39,10 +39,44 @@ const CallScreen = ({ contactName, contactAvatar }: CallScreenProps) => {
     const room = new Room();
     roomRef.current = room;
 
-    room.on(RoomEvent.ParticipantConnected, () => setRemoteConnected(true));
-    room.on(RoomEvent.ParticipantDisconnected, () => {
-      if (room.remoteParticipants.size === 0) setRemoteConnected(false);
+    room.on(RoomEvent.SignalConnected, () => {
+      console.log("[LK] SignalConnected");
     });
+
+    room.on(RoomEvent.Connected, () => {
+      console.log("[LK] Connected");
+    });
+
+    room.on(RoomEvent.Disconnected, (reason) => {
+      console.log("[LK] Disconnected", reason);
+    });
+
+    room.on(RoomEvent.ParticipantConnected, (p) => {
+      console.log("[LK] ParticipantConnected", p.identity);
+    });
+
+    room.on(RoomEvent.ParticipantDisconnected, (p) => {
+      console.log("[LK] ParticipantDisconnected", p.identity);
+    });
+
+    room.on(RoomEvent.LocalTrackPublished, (pub) => {
+      console.log("[LK] LocalTrackPublished", pub.kind);
+    });
+
+    room.on(RoomEvent.MediaDevicesError, (err) => {
+      console.error("[LK] MediaDevicesError", err);
+    });
+
+    room.on(RoomEvent.TrackSubscriptionFailed, (...args) => {
+      console.error("[LK] TrackSubscriptionFailed", args);
+    });
+
+    const updateRemoteStatus = () => {
+      setRemoteConnected(room.remoteParticipants.size > 0);
+    };
+
+    room.on(RoomEvent.ParticipantConnected, updateRemoteStatus);
+    room.on(RoomEvent.ParticipantDisconnected, updateRemoteStatus);
     room.on(RoomEvent.TrackSubscribed, (track: RemoteTrack) => {
       if (track.kind === Track.Kind.Video && remoteVideoRef.current) {
         track.attach(remoteVideoRef.current);
@@ -59,21 +93,35 @@ const CallScreen = ({ contactName, contactAvatar }: CallScreenProps) => {
 
     (async () => {
       try {
+        console.log("[LK] room.engine.client.connectOptions", room.engine.client, callId);
+        console.log("[LK] connect start", activeCall);
         await room.connect(activeCall.livekitUrl, activeCall.token);
+        console.log("[LK] connect OK");
+
         if (cancelled) {
           room.disconnect();
           return;
         }
+
+        console.log("[LK] enable microphone");
         await room.localParticipant.setMicrophoneEnabled(true);
+
+        console.log("[LK] microphone enabled");
+
         if (activeCall.callType === "video") {
+          console.log("[LK] enable camera");
           await room.localParticipant.setCameraEnabled(true);
           const camPub = Array.from(room.localParticipant.videoTrackPublications.values())[0];
           if (camPub?.track && localVideoRef.current) {
             camPub.track.attach(localVideoRef.current);
           }
+          console.log("[LK] camera enabled");
         }
+        console.log("[LK] remote count", room.remoteParticipants.size);
         setRemoteConnected(room.remoteParticipants.size > 0);
       } catch (e) {
+        console.error("[LK] ERROR", e);
+        if (cancelled) return;
         console.error("[call] livekit connect failed", e);
         if (!cancelled) setConnectError("Не удалось подключиться к звонку");
       }
